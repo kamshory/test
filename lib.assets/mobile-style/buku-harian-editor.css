@@ -1,0 +1,77 @@
+table tr td table.tabel-control{
+    width: 100%;
+}
+table tr td table.tabel-control tr > td:nth-child(1)
+{
+    width:auto;
+    padding:2px 2px 2px 0px;
+}
+table tr td table.tabel-control tr > td:nth-child(2)
+{
+    width:100px;
+    padding:2px 2px 2px 2px;
+}
+table tr td table.tabel-control tr > td:nth-child(3)
+{
+    width:30px;
+    padding:2px 0px 2px 2px;
+}
+table tr td table.tabel-control tr > td select, 
+table tr td table.tabel-control tr > td input[type="number"], 
+table tr td table.tabel-control tr > td input[type="button"]{
+    width:100%;
+    min-width:100%;
+    box-sizing:border-box;
+}
+table tr td table.tabel-control tr > td input[type="button"]{
+    color:#FFFFFF !important;
+    font-family:unand;
+}
+@media screen and (max-width:479px){
+    [data-table-type="two-cols"] tr td table.tabel-control tr td:nth-child(1), 
+    [data-table-type="two-cols"] tr td table.tabel-control tr td:nth-child(2),
+    [data-table-type="two-cols"] tr td table.tabel-control tr td:nth-child(3){
+        display:table-cell;
+    }
+}
+.data-pekerjaan{
+    margin-top:10px;
+}
+.list-in-cell.type-check {
+    margin: 0;
+    list-style-type: none;
+    padding: 0 0 0 2px;
+}
+
+.item-pekerjaan{
+    padding:0 0 8px 0;
+}
+.separator{
+    margin-top:5px;
+    margin-bottom:5px;
+    border-bottom:1px solid #EEEEEE;
+    height:1px;
+    box-sizing:border-box;
+}
+.cuaca-container{
+    padding:10px 0;
+}
+.detail-proyek{
+    margin-bottom:10px;
+}
+.item-pekerjaan{
+    padding:0 0 8px 0;
+}
+.separator{
+    margin-top:5px;
+    margin-bottom:5px;
+    border-bottom:1px solid #EEEEEE;
+    height:1px;
+    box-sizing:border-box;
+}
+.cuaca-container{
+    padding:10px 0;
+}
+.detail-proyek{
+    margin-bottom:10px;
+}
