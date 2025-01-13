@@ -881,6 +881,40 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 
 $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
 ?>
+<link rel="stylesheet" href="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/summernote/0.8.20/summernote.css">
+<link rel="stylesheet" href="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/summernote/0.8.20/summernote-bs4.min.css">
+<script type="text/javascript" src="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/popper/popper.min.js"></script>
+<script type="text/javascript" src="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/summernote/0.8.20/summernote.js"></script>
+<script type="text/javascript" src="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/summernote/0.8.20/summernote-bs4.min.js"></script>
+<style>
+	.note-hint-popover {
+		position: absolute;
+	}
+</style>
+<script>
+	jQuery(function(e){
+		$('textarea').summernote({
+			height: 200,
+			hint: {
+				words: [],
+				match: /\b(\w{1,})$/,
+				search: function (keyword, callback) 
+				{
+					callback($.grep(this.words, function (item) {
+						return item.indexOf(keyword) === 0;
+					}));
+				}
+			},
+			toolbar: [
+				['style', ['style', 'bold', 'italic', 'underline']],
+				['para', ['ul', 'ol', 'paragraph']],
+				['font', ['fontname', 'fontsize', 'color', 'background']],
+				['insert', ['picture', 'table']],
+			]
+		});
+	});
+</script>
 <div class="page page-jambi page-insert">
 	<div class="jambi-wrapper">
 		<script type="text/javascript">
