@@ -893,27 +893,90 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 	}
 </style>
 <script>
-	jQuery(function(e){
-		$('textarea').summernote({
-			height: 200,
-			hint: {
-				words: [],
-				match: /\b(\w{1,})$/,
-				search: function (keyword, callback) 
-				{
-					callback($.grep(this.words, function (item) {
-						return item.indexOf(keyword) === 0;
-					}));
+	let elements = [];
+	jQuery(function($) {
+		let editors = [];
+		var activeEditor = null;	
+		$('textarea').each(function(index){
+			$(this).attr('data-index', index);
+			$(this).addClass('summernote-source');
+			editors[index] = $(this).summernote({
+				height: 200,
+				hint: {
+					words: [],
+					match: /\b(\w{1,})$/,
+					search: function (keyword, callback) {
+						callback($.grep(this.words, function (item) {
+							return item.indexOf(keyword) === 0;
+						}));
+					}
+				},
+				toolbar: [
+					['style', ['style', 'bold', 'italic', 'underline']],
+					['para', ['ul', 'ol', 'paragraph']],
+					['font', ['fontname', 'fontsize', 'color', 'background']],
+					['insert', ['picture', 'table']],
+				],
+				callbacks: {
+					onImageUpload: function (files) {
+					},
+					onMediaDelete: function (target) {
+					},
+					onFocus: function() {
+						let idx = $(this).attr('data-index');
+						activeEditor = editors[idx];
+					}
 				}
-			},
-			toolbar: [
-				['style', ['style', 'bold', 'italic', 'underline']],
-				['para', ['ul', 'ol', 'paragraph']],
-				['font', ['fontname', 'fontsize', 'color', 'background']],
-				['insert', ['picture', 'table']],
-			]
+			});
+			elements[index] = $(this);
+		});
+
+		$('textarea.summernote-source').each(function(index) {
+			$(this).next().closest('.note-editor').on('click', function(e) {
+				activeEditor = editors[index];  
+				if (activeEditor) {
+					activeEditor.summernote('focus');
+				}
+			});
+		});
+
+		$(document).on('change', '.note-image-input.form-control-file.note-form-control.note-input', function(e) {
+			var files = e.target.files;
+
+			if (files.length > 0) {
+				var file = files[0];
+				if (file.type.startsWith('image/')) {
+					let mdl = $(this).closest('.modal-dialog');
+					let btn = mdl.find('.note-image-btn');
+					btn[0].disabled = false;
+				} else {
+					alert("Please select an image file.");
+				}
+			}
+		});
+
+		$(document).on('click', '.note-image-btn', function() {
+			let btn = $(this);
+			if (activeEditor) {
+				var fileInput = $(this).closest('.note-modal').find('.note-image-input.form-control-file.note-form-control.note-input')[0];
+				var file = fileInput.files[0];
+				if (file) {
+					var reader = new FileReader();
+					reader.onload = function(event) {
+						var base64Image = event.target.result;
+						activeEditor.summernote('insertImage', base64Image);
+						fileInput.value = "";
+						btn.closest('.modal').modal('hide');  // Close the modal
+					};
+					reader.readAsDataURL(file);
+				}
+			} else {
+				console.log('No active editor found.');
+			}
 		});
 	});
+
+
 </script>
 <div class="page page-jambi page-insert">
 	<div class="jambi-wrapper">
