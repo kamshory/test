@@ -976,7 +976,7 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 
 		<link rel="stylesheet" type="text/css" href="lib.assets/mobile-style/buku-harian.css">
 		<link rel="stylesheet" type="text/css" href="lib.assets/mobile-style/buku-harian-editor.css">
-		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian.js"></script>
+		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian.js?<?php echo mt_rand(111111, 99999999);?>"></script>
 		<script type="text/javascript">
 		var dataCuaca = [];
 		var bukuHarianID = 0;
@@ -1115,41 +1115,19 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					<td>Acuan Pengawasan</td>
 					<td>
 						<div class="acuan-pengawasan-container">
-						<?php
 						
-						$specs = PicoSpecification::getInstance()
-						->addAnd([Field::of()->proyekId, $proyekId])
-						;
-
-						$sorts = PicoSortable::getInstance()->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC));
-						$acuanPengawasan = new AcuanPengawasan(null, $database);
-						try
-						{
-							$pageData = $acuanPengawasan->findAll($specs, null, $sorts);
-							?>
-							<ul class="list-in-cell type-check">
-							<?php
-							foreach($pageData->getResult() as $row)
-							{
-								?>
-								<li> <label><input type="checkbox" name="acuan_pengawasan_id[]" value="<?php echo $row->getAcuanPengawasanId();?>"> <?php echo $row->getNama();?></label></li>
-								<?php
-							}
-							?>
-							</ul>
-							<?php
-						}
-						catch(Exception $e)
-						{
-							// do nothing
-						}
-						?>	
 						</div>
 					</td>
 					</tr>
 					<tr>
 					<td>Man Power</td>
-					<td><input type="number" min="0" name="jumlah_pekerja" id="jumlah_pekerja" class="form-control"></td>
+					<td>
+						<table class="tabel-control" id="tabel-man-power" cellpadding="0" cellspacing="0" border="0" class="form-control">
+						</table>
+						<div class="form-control-add">
+						<input type="button" value="Tambah" id="tambah-man-power" class="btn btn-primary">
+						</div>
+					</td>
 					</tr>
 					<tr>
 					<td>Peralatan</td>
@@ -1200,12 +1178,25 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 		</select>
 		<select class="resource-bill-of-quantity form-control">
 		</select>
+		<select class="resource-man-power form-control">
+		</select>
 		<script>
 			jQuery(function(){
+				$.ajax({
+					'url':'lib.mobile-tools/ajax-load-man-power.php',
+					'type':'GET',
+					'dataType':'html',
+					'data':{proyek_id:$('[name="proyek_id"]').val()},
+					success: function(data){
+						let select = $('.resource-man-power');
+						select.empty();
+						select.append(data);
+					}
+				});
+				
 				$('.resource-peralatan').load('lib.mobile-tools/ajax-load-peralatan.php');
 				$('.resource-material').load('lib.mobile-tools/ajax-load-material.php');
 				loadAcuanPengawasan();
-
 
 				document.querySelector('#tabel-boq').addEventListener('change', function(event) {
 					if(event.target.closest('.resource-bill-of-quantity'))

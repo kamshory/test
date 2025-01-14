@@ -65,6 +65,8 @@ jQuery(function(e) {
             }
         });
     });
+    
+    
 
     $(document).on('error', '#static-map-image', function(e){
         $(this).replaceWith('<div data-role="error">Tidak bisa menampilkan peta.</div>');
@@ -135,6 +137,36 @@ jQuery(function(e) {
         dom.find('.resource-bill-of-quantity').attr({'name':'boq_proyek_id_'+id, 'required':'required'});
         $('#tabel-boq').append(dom);
         setMinMaxVolume(dom.find('select'));
+    });
+    
+    $(document).on('click', '#tambah-man-power', function(e){
+        let id = 'rand_'+Math.round(Math.random()*100000);
+        let res = $('.resource-man-power')[0].outerHTML;
+        let html = '<tr>\r\n'+
+        '<td>'+res+'</td>\r\n'+
+        '<td>\r\n'+
+        '<input type="number" step="any" min="0" name="jumlah_'+id+'" value="1" class="form-control" required="required">\r\n'+
+        '</td>\r\n'+
+        '<td>\r\n'+
+        '<button type="button" class="btn btn-danger remover">&#215;</button>\r\n'+
+        '<input type="hidden" name="man_power_id[]" value="'+id+'">\r\n'+
+        '</td>\r\n'+
+        '</tr>\r\n';
+        let dom = $(html);
+        dom.find('.resource-man-power').attr({'name':'man_power_'+id, 'required':'required'});
+        $('#tabel-man-power').append(dom);
+    });
+    
+    $(document).on('change', '.resource-man-power', function(e){
+        let opt = $(this);
+        let tr = opt.closest('tr');
+        let te = tr.find('[type="number"]');
+        let jumlahPekerja = opt.find('option:selected').attr('data-jumlah-pekerja');    
+        if(jumlahPekerja !== undefined && jumlahPekerja !== null) {
+            te.val(jumlahPekerja);
+        } else {
+            te.val('');
+        }
     });
 });
 
