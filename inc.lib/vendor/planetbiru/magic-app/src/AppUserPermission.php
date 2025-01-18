@@ -143,7 +143,10 @@ class AppUserPermission
         }
         $this->currentModule = $currentModule;
         $this->currentUser = $currentUser;
-        $this->userLevelId = $currentUser->getUserLevelId();
+        if(isset($currentUser))
+        {
+            $this->userLevelId = $currentUser->getUserLevelId();
+        }
     }
     
     /**
@@ -156,7 +159,7 @@ class AppUserPermission
      */
     public function loadPermission()
     {
-        if($this->appConfig->getRole()->getBypassRole())
+        if($this->appConfig->issetRole() && $this->appConfig->getRole()->getBypassRole())
         {
             $this->allowedList =  true;
             $this->allowedDetail =  true;
