@@ -9,7 +9,7 @@ $appConfig = new SecretObject();
 
 
 $languageDir = dirname(__DIR__)."/inc.lang";
-$appConfig->setBaseDirectoryLanguage($languageDir);
+$appConfig->setBaseLanguageDirectory($languageDir);
 
 $appConfig->loadYamlFile(dirname(__DIR__)."/inc.cfg/application.yml", false, true, true);
 
