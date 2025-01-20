@@ -1550,7 +1550,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						'<span class="page-selector page-selector-step-one%s" data-page-number="%d"><a href="%s">%s</a></span>',
 						'<span class="page-selector page-selector-end%s" data-page-number="%d"><a href="%s">%s</a></span>'
 						)
-				    ->setMargin($appConfig->getData()->getPageMargin())
+				    ->setPageRange($appConfig->getData()->getPageRange())
 				    ;
 			?>
 			<div class="pagination pagination-top">

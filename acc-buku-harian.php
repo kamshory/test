@@ -439,7 +439,7 @@ if(!$currentAction->isRequestViaAjax()){
 				    '<i class="fa-solid fa-angle-left"></i>', '<i class="fa-solid fa-angle-right"></i>',
 				    '<i class="fa-solid fa-angles-left"></i>', '<i class="fa-solid fa-angles-right"></i>'
 				    )
-				    ->setMargin($appConfig->getData()->getPageMargin())
+				    ->setPageRange($appConfig->getData()->getPageRange())
 				    ;
 			?>
 			<div class="pagination pagination-top">

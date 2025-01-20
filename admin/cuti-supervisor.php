@@ -725,7 +725,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				        $appConfig->getData()->getPrev(), $appConfig->getData()->getNext(),
 				        $appConfig->getData()->getFirst(), $appConfig->getData()->getLast()
 				    )
-				    ->setMargin($appConfig->getData()->getPageMargin())
+				    ->setPageRange($appConfig->getData()->getPageRange())
 				    ;
 			?>
 			<div class="pagination pagination-top">
