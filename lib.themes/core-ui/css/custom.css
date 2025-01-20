@@ -364,6 +364,18 @@ td[data-order-method=desc] {
   right: 5px;
 }
 
+.input-datetime-wrapper-inline {
+  display: inline-block;
+}
+.input-datetime-wrapper-inline.time {
+  width: 110px;
+}
+
+.select-cuaca.form-control {
+  display: inline-block !important;
+  width: auto;
+}
+
 .button-area {
   line-height: 2.6rem;
 }

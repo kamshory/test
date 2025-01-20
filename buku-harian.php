@@ -1124,6 +1124,20 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					</tr>
 
 					<tr>
+						<td>Cuaca</td>
+						<td>
+							<input type="time" class="form-control input-time input-inline">
+							<input type="time" class="form-control input-time input-inline">
+							<select class="form-control select-cuaca">
+								<option value="cerah">Cerah</option>
+								<option value="berawan">Berawan</option>
+								<option value="hujan">Hujan</option>
+								<option value="hujan-lebat">Hujan Lebat</option>
+							</select>
+						</td>
+					</tr>
+
+					<tr>
 						<td>Kegiatan</td>
 						<td><textarea spellcheck="false" name="kegiatan" id="kegiatan" class="form-control"></textarea></td>
 					</tr>

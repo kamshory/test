@@ -1715,6 +1715,10 @@ function initDatetimePicker() {
 			(ev.viewMode == 'days') ? $(this).datepicker('hide'): '';
 		});
 	}
+
+  $('.input-datetime-wrapper .input-inline').each(function(){
+    $(this).parent().addClass('input-datetime-wrapper-inline');
+  })
 }
 
 function initSortData()
