@@ -1045,6 +1045,66 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 		var bukuHarianID = 0;
 		</script>
 		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian-editor.js"></script>
+		<script>
+			jQuery(function(e){
+				$(document).on('click', '.tambah-cuaca', function(e2){
+					let obj1 = $(`<div class="cuaca-item" style="padding:2px 0">
+					<input type="time" class="form-control t1 input-time input-inline">
+					<input type="time" class="form-control t2 input-time input-inline">
+					<select class="form-control select-cuaca c">
+						<option value="cerah">Cerah</option>
+						<option value="berawan">Berawan</option>
+						<option value="hujan">Hujan</option>
+						<option value="hujan-lebat">Hujan Lebat</option>
+					</select>
+					</div>`);
+					$('.data-cuaca').append(obj1);
+					
+					obj1.find('input[type="time"]').each(function (index, element) {
+						let obj = $(this);
+						obj.attr('type', 'text');
+						obj.addClass('time-picker');
+						let html = obj[0].outerHTML;
+						let html2 =
+							'<div class="input-datetime-wrapper time">\r\n' +
+							html + '\r\n' +
+							'</div>\r\n';
+						obj.replaceWith(html2);
+					});
+					
+					obj1.find('.time-picker').datetimepicker({
+							format: 'HH:mm:ss'
+					});
+					
+					obj1.find('.input-datetime-wrapper .input-inline').each(function(){
+						$(this).parent().addClass('input-datetime-wrapper-inline');
+					});
+					
+					
+					
+				});
+				$(document).on('blur', '.t1, .t2', function(e2){
+					updateCuaca();
+				});
+				$(document).on('change', '.c', function(e2){
+					updateCuaca();
+				});
+			});
+			
+			function updateCuaca()
+			{
+				let items = $('.cuaca-item');
+				let cuacaJson = [];
+				items.each(function(){
+					cuacaJson.push({
+						'dari':$(this).find('.t1').val(),
+						'hingga':$(this).find('.t2').val(),
+						'cuaca':$(this).find('.c').val(),
+					});
+				});
+				$('[name="cuaca"]').val(JSON.stringify(cuacaJson));
+			}
+		</script>
 		<form name="createform" id="createform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
@@ -1099,9 +1159,6 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 						<input class="form-control" type="date" name="tanggal" id="tanggal" value="<?php echo $tanggal;?>">
 						</td>
 					</tr>
-
-				
-
 					
 					<tr>
 					<td>Lokasi Pekerjaan</td>
@@ -1122,18 +1179,29 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					</select>
 					</td>
 					</tr>
-
+						
 					<tr>
 						<td>Cuaca</td>
 						<td>
-							<input type="time" class="form-control input-time input-inline">
-							<input type="time" class="form-control input-time input-inline">
-							<select class="form-control select-cuaca">
-								<option value="cerah">Cerah</option>
-								<option value="berawan">Berawan</option>
-								<option value="hujan">Hujan</option>
-								<option value="hujan-lebat">Hujan Lebat</option>
-							</select>
+							<div class="data-cuaca">
+								<input type="hidden" name="cuaca">
+								<div class="cuaca-item" style="padding:2px 0">
+									<input type="time" class="form-control t1 input-time input-inline">
+									<input type="time" class="form-control t2 input-time input-inline">
+									<select class="form-control c select-cuaca">
+										<option value="cerah">Cerah</option>
+										<option value="berawan">Berawan</option>
+										<option value="hujan">Hujan</option>
+										<option value="hujan-lebat">Hujan Lebat</option>
+									</select>
+								</div>
+							</div>
+						</td>
+					</tr>
+					<tr class="kontrol-cuaca">
+						<td></td>
+						<td>
+							<button class="btn btn-primary tambah-cuaca" type="button"><?php echo $appLanguage->getButtonAddWeather();?></button>
 						</td>
 					</tr>
 
