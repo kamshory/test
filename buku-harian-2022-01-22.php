@@ -32,11 +32,8 @@ use Sipro\Entity\Data\ManPowerProyek;
 use Sipro\Entity\Data\MaterialProyek;
 use Sipro\Entity\Data\Pekerjaan;
 use Sipro\Entity\Data\PeralatanProyek;
-use Sipro\Entity\Data\PermasalahanMin;
 use Sipro\Entity\Data\ProgresProyek;
 use Sipro\Entity\Data\Proyek;
-use Sipro\Entity\Data\RekomendasiMin;
-use Sipro\Entity\Data\RekomendasiPekerjaan;
 use Sipro\Entity\Data\SupervisorProyek;
 use Sipro\Entity\Data\TipePondasi;
 use Sipro\Util\BoqUtil;
@@ -51,319 +48,24 @@ $currentModule = new PicoModule($appConfig, $database, null, "/", "buku-harian",
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-function arrayCount($arr)
-{
-	if(isset($arr) && is_array($arr))
-	{
-		return count($arr);
-	}
-	return 0;
-}
-
-function savePermasalahanRekomendasi($database, $currentAction, $proyekId, $bukuHarianId, $permasalahanIds, $rekomendasiIds)
-{
-	$max = max(arrayCount($permasalahanIds), arrayCount($rekomendasiIds));
-	$ids = array();
-	for($i = 0; $i < $max; $i++)
-	{
-		$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
-		$permasalahanId = isset($permasalahanIds[$i]) ? $permasalahanIds[$i] : null;
-		$rekomendasiId = isset($rekomendasiIds[$i]) ? $rekomendasiIds[$i] : null;
-		try
-		{
-			$rekomendasiPekerjaan->findOneByProyekIdAndBukuHarianIdAndPermasalahanIdAndRekomendasiId($proyekId, $bukuHarianId, $permasalahanId, $rekomendasiId);
-			$ids[] = $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
-		}
-		catch(Exception $e)
-		{
-			// Not found
-			// Insert
-			$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
-			$rekomendasiPekerjaan->setProyekId($proyekId);
-			$rekomendasiPekerjaan->setBukuHarianId($bukuHarianId);
-			$rekomendasiPekerjaan->setSupervisorId($currentAction->getSupervisorId());
-			$rekomendasiPekerjaan->setPermasalahanId($permasalahanId);
-			$rekomendasiPekerjaan->setRekomendasiId($rekomendasiId);
-			$rekomendasiPekerjaan->setAktif(true);
-			$rekomendasiPekerjaan->setWaktuBuat($currentAction->getTime());
-			$rekomendasiPekerjaan->setIpBuat($currentAction->getIp());
-			$rekomendasiPekerjaan->setWaktuUbah($currentAction->getTime());
-			$rekomendasiPekerjaan->setIpUbah($currentAction->getIp());
-			$rekomendasiPekerjaan->insert();
-			$ids[] = $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
-		}
-	}
-
-	// Clean up
-	$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
-	$rekomendasiPekerjaan->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->rekomendasiPekerjaanId, $ids)))
-		->delete();
-}
-
-function saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $bodIds, $jumlahBoqs)
-{
-	$max = max(arrayCount($bodIds), arrayCount($jumlahBoqs));
-	$ids = array();
-	for($i = 0; $i < $max; $i++)
-	{
-		$billOfQuantityProyek = new BillOfQuantityProyek(null, $database);
-		$billOfQuantityId = isset($bodIds[$i]) ? $bodIds[$i] : null;
-		$volumeProyek = isset($jumlahBoqs[$i]) ? $jumlahBoqs[$i] : null;
-		try
-		{
-			$billOfQuantityProyek->findOneByProyekIdAndBukuHarianIdAndBillOfQuantityId($proyekId, $bukuHarianId, $billOfQuantityId);
-			$ids[] = $billOfQuantityProyek->getBillOfQuantityProyekId();
-		}
-		catch(Exception $e)
-		{
-			// Not found
-			// Insert
-
-			try
-			{
-				$billOfQuantity = new BillOfQuantity(null, $database);
-				$billOfQuantity->findOneByBillOfQuantityId($billOfQuantityId);
-
-				$volume = $billOfQuantity->getVolume();
-				$persen = $volume == 0 ? 0 : (100*$volumeProyek/$volume);
-
-				$billOfQuantityProyek = new BillOfQuantityProyek(null, $database);
-				$billOfQuantityProyek->setProyekId($proyekId);
-				$billOfQuantityProyek->setBukuHarianId($bukuHarianId);
-				$billOfQuantityProyek->setSupervisorBuatId($currentAction->getSupervisorId());
-				$billOfQuantityProyek->setSupervisorUbahId($currentAction->getSupervisorId());
-				$billOfQuantityProyek->setBillOfQuantityId($billOfQuantityId);
-				$billOfQuantityProyek->setVolumeProyek($volumeProyek);
-				$billOfQuantityProyek->setVolume($volume);
-				$billOfQuantityProyek->setPersen($persen);
-
-
-				$billOfQuantityProyek->setAktif(true);
-				$billOfQuantityProyek->setWaktuBuat($currentAction->getTime());
-				$billOfQuantityProyek->setIpBuat($currentAction->getIp());
-				$billOfQuantityProyek->setWaktuUbah($currentAction->getTime());
-				$billOfQuantityProyek->setIpUbah($currentAction->getIp());
-				$billOfQuantityProyek->insert();
-
-				$billOfQuantity->setVolume($volumeProyek);
-				$billOfQuantity->update();
-
-				$ids[] = $billOfQuantityProyek->getBillOfQuantityProyekId();
-			}
-			catch(Exception $e2)
-			{
-				// Do nothing
-			}
-		}
-	}
-
-	// Clean up
-	$billOfQuantityProyek = new BillOfQuantityProyek(null, $database);
-	$billOfQuantityProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->billOfQuantityProyekId, $ids)))
-		->delete();
-}
-
-function saveAcuanPengawasan($database, $currentAction, $proyekId, $bukuHarianId, $acuanPengawasanIds)
-{
-	$max = arrayCount($acuanPengawasanIds);
-	for($i = 0; $i < $max; $i++)
-	{
-		try
-		{
-			$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
-		}
-		catch(Exception $e)
-		{
-
-		}
-	}
-}
-
-function saveManPower($database, $currentAction, $proyekId, $bukuHarianId, $manPowerIds, $jumlahManPowers)
-{
-	$max = max(arrayCount($manPowerIds), arrayCount($jumlahManPowers));
-	$ids = array();
-	for($i = 0; $i < $max; $i++)
-	{
-		$manPowerProyek = new ManPowerProyek(null, $database);
-		$manPowerId = isset($manPowerIds[$i]) ? $manPowerIds[$i] : null;
-		$jumlahManPower = isset($jumlahManPowers[$i]) ? $jumlahManPowers[$i] : null;
-		try
-		{
-			$manPowerProyek->findOneByProyekIdAndBukuHarianIdAndManPowerId($proyekId, $bukuHarianId, $manPowerId);
-			$ids[] = $manPowerProyek->getManPowerProyekId();
-		}
-		catch(Exception $e)
-		{
-			// Not found
-			// Insert
-			$manPowerProyek = new ManPowerProyek(null, $database);
-			$manPowerProyek->setProyekId($proyekId);
-			$manPowerProyek->setBukuHarianId($bukuHarianId);
-			$manPowerProyek->setSupervisorId($currentAction->getSupervisorId());
-			$manPowerProyek->setManPowerId($manPowerId);
-			$manPowerProyek->setJumlahPekerja($jumlahManPower);
-			$manPowerProyek->setAktif(true);
-			$manPowerProyek->setWaktuBuat($currentAction->getTime());
-			$manPowerProyek->setIpBuat($currentAction->getIp());
-			$manPowerProyek->setWaktuUbah($currentAction->getTime());
-			$manPowerProyek->setIpUbah($currentAction->getIp());
-			$manPowerProyek->insert();
-			$ids[] = $manPowerProyek->getManPowerProyekId();
-		}
-	}
-
-	// Clean up
-	$manPowerProyek = new ManPowerProyek(null, $database);
-	$manPowerProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->manPowerProyekId, $ids)))
-		->delete();
-}
-
-function savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $peralatanIds, $jumlahPeralatans)
-{
-	$max = max(arrayCount($peralatanIds), arrayCount($jumlahPeralatans));
-	$ids = array();
-	for($i = 0; $i < $max; $i++)
-	{
-		$peralatanProyek = new PeralatanProyek(null, $database);
-		$peralatanId = isset($peralatanIds[$i]) ? $peralatanIds[$i] : null;
-		$jumlah = isset($jumlahPeralatans[$i]) ? $jumlahPeralatans[$i] : null;
-		try
-		{
-			$peralatanProyek->findOneByProyekIdAndBukuHarianIdAndPeralatanId($proyekId, $bukuHarianId, $peralatanId);
-			$ids[] = $peralatanProyek->getManPowerProyekId();
-		}
-		catch(Exception $e)
-		{
-			// Not found
-			// Insert
-			$peralatanProyek = new PeralatanProyek(null, $database);
-			$peralatanProyek->setProyekId($proyekId);
-			$peralatanProyek->setBukuHarianId($bukuHarianId);
-			$peralatanProyek->setSupervisorId($currentAction->getSupervisorId());
-			$peralatanProyek->setPeralatan($peralatanId);
-			$peralatanProyek->setJumlah($jumlah);
-			$peralatanProyek->setAktif(true);
-			$peralatanProyek->setWaktuBuat($currentAction->getTime());
-			$peralatanProyek->setIpBuat($currentAction->getIp());
-			$peralatanProyek->setWaktuUbah($currentAction->getTime());
-			$peralatanProyek->setIpUbah($currentAction->getIp());
-			$peralatanProyek->insert();
-			$ids[] = $peralatanProyek->getManPowerProyekId();
-		}
-	}
-
-	// Clean up
-	$peralatanProyek = new PeralatanProyek(null, $database);
-	$peralatanProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->peralatanProyekId, $ids)))
-		->delete();
-}
-
-function saveMaterial($database, $currentAction, $proyekId, $bukuHarianId, $materialIds, $jumlahMaterials)
-{
-	$max = max(arrayCount($materialIds), arrayCount($materialIds));
-	$ids = array();
-	for($i = 0; $i < $max; $i++)
-	{
-		$materialProyek = new MaterialProyek(null, $database);
-		$materialId = isset($materialIds[$i]) ? $materialIds[$i] : null;
-		$jumlah = isset($jumlahMaterials[$i]) ? $jumlahMaterials[$i] : null;
-		try
-		{
-			$materialProyek->findOneByProyekIdAndBukuHarianIdAndMaterialId($proyekId, $bukuHarianId, $materialId);
-			$ids[] = $materialProyek->getMaterialProyekId();
-		}
-		catch(Exception $e)
-		{
-			// Not found
-			// Insert
-			$materialProyek = new MaterialProyek(null, $database);
-			$materialProyek->setProyekId($proyekId);
-			$materialProyek->setBukuHarianId($bukuHarianId);
-			$materialProyek->setSupervisorId($currentAction->getSupervisorId());
-			$materialProyek->setMaterialId($materialId);
-			$materialProyek->setJumlah($jumlah);
-			$materialProyek->setAktif(true);
-			$materialProyek->setWaktuBuat($currentAction->getTime());
-			$materialProyek->setIpBuat($currentAction->getIp());
-			$materialProyek->setWaktuUbah($currentAction->getTime());
-			$materialProyek->setIpUbah($currentAction->getIp());
-			$materialProyek->insert();
-			$ids[] = $materialProyek->getMaterialProyekId();
-		}
-	}
-
-	// Clean up
-	$materialProyek = new MaterialProyek(null, $database);
-	$materialProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->materialProyekId, $ids)))
-		->delete();
-}
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
-
-
 	/*
-	{
-		"proyekId": "168",
-		"tanggal": "2025-01-28",
-		"lokasiProyekId": [
-			"5490"
-		],
-		"kegiatan": "gerge</p>",
-		"files": "",
-		"permasalahanId": [
-			"3",
-			"7"
-		],
-		"rekomendasiId": [
-			"2",
-			"1"
-		],
-		"billOfQuantityId": "9",
-		"boqId": [
-			"11"
-		],
-		"jumlahBoq": [
-			"3"
-		],
-		"acuanPengawasanId": [
-			"5"
-		],
-		"manPowerId": [
-			"1"
-		],
-		"jumlahManPower": [
-			"7"
-		],
-		"peralatanId": [
-			"461"
-		],
-		"jumlahPeralatan": [
-			"1"
-		],
-		"materialId": [
-			"485"
-		],
-		"jumlahMaterial": [
-			"1"
-		],
-		"latitude": "",
-		"longitude": "",
-		"altitude": "",
-		"userAction": "create"
-	}
-  */
+	$logger = fopen("log.sql", "a");
+	$database->setCallbackExecuteQuery(function($sql, $type) use ($logger) {
+		fputs($logger, $sql.";\r\n\r\n");
+	});
+	*/
 
-
-	
-    $proyekId = $inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true);
+	$proyekId = $inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true);
 
     $bukuHarian = new BukuHarian(null, $database);
 	$bukuHarian->setSupervisorId($currentLoggedInSupervisor->getSupervisorId());
-	$bukuHarian->setProyekId($proyekId);
+	$bukuHarian->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
 	$bukuHarian->setBillOfQuantityId($inputPost->getBillOfQuantityId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$bukuHarian->setPermasalahan($inputPost->getPermasalahan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$bukuHarian->setRekomendasi($inputPost->getRekomendasi(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$bukuHarian->setTanggal($inputPost->getTanggal(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$bukuHarian->setKegiatan($inputPost->getKegiatan(PicoFilterConstant::FILTER_DEFAULT, false, false, true));
 	$bukuHarian->setLatitude($inputPost->getLatitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
 	$bukuHarian->setLongitude($inputPost->getLongitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
 	$bukuHarian->setAltitude($inputPost->getAltitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
@@ -374,71 +76,238 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 	$bukuHarian->setIpUbah($currentAction->getIp());
 
 	$bukuHarian->insert();
-
+	
 	$bukuHarianId = $bukuHarian->getBukuHarianId();
 
-	/*
-	"permasalahanId": [
-			"3",
-			"7"
-		],
-		"rekomendasiId": [
-			"2",
-			"1"
-		],
-	*/
-	savePermasalahanRekomendasi($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getPermasalahanId(), $inputPost->getRekomendasiId());
-
-	/*
-	"boqId": [
-			"11"
-		],
-		"jumlahBoq": [
-			"3"
-		],
-	*/
-	saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getBoqId(), $inputPost->getJumlahBoq());
+	$waktuBuat = $currentAction->getTime();
+	$waktuUbah = $waktuBuat;
+	$ipBuat = $_SERVER['REMOTE_ADDR'];
+	$ipUbah = $_SERVER['REMOTE_ADDR'];
 	
-	/*
-	"acuanPengawasanId": [
-			"5"
-		],
-	*/
-	saveAcuanPengawasan($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getAcuanPengawasanId());
+	$arrPeralatanId = array();
 	
-	/*
-	"manPowerId": [
-			"1"
-		],
-		"jumlahManPower": [
-			"7"
-		],
-	*/
-	saveManPower($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getManPowerId(), $inputPost->getJumlahManPower());
+	$pekerjaan = new Pekerjaan(null, $database);
+	$pekerjaan->setPekerjaanId($inputPost->getPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$pekerjaan->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$pekerjaan->setBukuHarianId($bukuHarianId);
+	$pekerjaan->setSupervisorId($currentAction->getSupervisorId());
+	$pekerjaan->setJenisPekerjaanId($inputPost->getJenisPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$pekerjaan->setLokasiProyekId($inputPost->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$pekerjaan->setTipePondasiId($inputPost->getTipePondasiId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$pekerjaan->setKelasTowerId($inputPost->getKelasTowerId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$pekerjaan->setLatitude($inputPost->getLatitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
+	$pekerjaan->setLongitude($inputPost->getLongitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
+	$pekerjaan->setAtitude($inputPost->getAtitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
+	$pekerjaan->setKegiatan($inputPost->getKegiatan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$pekerjaan->setJumlahPekerja($inputPost->getJumlahPekerja(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true));
+	$pekerjaan->setAcuanPengawasan($inputPost->getAcuanPengawasan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$pekerjaan->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
+	$pekerjaan->setAdminBuat($currentUser->getUserId());
+	$pekerjaan->setWaktuBuat($currentAction->getTime());
+	$pekerjaan->setIpBuat($currentAction->getIp());
+	$pekerjaan->setAdminUbah($currentUser->getUserId());
+	$pekerjaan->setWaktuUbah($currentAction->getTime());
+	$pekerjaan->setIpUbah($currentAction->getIp());
 
-	/*
-	"peralatanId": [
-			"461"
-		],
-		"jumlahPeralatan": [
-			"1"
-		],
-	*/
-	savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getPeralatanId(), $inputPost->getJumlahPeralatan());
+	$pekerjaan->insert();
 
+	$pekerjaanId = $pekerjaan->getPekerjaanId();
 
-	/*
-	"materialId": [
-			"485"
-		],
-		"jumlahMaterial": [
-			"1"
-		],
-	*/
-	savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getMaterialId(), $inputPost->getJumlahMaterial());
+	$acuan_pengawasan = $inputPost->getAcuanPengawasan();
+	$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
+	$acuanPengawasanPekerjaan->deleteByPekerjaanId($pekerjaanId);
+
+	if(isset($acuan_pengawasan) && is_array($acuan_pengawasan))
+	{
+		foreach($acuan_pengawasan as $key=>$acuan_pengawasan_id)
+		{
+			$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
+			$acuanPengawasanPekerjaan->setPekerjaanId($pekerjaanId);
+			$acuanPengawasanPekerjaan->setAcuanPengawasan($acuan_pengawasan_id);
+			$acuanPengawasanPekerjaan->setAktif(true);
+			$acuanPengawasanPekerjaan->insert();
+		}
+	}
+
+	if(isset($_POST['peralatan_proyek_id']))
+	{
+		$peralatan_proyek_id = $_POST['peralatan_proyek_id'];
+		if(is_array($peralatan_proyek_id))
+		{
+			foreach($peralatan_proyek_id as $key=>$val)
+			{
+				if(stripos($val, 'rand_') !== false)
+				{
+					// insert
+					$peralatan_id = $inputPost->get('peralatan_id_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+					$jumlah = $inputPost->get('jumlah_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+
+					$pemalatanProyek = new PeralatanProyek(null, $database);
+					$pemalatanProyek->setPekerjaanId($pekerjaanId);
+					$pemalatanProyek->setPeralatanId($peralatan_id);
+					$pemalatanProyek->setJumlah($jumlah);
+					$pemalatanProyek->setProyekId($proyekId);
+					$pemalatanProyek->setAktif(true);
+
+					$pemalatanProyek->insert();
+
+					$arrPeralatanId[] = $pemalatanProyek->getPeralatanProyekId();
+				}
+			}
+		}
+	}
+	if(isset($_POST['material_proyek_id']))
+	{
+		$arrMaterialProyekId = $_POST['material_proyek_id'];
+		if(is_array($arrMaterialProyekId))
+		{
+			foreach($arrMaterialProyekId as $key=>$val)
+			{
+				if(stripos($val, 'rand_') !== false)
+				{
+					// insert
+					$materialId = $inputPost->get('material_id_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+					$jumlah = $inputPost->get('jumlah_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+
+					$materialProyek = new MaterialProyek(null, $database);
+					$materialProyek->setPekerjaanId($pekerjaanId);
+					$materialProyek->setMaterialId($materialId);
+					$materialProyek->setProyekId($proyekId);
+					$materialProyek->setJumlah($jumlah);
+					$materialProyek->setAktif(true);
+
+					$materialProyek->insert();
+
+					$arr_material_id[] = $materialProyek->getMaterialProyekId();
+				}
+			}
+		}
+	}
+
+	if(isset($_POST['man_power_proyek_id']))
+	{
+		$arrMaterialProyekId = $_POST['man_power_proyek_id'];
+		if(is_array($arrMaterialProyekId))
+		{
+			foreach($arrMaterialProyekId as $key=>$val)
+			{
+				if(stripos($val, 'rand_') !== false)
+				{
+					// insert
+					$manPowerId = $inputPost->get('man_power_id_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+					$jumlah = $inputPost->get('jumlah_pekerja_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+
+					$manPowerProyek = new ManPowerProyek(null, $database);
+					$manPowerProyek->setPekerjaanId($pekerjaanId);
+					$manPowerProyek->setManPowerId($manPowerId);
+					$manPowerProyek->setProyekId($proyekId);
+					$manPowerProyek->setJumlah($jumlah);
+					$manPowerProyek->setAktif(true);
+
+					$manPowerProyek->insert();
+
+					$arr_man_power_id[] = $manPowerProyek->getManPowerProyekId();
+				}
+			}
+		}
+	}
+
+	if(isset($_POST['boq_proyek_id']))
+	{
+		$arrBoqProyekId = $_POST['boq_proyek_id'];
+		if(is_array($arrBoqProyekId))
+		{
+			foreach($arrBoqProyekId as $key=>$val)
+			{
+				if(stripos($val, 'rand_') !== false)
+				{
+					// insert
+					$boqId = $inputPost->get('boq_proyek_id_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT));
+					$volumeProyek = $inputPost->get('volume_'.$val, array(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT));
+
+					$boq = new BillOfQuantity(null, $database);
+
+					try
+					{
+						$boq->find($boqId);
+
+						$boqMin = $boq->getVolumeProyek();
+						$boqMax = $boq->getVolume();
+
+						if($volumeProyek < $boqMin)
+						{
+							$volumeProyek = $boqMin;
+						}
+						if($volumeProyek > $boqMax)
+						{
+							$volumeProyek = $boqMax;
+						}	
+						
+						$boqProyek = new BillOfQuantityProyek(null, $database);
+
+						$boqProyek->setProyekId($proyekId);
+						$boqProyek->setBukuHarianId($bukuHarianId);
+						$boqProyek->setBillOfQuantityId($boqId);
+						$boqProyek->setVolumeProyek($volumeProyek);
+						$boqProyek->setVolume($boq->getVolume());
+						$boqProyek->setAktif(true);
+						$boqProyek->setIpBuat($ipBuat);
+						$boqProyek->setIpUbah($ipUbah);
+						$boqProyek->setWaktuBuat($waktuBuat);
+						$boqProyek->setWaktuUbah($waktuUbah);
+						$boqProyek->setSupervisorBuat($currentLoggedInSupervisor->getSupervisorId());
+						$boqProyek->setSupervisorUbah($currentLoggedInSupervisor->getSupervisorId());
+
+						$persen = $boqProyek->getVolume() > 0 ? 100 * $boqProyek->getVolumeProyek() / $boqProyek->getVolume() : 0;
+						$boqProyek->setPersen($persen);
+						
+						$boqProyek->insert();
+						
+						// update BOQ
+						$boq->setVolumeProyek($volumeProyek)->update();
+
+						$arr_boq_id[] = $boqProyek->getBillOfQuantityProyekId();
+					}
+					catch(Exception $e)
+					{
+						error_log($e->getMessage());
+					}
+				}
+			}
+		}
+	}
+
+	// update rata-rata
+	$boqFinder = new BillOfQuantity(null, $database);
+	try
+	{
+		$boqData = $boqFinder->findByProyekId($proyekId);
+		$boqResult = $boqData->getResult();
+		$persen = BoqUtil::getAveragePercent($boqResult);
+		if($persen > 0)
+		{
+			$progresProyek = new ProgresProyek(null, $database);
+			$progresProyek->setProyekId($proyekId);
+			$progresProyek->setPersen($persen);
+			$progresProyek->setAktif(true);
+			$progresProyek->setIpBuat($ipBuat);
+			$progresProyek->setIpUbah($ipUbah);
+			$progresProyek->setWaktuBuat($waktuBuat);
+			$progresProyek->setWaktuUbah($waktuUbah);
+			$progresProyek->setSupervisorBuat($currentLoggedInSupervisor->getSupervisorId());
+			$progresProyek->setSupervisorUbah($currentLoggedInSupervisor->getSupervisorId());
+			$progresProyek->insert();
+
+			$proyek = new Proyek(null, $database);
+			$proyek->setProyekId($proyekId)->setPersen($persen)->update();
+		}
+	}
+	catch(Exception $e)
+	{
+		error_log($e->getMessage());
+	}
 	
 	$currentModule->redirectTo(UserAction::DETAIL, Field::of()->buku_harian_id, $bukuHarianId);
-	
 }
 else if($inputPost->getUserAction() == UserAction::UPDATE)
 {
@@ -992,7 +861,7 @@ if(isset($_POST['add-boq']))
 					}
 					catch(Exception $e)
 					{
-						// Do nothing
+
 					}
 				}
 			}
@@ -1026,7 +895,7 @@ if(isset($_POST['add-boq']))
 	}
 	catch(Exception $e)
 	{
-		// Do nothing
+		
 	}
 	
 	header("Location: ".basename($_SERVER['PHP_SELF'])."?option=detail&buku_harian_id=$bukuHarianId");
@@ -1136,6 +1005,7 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 		});
 	});
 
+
 </script>
 <div class="page page-jambi page-insert">
 	<div class="jambi-wrapper">
@@ -1195,16 +1065,27 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 		}
 		
 		</script>
+
+		<link rel="stylesheet" type="text/css" href="lib.assets/mobile-style/buku-harian.css">
+		<link rel="stylesheet" type="text/css" href="lib.assets/mobile-style/buku-harian-editor.css">
+		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian.js?<?php echo mt_rand(111111, 99999999);?>"></script>
+		
+		<style>
+		.form-control.input-inline.time-picker{
+			display:inline-block;
+			width:110px;
+		}
+		.form-control.select-cuaca{
+			display:inline-block;
+			width:auto;
+		}
+		</style>
+
 		<script type="text/javascript">
 		var dataCuaca = [];
 		var bukuHarianID = 0;
 		</script>
-
-		<link rel="stylesheet" type="text/css" href="lib.assets/mobile-style/buku-harian.css?rand=<?php echo mt_rand(111111, 999999);?>"">
-		<link rel="stylesheet" type="text/css" href="lib.assets/mobile-style/buku-harian-editor.css?rand=<?php echo mt_rand(111111, 999999);?>"">
-		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian.js?<?php echo mt_rand(111111, 99999999);?>"></script>
-		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian-editor.js?rand=<?php echo mt_rand(111111, 999999);?>"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+		<script type="text/javascript" src="lib.assets/mobile-script/buku-harian-editor.js"></script>
 		
 		<form name="createform" id="createform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -1212,7 +1093,7 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
 						<td>
-						<select name="proyek_id" class="form-control" required="required" onchange="window.location='?user_action=create&proyek_id='+this.value+'&tanggal=<?php echo $inputGet->getTanggal();?>'">
+						<select name="proyek_id" class="form-control" required="required">
 							<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
 							<?php 
 							$supervisorProyek = new SupervisorProyek(null, $database);
@@ -1284,55 +1165,25 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					</select>
 					</td>
 					</tr>
+						
+
 					<tr>
 						<td>Kegiatan</td>
 						<td><textarea spellcheck="false" name="kegiatan" id="kegiatan" class="form-control"></textarea></td>
 					</tr>
+
 					<tr>
-						<td>Permasalahan dan Rekomendasi</td>
-						<td>
-							<table class="tabel-control-two-side">
-								<tbody>
-									<tr>
-										<td>
-											<select class="form-control" data-name="permasalahan_id">
-												<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-												<?php echo AppFormBuilder::getInstance()->createSelectOption(new PermasalahanMin(null, $database), 
-												PicoSpecification::getInstance()
-													->addAnd(new PicoPredicate(Field::of()->proyekId, $proyekId))
-													->addAnd(new PicoPredicate(Field::of()->aktif, true))
-													->addAnd(new PicoPredicate(Field::of()->ditutup, false)), 
-												PicoSortable::getInstance()
-													->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
-													->add(new PicoSort(Field::of()->permasalahan, PicoSort::ORDER_TYPE_ASC)), 
-												Field::of()->permasalahanId, Field::of()->permasalahan)
-												->setTextNodeFormat('"%s : %s : %s", permasalahan, rekomendasi, tindakLanjut')
-												; ?>
-												?>
-											</select>
-										</td>
-										<td>
-											<button type="button" class="btn btn-danger remove-issue">×</button>
-										</td>
-									</tr>
-								</tbody>
-								<tfoot>
-									<tr>
-										<td colspan="2">
-											<button type="button" class="btn btn-primary add-issue">
-												Tambah
-											</button>
-											<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#permasalahan-modal">
-												Atur
-											</button>
-										</td>
-									</tr>
-								</tfoot>
-							</table>
-						</td>
+						<td>Permasalahan</td>
+						<td><textarea spellcheck="false" name="permasalahan" id="permasalahan" class="form-control"></textarea></td>
 					</tr>
+
 					<tr>
-						<td>Bill of Quality</td>
+						<td>Rekomendasi</td>
+						<td><textarea spellcheck="false" name="rekomendasi" id="rekomendasi" class="form-control"></textarea></td>
+					</tr>
+
+					<tr>
+					<td>Bill of Quality</td>
 					<td>
 						<select class="form-control" name="bill_of_quantity_id" id="bill_of_quantity_id">
 							<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
@@ -1348,8 +1199,8 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 								->addAnd(new PicoPredicate(Field::of()->aktif, true)), 
 							PicoSortable::getInstance()
 								->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
-								->add(new PicoSort(Field::of()->timeCreate, PicoSort::ORDER_TYPE_DESC)), 
-							Field::of()->billOfQuantityId, Field::of()->nama, null, [Field::of()->proyekId, Field::of()->parentId])
+								->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+							Field::of()->billOfQuantityId, Field::of()->nama, null, array('proyekId', 'parentId'))
 							; ?>
 							?>
 						</select>
@@ -1359,7 +1210,7 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 						<td></td>
 						<td>
 							<table class="tabel-control" id="tabel-boq" cellpadding="0" cellspacing="0" border="0" class="form-control">
-								<tbody></tbody>
+						
 							</table>
 							<div class="form-control-add">
 							<input type="button" value="Tambah" id="tambah-boq" class="btn btn-primary">
@@ -1379,11 +1230,9 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					<td>Man Power</td>
 					<td>
 						<table class="tabel-control" id="tabel-man-power" cellpadding="0" cellspacing="0" border="0" class="form-control">
-							<tbody></tbody>
 						</table>
 						<div class="form-control-add">
 						<input type="button" value="Tambah" id="tambah-man-power" class="btn btn-primary">
-						<span id="total-man-power"></span>
 						</div>
 					</td>
 					</tr>
@@ -1391,7 +1240,7 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					<td>Peralatan</td>
 					<td>
 						<table class="tabel-control" id="tabel-peralatan" cellpadding="0" cellspacing="0" border="0" class="form-control">
-							<tbody></tbody>
+						
 						</table>
 						<div class="form-control-add">
 						<input type="button" value="Tambah" id="tambah-peralatan" class="btn btn-primary">
@@ -1403,7 +1252,6 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					<td>Material</td>
 					<td>
 						<table class="tabel-control" id="tabel-material" cellpadding="0" cellspacing="0" border="0" class="form-control">
-							<tbody></tbody>
 						</table>
 						<div class="form-control-add">
 						<input type="button" value="Tambah" id="tambah-material" class="btn btn-primary">
@@ -1411,7 +1259,8 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 					</td>
 					</tr>
 
-				</tbody>
+				</table>
+
 			</table>
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
@@ -1428,56 +1277,74 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 				</tbody>
 			</table>
 		</form>
-        
+
 		<div style="display:none">
-			<select class="resource-peralatan form-control">
-			</select>
-			<select class="resource-material form-control">
-			</select>
-			<select class="resource-bill-of-quantity form-control">
-			</select>
-			<select class="resource-man-power form-control">
-			</select>		
-		</div>
+		<select class="resource-peralatan form-control">
+		</select>
+		<select class="resource-material form-control">
+		</select>
+		<select class="resource-bill-of-quantity form-control">
+		</select>
+		<select class="resource-man-power form-control">
+		</select>
+		<script>
+			jQuery(function(){
+				$.ajax({
+					'url':'lib.mobile-tools/ajax-load-man-power.php',
+					'type':'GET',
+					'dataType':'html',
+					'data':{proyek_id:$('[name="proyek_id"]').val()},
+					success: function(data){
+						let select = $('.resource-man-power');
+						select.empty();
+						select.append(data);
+					}
+				});
+				
+				$('.resource-peralatan').load('lib.mobile-tools/ajax-load-peralatan.php');
+				$('.resource-material').load('lib.mobile-tools/ajax-load-material.php');
+				loadAcuanPengawasan();
+
+				document.querySelector('#tabel-boq').addEventListener('change', function(event) {
+					if(event.target.closest('.resource-bill-of-quantity'))
+					{
+						loadAcuanPengawasan();
+					}
+				});
+				document.querySelector('[name="proyek_id"]').addEventListener('change', function(event) {
+					loadAcuanPengawasan();
+				});
+				
+			});
+
+			function loadAcuanPengawasan()
+			{
+				let proyekId = document.querySelector('[name="proyek_id"]').value;
+				let billOfQuantity = [];
+				let boqs = document.querySelector('#tabel-boq').querySelectorAll('.resource-bill-of-quantity');
+				if(boqs)
+				{
+					boqs.forEach((elem, index) => {
+						if(elem.value != '')
+						{
+							billOfQuantity.push(elem.value);
+						}
+					});
+				}				
+				$.ajax({
+					'method': 'GET',
+					'url': 'lib.mobile-tools/ajax-load-acuan-pengawasan-pekerjaan.php',
+					'data': {proyekId: proyekId, billOfQuantityId: billOfQuantity},
+					'success': function(data) {
+						document.querySelector('.acuan-pengawasan-container').innerHTML = data;
+					}
+				});
+			}
+		</script>
+
+		
 	</div>
-
-    <div class="modal modal-lg fade" data-mode="list" id="permasalahan-modal" tabindex="-1" aria-labelledby="permasalahanLabel" aria-hidden="true" data-proyek-id="<?php echo $proyekId;?>">
-        <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="permasalahanLabel"><?php echo $appLanguage->getIssue();?></h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success save-issue"><?php echo $appLanguage->getButtonSave();?></button>
-                <button type="button" class="btn btn-primary cancel-issue"><?php echo $appLanguage->getButtonCancel();?></button>
-                <button type="button" class="btn btn-primary add-issue"><?php echo $appLanguage->getButtonAdd();?></button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo $appLanguage->getButtonClose();?></button>
-            </div>
-        </div>
-        </div>
-    </div>
-
-    <div class="modal modal-lg fade" data-mode="list" id="rekomendasi-modal" tabindex="-1" aria-labelledby="rekomendasiLabel" aria-hidden="true" data-proyek-id="<?php echo $proyekId;?>">
-        <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="rekomendasiLabel"><?php echo $appLanguage->getRecommendation();?></h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success save-recommendation"><?php echo $appLanguage->getButtonSave();?></button>
-                <button type="button" class="btn btn-primary cancel-recommendation"><?php echo $appLanguage->getButtonCancel();?></button>
-                <button type="button" class="btn btn-primary add-recommendation"><?php echo $appLanguage->getButtonAdd();?></button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo $appLanguage->getButtonClose();?></button>
-            </div>
-        </div>
-        </div>
-    </div>
+	</div>
 
 
 	<!-- Modal -->
@@ -1533,6 +1400,8 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 		</div>
 	</div>
 </div>
+
+
 
 <?php 
 require_once __DIR__ . "/inc.app/footer-supervisor.php";
@@ -2422,7 +2291,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				}
 				catch(Exception $e)
 				{
-					// Do nothing
+
 				}
 				
 				?>

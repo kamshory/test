@@ -14,7 +14,7 @@ echo '<option value=""></option>'."\r\n";
 try
 {
     $peralatan = new Peralatan(null, $database);
-    $pageData3 = $peralatan->findAll($pecs3, null, $sorts3);
+    $pageData3 = $peralatan->findAll($specs3, null, $sorts3);
     foreach($pageData3->getResult() as $row)
     {
         $nama = $row->getNama();

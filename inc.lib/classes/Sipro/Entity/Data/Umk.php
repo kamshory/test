@@ -5,7 +5,13 @@ namespace Sipro\Entity\Data;
 use MagicObject\MagicObject;
 
 /**
- * Umk is entity of table umk. You can join this entity to other entity using annotation JoinColumn. 
+ * The Umk class represents an entity in the "umk" table.
+ *
+ * This entity maps to the "umk" table in the database and supports ORM (Object-Relational Mapping) operations. 
+ * You can establish relationships with other entities using the JoinColumn annotation. 
+ * Ensure to include the appropriate "use" statement if related entities are defined in a different namespace.
+ * 
+ * For detailed guidance on using the MagicObject ORM, refer to the official tutorial:
  * @link https://github.com/Planetbiru/MagicObject/blob/main/tutorial.md#orm
  * 
  * @package Sipro\Entity\Data
@@ -22,7 +28,7 @@ class Umk extends MagicObject
 	 * @GeneratedValue(strategy=GenerationType.IDENTITY)
 	 * @NotNull
 	 * @Column(name="umk_id", type="bigint(20)", length=20, nullable=false, extra="auto_increment")
-	 * @Label(content="UMK ID")
+	 * @Label(content="Umk ID")
 	 * @var int
 	 */
 	protected $umkId;
@@ -158,7 +164,7 @@ class Umk extends MagicObject
 	 * 
 	 * @JoinColumn(name="admin_buat", referenceColumnName="user_id")
 	 * @Label(content="Pembuat")
-	 * @var User
+	 * @var UserMin
 	 */
 	protected $pembuat;
 
@@ -176,7 +182,7 @@ class Umk extends MagicObject
 	 * 
 	 * @JoinColumn(name="admin_ubah", referenceColumnName="user_id")
 	 * @Label(content="Pengubah")
-	 * @var User
+	 * @var UserMin
 	 */
 	protected $pengubah;
 

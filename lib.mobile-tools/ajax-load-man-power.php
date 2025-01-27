@@ -6,7 +6,7 @@ use MagicObject\Request\InputGet;
 use MagicObject\Request\PicoFilterConstant;
 use Sipro\Entity\Data\ManPower;
 
-require_once dirname(__DIR__) . "/inc.app/auth-supervisor.php";
+require_once dirname(__DIR__) . "/inc.app/app.php";
 
 $resourceManPower = [];
 

@@ -32,7 +32,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "material", "Material");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "material", $appLanguage->getMaterial());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 

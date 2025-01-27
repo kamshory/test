@@ -15,7 +15,7 @@ $jenisPekerjaanId = $inputGet->getId();
 $specs = PicoSpecification::getInstance()
 	->addAnd(PicoPredicate::getInstance()->equals('jenisPekerjaanId', $jenisPekerjaanId))
 	->addAnd(PicoPredicate::getInstance()->equals('material.aktif', true))
-	;
+;
 
 $sorts = PicoSortable::getInstance()
 	->add(['material.nama', PicoSort::ORDER_TYPE_ASC])

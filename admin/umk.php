@@ -6,6 +6,7 @@
 use MagicObject\MagicObject;
 use MagicObject\Database\PicoPage;
 use MagicObject\Database\PicoPageable;
+use MagicObject\Database\PicoPredicate;
 use MagicObject\Database\PicoSort;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
@@ -17,15 +18,18 @@ use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
 use MagicApp\AppUserPermission;
-use Sipro\Entity\Data\Umk;
 use Sipro\AppIncludeImpl;
+use Sipro\Entity\Data\Umk;
+use MagicApp\XLSX\DocumentWriter;
+use MagicApp\XLSX\XLSXDataFormat;
+
 
 require_once dirname(__DIR__) . "/inc.app/auth.php";
 
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "umk", "Umk");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "umk", $appLanguage->getUmk());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -34,6 +38,8 @@ if(!$userPermission->allowedAccess($inputGet, $inputPost))
 	require_once $appInclude->appForbiddenPage(__DIR__);
 	exit();
 }
+
+$dataFilter = null;
 
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
@@ -48,45 +54,79 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 	$umk->setKabupaten($inputPost->getKabupaten(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$umk->setKecamatan($inputPost->getKecamatan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$umk->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
-	$umk->setAdminBuat($currentUser->getUserId());
+	$umk->setAdminBuat($currentAction->getUserId());
 	$umk->setWaktuBuat($currentAction->getTime());
 	$umk->setIpBuat($currentAction->getIp());
-	$umk->setAdminUbah($currentUser->getUserId());
+	$umk->setAdminUbah($currentAction->getUserId());
 	$umk->setWaktuUbah($currentAction->getTime());
 	$umk->setIpUbah($currentAction->getIp());
-	$umk->insert();
-	$newId = $umk->getUmkId();
-	$currentModule->redirectTo(UserAction::DETAIL, Field::of()->umk_id, $newId);
+	try
+	{
+		$umk->insert();
+		$newId = $umk->getUmkId();
+		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->umk_id, $newId);
+	}
+	catch(Exception $e)
+	{
+		$currentModule->redirectToItself();
+	}
 }
 else if($inputPost->getUserAction() == UserAction::UPDATE)
 {
+	$specification = PicoSpecification::getInstanceOf(Field::of()->umkId, $inputPost->getUmkId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
+	$specification->addAnd($dataFilter);
 	$umk = new Umk(null, $database);
-	$umk->setNama($inputPost->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setAlamat($inputPost->getAlamat(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setTelepon($inputPost->getTelepon(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setFaksimili($inputPost->getFaksimili(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setEmail($inputPost->getEmail(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setWebsite($inputPost->getWebsite(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setProvinsi($inputPost->getProvinsi(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setKabupaten($inputPost->getKabupaten(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setKecamatan($inputPost->getKecamatan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$umk->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
-	$umk->setAdminUbah($currentUser->getUserId());
-	$umk->setWaktuUbah($currentAction->getTime());
-	$umk->setIpUbah($currentAction->getIp());
-	$umk->setUmkId($inputPost->getUmkId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
-	$umk->update();
-	$newId = $umk->getUmkId();
-	$currentModule->redirectTo(UserAction::DETAIL, Field::of()->umk_id, $newId);
+	$updater = $umk->where($specification)
+		->setNama($inputPost->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setAlamat($inputPost->getAlamat(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setTelepon($inputPost->getTelepon(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setFaksimili($inputPost->getFaksimili(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setEmail($inputPost->getEmail(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setWebsite($inputPost->getWebsite(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setProvinsi($inputPost->getProvinsi(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setKabupaten($inputPost->getKabupaten(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setKecamatan($inputPost->getKecamatan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true))
+	;
+	$updater->setAdminUbah($currentAction->getUserId());
+	$updater->setWaktuUbah($currentAction->getTime());
+	$updater->setIpUbah($currentAction->getIp());
+	try
+	{
+		$updater->update();
+		$newId = $inputPost->getUmkId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
+		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->umk_id, $newId);
+	}
+	catch(Exception $e)
+	{
+		$currentModule->redirectToItself();
+	}
 }
 else if($inputPost->getUserAction() == UserAction::ACTIVATE)
 {
 	if($inputPost->countableCheckedRowId())
 	{
-		foreach($inputPost->getCheckedRowId() as $rowId)
+		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
 		{
 			$umk = new Umk(null, $database);
-			$umk->setUmkId($rowId)->setAktif(true)->update();
+			try
+			{
+				$umk->where(PicoSpecification::getInstance()
+					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->umkId, $rowId))
+					->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->aktif, true))
+					->addAnd($dataFilter)
+				)
+				->setAdminUbah($currentAction->getUserId())
+				->setWaktuUbah($currentAction->getTime())
+				->setIpUbah($currentAction->getIp())
+				->setAktif(true)
+				->update();
+			}
+			catch(Exception $e)
+			{
+				// Do something here to handle exception
+				error_log($e->getMessage());
+			}
 		}
 	}
 	$currentModule->redirectToItself();
@@ -95,10 +135,27 @@ else if($inputPost->getUserAction() == UserAction::DEACTIVATE)
 {
 	if($inputPost->countableCheckedRowId())
 	{
-		foreach($inputPost->getCheckedRowId() as $rowId)
+		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
 		{
 			$umk = new Umk(null, $database);
-			$umk->setUmkId($rowId)->setAktif(false)->update();
+			try
+			{
+				$umk->where(PicoSpecification::getInstance()
+					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->umkId, $rowId))
+					->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->aktif, false))
+					->addAnd($dataFilter)
+				)
+				->setAdminUbah($currentAction->getUserId())
+				->setWaktuUbah($currentAction->getTime())
+				->setIpUbah($currentAction->getIp())
+				->setAktif(false)
+				->update();
+			}
+			catch(Exception $e)
+			{
+				// Do something here to handle exception
+				error_log($e->getMessage());
+			}
 		}
 	}
 	$currentModule->redirectToItself();
@@ -107,10 +164,23 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 {
 	if($inputPost->countableCheckedRowId())
 	{
-		foreach($inputPost->getCheckedRowId() as $rowId)
+		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
 		{
-			$umk = new Umk(null, $database);
-			$umk->deleteOneByUmkId($rowId);
+			try
+			{
+				$specification = PicoSpecification::getInstance()
+					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->umkId, $rowId))
+					->addAnd($dataFilter)
+					;
+				$umk = new Umk(null, $database);
+				$umk->where($specification)
+					->delete();
+			}
+			catch(Exception $e)
+			{
+				// Do something here to handle exception
+				error_log($e->getMessage());
+			}
 		}
 	}
 	$currentModule->redirectToItself();
@@ -146,7 +216,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getFaksimili();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="url" name="faksimili" id="faksimili"/>
+							<input autocomplete="off" class="form-control" type="tel" name="faksimili" id="faksimili"/>
 						</td>
 					</tr>
 					<tr>
@@ -206,10 +276,12 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else if($inputGet->getUserAction() == UserAction::UPDATE)
 {
+	$specification = PicoSpecification::getInstanceOf(Field::of()->umkId, $inputGet->getUmkId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
+	$specification->addAnd($dataFilter);
 	$umk = new Umk(null, $database);
 	try{
-		$umk->findOneByUmkId($inputGet->getUmkId());
-		if($umk->hasValueUmkId())
+		$umk->findOne($specification);
+		if($umk->issetUmkId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Umk(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -240,7 +312,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getFaksimili();?></td>
 						<td>
-							<input class="form-control" type="url" name="faksimili" id="faksimili" value="<?php echo $umk->getFaksimili();?>" autocomplete="off"/>
+							<input class="form-control" type="tel" name="faksimili" id="faksimili" value="<?php echo $umk->getFaksimili();?>" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
@@ -303,7 +375,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			// Do somtething here when data is not found
 			?>
 			<div class="alert alert-warning"><?php echo $appLanguage->getMessageDataNotFound();?></div>
-			<?php
+			<?php 
 		}
 require_once $appInclude->mainAppFooter(__DIR__);
 	}
@@ -313,18 +385,20 @@ require_once $appInclude->mainAppHeader(__DIR__);
 		// Do somtething here when exception
 		?>
 		<div class="alert alert-danger"><?php echo $e->getMessage();?></div>
-		<?php
+		<?php 
 require_once $appInclude->mainAppFooter(__DIR__);
 	}
 }
 else if($inputGet->getUserAction() == UserAction::DETAIL)
 {
+	$specification = PicoSpecification::getInstanceOf(Field::of()->umkId, $inputGet->getUmkId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
+	$specification->addAnd($dataFilter);
 	$umk = new Umk(null, $database);
 	try{
 		$subqueryMap = array(
 		"adminBuat" => array(
 			"columnName" => "admin_buat",
-			"entityName" => "User",
+			"entityName" => "UserMin",
 			"tableName" => "user",
 			"primaryKey" => "user_id",
 			"objectName" => "pembuat",
@@ -332,23 +406,32 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		), 
 		"adminUbah" => array(
 			"columnName" => "admin_ubah",
-			"entityName" => "User",
+			"entityName" => "UserMin",
 			"tableName" => "user",
 			"primaryKey" => "user_id",
 			"objectName" => "pengubah",
 			"propertyName" => "first_name"
 		)
 		);
-		$umk->findOneWithPrimaryKeyValue($inputGet->getUmkId(), $subqueryMap);
-		if($umk->hasValueUmkId())
+		$umk->findOne($specification, null, $subqueryMap);
+		if($umk->issetUmkId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Umk(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
-			// define map here
+			// Define map here
 			
 ?>
 <div class="page page-jambi page-detail">
 	<div class="jambi-wrapper">
+		<?php
+		if(UserAction::isRequireNextAction($inputGet) && UserAction::isRequireApproval($umk->getWaitingFor()))
+		{
+				?>
+				<div class="alert alert-info"><?php echo UserAction::getWaitingForMessage($appLanguage, $umk->getWaitingFor());?></div>
+				<?php
+		}
+		?>
+		
 		<form name="detailform" id="detailform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
@@ -406,11 +489,11 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAdminBuat();?></td>
-						<td><?php echo $umk->hasValuePembuat() ? $umk->getPembuat()->getFirstName() : "";?></td>
+						<td><?php echo $umk->issetPembuat() ? $umk->getPembuat()->getFirstName() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAdminUbah();?></td>
-						<td><?php echo $umk->hasValuePengubah() ? $umk->getPengubah()->getFirstName() : "";?></td>
+						<td><?php echo $umk->issetPengubah() ? $umk->getPengubah()->getFirstName() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
@@ -423,8 +506,12 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td></td>
 						<td>
-							<?php if($userPermission->isAllowedUpdate()){ ?><button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->umk_id, $umk->getUmkId());?>';"><?php echo $appLanguage->getButtonUpdate();?></button><?php } ?>&#xD;
+							<?php if($userPermission->isAllowedUpdate()){ ?>
+							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->umk_id, $umk->getUmkId());?>';"><?php echo $appLanguage->getButtonUpdate();?></button>
+							<?php } ?>
+		
 							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonBackToList();?></button>
+							<input type="hidden" name="umk_id" value="<?php echo $umk->getUmkId();?>"/>
 						</td>
 					</tr>
 				</tbody>
@@ -440,7 +527,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 			// Do somtething here when data is not found
 			?>
 			<div class="alert alert-warning"><?php echo $appLanguage->getMessageDataNotFound();?></div>
-			<?php
+			<?php 
 		}
 	}
 	catch(Exception $e)
@@ -449,13 +536,117 @@ require_once $appInclude->mainAppHeader(__DIR__);
 		// Do somtething here when exception
 		?>
 		<div class="alert alert-danger"><?php echo $e->getMessage();?></div>
-		<?php
+		<?php 
 require_once $appInclude->mainAppFooter(__DIR__);
 	}
 }
 else 
 {
 $appEntityLanguage = new AppEntityLanguage(new Umk(), $appConfig, $currentUser->getLanguageId());
+
+$specMap = array(
+	"nama" => PicoSpecification::filter("nama", "fulltext")
+);
+$sortOrderMap = array(
+	"nama" => "nama",
+	"telepon" => "telepon",
+	"email" => "email",
+	"provinsi" => "provinsi",
+	"kabupaten" => "kabupaten",
+	"kecamatan" => "kecamatan",
+	"aktif" => "aktif"
+);
+
+// You can define your own specifications
+// Pay attention to security issues
+$specification = PicoSpecification::fromUserInput($inputGet, $specMap);
+$specification->addAnd($dataFilter);
+
+
+// You can define your own sortable
+// Pay attention to security issues
+$sortable = PicoSortable::fromUserInput($inputGet, $sortOrderMap, array(
+	array(
+		"sortBy" => "nama", 
+		"sortType" => PicoSort::ORDER_TYPE_ASC
+	)
+));
+
+$pageable = new PicoPageable(new PicoPage($inputGet->getPage(), $dataControlConfig->getPageSize()), $sortable);
+$dataLoader = new Umk(null, $database);
+
+$subqueryMap = array(
+"adminBuat" => array(
+	"columnName" => "admin_buat",
+	"entityName" => "UserMin",
+	"tableName" => "user",
+	"primaryKey" => "user_id",
+	"objectName" => "pembuat",
+	"propertyName" => "first_name"
+), 
+"adminUbah" => array(
+	"columnName" => "admin_ubah",
+	"entityName" => "UserMin",
+	"tableName" => "user",
+	"primaryKey" => "user_id",
+	"objectName" => "pengubah",
+	"propertyName" => "first_name"
+)
+);
+
+if($inputGet->getUserAction() == UserAction::EXPORT)
+{
+	$exporter = DocumentWriter::getXLSXDocumentWriter($appLanguage);
+	$fileName = $currentModule->getModuleName()."-".date("Y-m-d-H-i-s").".xlsx";
+	$sheetName = "Sheet 1";
+
+	$headerFormat = new XLSXDataFormat($dataLoader, 3);
+	$pageData = $dataLoader->findAll($specification, null, $sortable, true, $subqueryMap, MagicObject::FIND_OPTION_NO_COUNT_DATA | MagicObject::FIND_OPTION_NO_FETCH_DATA);
+	$exporter->write($pageData, $fileName, $sheetName, array(
+		$appLanguage->getNumero() => $headerFormat->asNumber(),
+		$appEntityLanguage->getUmkId() => $headerFormat->getUmkId(),
+		$appEntityLanguage->getNama() => $headerFormat->getNama(),
+		$appEntityLanguage->getAlamat() => $headerFormat->asString(),
+		$appEntityLanguage->getTelepon() => $headerFormat->getTelepon(),
+		$appEntityLanguage->getFaksimili() => $headerFormat->getFaksimili(),
+		$appEntityLanguage->getEmail() => $headerFormat->getEmail(),
+		$appEntityLanguage->getWebsite() => $headerFormat->getWebsite(),
+		$appEntityLanguage->getProvinsi() => $headerFormat->getProvinsi(),
+		$appEntityLanguage->getKabupaten() => $headerFormat->getKabupaten(),
+		$appEntityLanguage->getKecamatan() => $headerFormat->getKecamatan(),
+		$appEntityLanguage->getWaktuBuat() => $headerFormat->getWaktuBuat(),
+		$appEntityLanguage->getWaktuUbah() => $headerFormat->getWaktuUbah(),
+		$appEntityLanguage->getIpBuat() => $headerFormat->getIpBuat(),
+		$appEntityLanguage->getIpUbah() => $headerFormat->getIpUbah(),
+		$appEntityLanguage->getAdminBuat() => $headerFormat->asString(),
+		$appEntityLanguage->getAdminUbah() => $headerFormat->asString(),
+		$appEntityLanguage->getAktif() => $headerFormat->asString()
+	), 
+	function($index, $row, $appLanguage){
+		
+		return array(
+			sprintf("%d", $index + 1),
+			$row->getUmkId(),
+			$row->getNama(),
+			$row->getAlamat(),
+			$row->getTelepon(),
+			$row->getFaksimili(),
+			$row->getEmail(),
+			$row->getWebsite(),
+			$row->getProvinsi(),
+			$row->getKabupaten(),
+			$row->getKecamatan(),
+			$row->getWaktuBuat(),
+			$row->getWaktuUbah(),
+			$row->getIpBuat(),
+			$row->getIpUbah(),
+			$row->issetPembuat() ? $row->getPembuat()->getFirstName() : "",
+			$row->issetPengubah() ? $row->getPengubah()->getFirstName() : "",
+			$row->optionAktif($appLanguage->getYes(), $appLanguage->getNo())
+		);
+	});
+	exit();
+}
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -474,6 +665,12 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				<span class="filter-group">
 					<button type="submit" class="btn btn-success"><?php echo $appLanguage->getButtonSearch();?></button>
 				</span>
+				<?php if($userPermission->isAllowedDetail()){ ?>
+		
+				<span class="filter-group">
+					<button type="submit" name="user_action" value="export" class="btn btn-success"><?php echo $appLanguage->getButtonExport();?></button>
+				</span>
+				<?php } ?>
 				<?php if($userPermission->isAllowedCreate()){ ?>
 		
 				<span class="filter-group">
@@ -484,67 +681,17 @@ require_once $appInclude->mainAppHeader(__DIR__);
 		</div>
 		<div class="data-section" data-ajax-support="true" data-ajax-name="main-data">
 			<?php } /*ajaxSupport*/ ?>
-			<?php 	
-			
-			$specMap = array(
-			    "nama" => PicoSpecification::filter("nama", "fulltext")
-			);
-			$sortOrderMap = array(
-			    "nama" => "nama",
-				"telepon" => "telepon",
-				"email" => "email",
-				"provinsi" => "provinsi",
-				"kabupaten" => "kabupaten",
-				"kecamatan" => "kecamatan",
-				"aktif" => "aktif"
-			);
-			
-			// You can define your own specifications
-			// Pay attention to security issues
-			$specification = PicoSpecification::fromUserInput($inputGet, $specMap);
-			
-			
-			// You can define your own sortable
-			// Pay attention to security issues
-			$sortable = PicoSortable::fromUserInput($inputGet, $sortOrderMap, array(
-				array(
-					"sortBy" => "nama", 
-					"sortType" => PicoSort::ORDER_TYPE_ASC
-				)
-			));
-			
-			$pageable = new PicoPageable(new PicoPage($inputGet->getPage(), $appConfig->getData()->getPageSize()), $sortable);
-			$dataLoader = new Umk(null, $database);
-			
-			$subqueryMap = array(
-			"adminBuat" => array(
-				"columnName" => "admin_buat",
-				"entityName" => "User",
-				"tableName" => "user",
-				"primaryKey" => "user_id",
-				"objectName" => "pembuat",
-				"propertyName" => "first_name"
-			), 
-			"adminUbah" => array(
-				"columnName" => "admin_ubah",
-				"entityName" => "User",
-				"tableName" => "user",
-				"primaryKey" => "user_id",
-				"objectName" => "pengubah",
-				"propertyName" => "first_name"
-			)
-			);
-			$pageData = $dataLoader->findAll($specification, $pageable, $sortable, true, $subqueryMap, MagicObject::FIND_OPTION_NO_FETCH_DATA);
-			
-			if($pageData->getTotalResult() > 0)
-			{
-				$pageControl = $pageData->getPageControl("page", $currentModule->getSelf())
-				->setNavigation(
-				'<i class="fa-solid fa-angle-left"></i>', '<i class="fa-solid fa-angle-right"></i>',
-				'<i class="fa-solid fa-angles-left"></i>', '<i class="fa-solid fa-angles-right"></i>'
-				)
-				->setPageRange($appConfig->getData()->getPageRange())
-				;
+			<?php try{
+				$pageData = $dataLoader->findAll($specification, $pageable, $sortable, true, $subqueryMap, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+				if($pageData->getTotalResult() > 0)
+				{		
+				    $pageControl = $pageData->getPageControl(Field::of()->page, $currentModule->getSelf())
+				    ->setNavigation(
+				        $dataControlConfig->getPrev(), $dataControlConfig->getNext(),
+				        $dataControlConfig->getFirst(), $dataControlConfig->getLast()
+				    )
+				    ->setPageRange($dataControlConfig->getPageRange())
+				    ;
 			?>
 			<div class="pagination pagination-top">
 			    <div class="pagination-number">
@@ -590,7 +737,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								$dataIndex++;
 							?>
 		
-							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $umk->optionAktif('true', 'false');?>">
 								<?php if($userPermission->isAllowedBatchAction()){ ?>
 								<td class="data-selector" data-key="umk_id">
 									<input type="checkbox" class="checkbox check-slave checkbox-umk-id" name="checked_row_id[]" value="<?php echo $umk->getUmkId();?>"/>
@@ -644,10 +791,20 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			}
 			else
 			{
-			?>
+			    ?>
 			    <div class="alert alert-info"><?php echo $appLanguage->getMessageDataNotFound();?></div>
+			    <?php
+			}
+			?>
+			
 			<?php
 			}
+			catch(Exception $e)
+			{
+			    ?>
+			    <div class="alert alert-danger"><?php echo $appInclude->printException($e);?></div>
+			    <?php
+			} 
 			?>
 			<?php /*ajaxSupport*/ if(!$currentAction->isRequestViaAjax()){ ?>
 		</div>

@@ -1,5 +1,6 @@
 <?php
 
+use MagicObject\Database\PicoSort;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use Sipro\Entity\Data\Material;
@@ -9,7 +10,7 @@ require_once dirname(__DIR__) . "/inc.app/auth-supervisor.php";
 $resourse_material = [];
 
 $specs4 = PicoSpecification::getInstance()->add(['aktif', true]);
-$sorts4 = PicoSortable::getInstance()->add(['nama', 'asc']);
+$sorts4 = PicoSortable::getInstance()->add(['nama', PicoSort::ORDER_TYPE_ASC]);
 echo '<option value=""></option>'."\r\n";
 try
 {

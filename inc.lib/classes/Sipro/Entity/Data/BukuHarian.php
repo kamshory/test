@@ -72,6 +72,15 @@ class BukuHarian extends MagicObject
 	 * @var string
 	 */
 	protected $tanggal;
+	
+	/**
+	 * Kegiatan
+	 * 
+	 * @Column(name="kegiatan", type="longtext", nullable=true)
+	 * @Label(content="Kegiatan")
+	 * @var string
+	 */
+	protected $kegiatan;
 
 	/**
 	 * Permasalahan
@@ -90,6 +99,24 @@ class BukuHarian extends MagicObject
 	 * @var string
 	 */
 	protected $rekomendasi;
+
+	/**
+	 * Bill of Quantity ID
+	 * 
+	 * @Column(name="bill_of_quantity_id", type="bigint(20)", length=20, nullable=true)
+	 * @Label(content="Bill of Quantity ID")
+	 * @var int
+	 */
+	protected $billOfQuantityId;
+
+	/**
+	 * Bill of Quantity
+	 * 
+	 * @JoinColumn(name="bill_of_quantity_id", referenceColumnName="bill_of_quantity_id")
+	 * @Label(content="Bill of Quantity")
+	 * @var BillOfQuantityMin
+	 */
+	protected $billOfQuantity;
 
 	/**
 	 * Acuan Pengawasan

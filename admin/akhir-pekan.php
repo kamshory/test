@@ -28,7 +28,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "akhir-pekan", "Akhir Pekan");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "akhir-pekan", $appLanguage->getAkhirPekan());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -219,7 +219,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getNama();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="text" name="nama" id="nama"/>
+							<input autocomplete="off" class="form-control" type="text" name="nama" id="nama" required="required"/>
 						</td>
 					</tr>
 					<tr>
@@ -285,7 +285,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getNama();?></td>
 						<td>
-							<input class="form-control" type="text" name="nama" id="nama" value="<?php echo $akhirPekan->getNama();?>" autocomplete="off"/>
+							<input class="form-control" type="text" name="nama" id="nama" value="<?php echo $akhirPekan->getNama();?>" autocomplete="off" required="required"/>
 						</td>
 					</tr>
 					<tr>

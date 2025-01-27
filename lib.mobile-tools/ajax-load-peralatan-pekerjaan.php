@@ -19,7 +19,8 @@ $specs = PicoSpecification::getInstance()
 
 $sorts = PicoSortable::getInstance()
 	->add(['peralatan.nama', PicoSort::ORDER_TYPE_ASC])
-;
+	;
+
 $peralatanPekerjaan = new PeralatanPekerjaan(null, $database);
 
 $json = [];

@@ -20,9 +20,12 @@ use MagicApp\PicoModule;
 use MagicApp\UserAction;
 use MagicApp\AppUserPermission;
 use Sipro\AppIncludeImpl;
-use Sipro\Entity\Data\LokasiProyek;
+use Sipro\Entity\Data\RekomendasiPekerjaan;
 use Sipro\Entity\Data\ProyekMin;
+use Sipro\Entity\Data\BukuHarianMin;
 use Sipro\Entity\Data\SupervisorMin;
+use Sipro\Entity\Data\PermasalahanMin;
+use Sipro\Entity\Data\RekomendasiMin;
 use MagicApp\XLSX\DocumentWriter;
 use MagicApp\XLSX\XLSXDataFormat;
 
@@ -32,7 +35,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "lokasi-proyek", $appLanguage->getLokasiProyek());
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "rekomendasi-pekerjaan", $appLanguage->getRekomendasiPekerjaan());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -46,26 +49,24 @@ $dataFilter = null;
 
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
-	$lokasiProyek = new LokasiProyek(null, $database);
-	$lokasiProyek->setNama($inputPost->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$lokasiProyek->setKodeLokasi($inputPost->getKodeLokasi(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-	$lokasiProyek->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
-	$lokasiProyek->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
-	$lokasiProyek->setLatitude($inputPost->getLatitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
-	$lokasiProyek->setLongitude($inputPost->getLongitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
-	$lokasiProyek->setAtitude($inputPost->getAtitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true));
-	$lokasiProyek->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
-	$lokasiProyek->setAdminBuat($currentAction->getUserId());
-	$lokasiProyek->setWaktuBuat($currentAction->getTime());
-	$lokasiProyek->setIpBuat($currentAction->getIp());
-	$lokasiProyek->setAdminUbah($currentAction->getUserId());
-	$lokasiProyek->setWaktuUbah($currentAction->getTime());
-	$lokasiProyek->setIpUbah($currentAction->getIp());
+	$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
+	$rekomendasiPekerjaan->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$rekomendasiPekerjaan->setBukuHarianId($inputPost->getBukuHarianId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$rekomendasiPekerjaan->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$rekomendasiPekerjaan->setPermasalahanId($inputPost->getPermasalahanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$rekomendasiPekerjaan->setRekomendasiId($inputPost->getRekomendasiId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$rekomendasiPekerjaan->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
+	$rekomendasiPekerjaan->setAdminBuat($currentAction->getUserId());
+	$rekomendasiPekerjaan->setWaktuBuat($currentAction->getTime());
+	$rekomendasiPekerjaan->setIpBuat($currentAction->getIp());
+	$rekomendasiPekerjaan->setAdminUbah($currentAction->getUserId());
+	$rekomendasiPekerjaan->setWaktuUbah($currentAction->getTime());
+	$rekomendasiPekerjaan->setIpUbah($currentAction->getIp());
 	try
 	{
-		$lokasiProyek->insert();
-		$newId = $lokasiProyek->getLokasiProyekId();
-		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->lokasi_proyek_id, $newId);
+		$rekomendasiPekerjaan->insert();
+		$newId = $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
+		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->rekomendasi_pekerjaan_id, $newId);
 	}
 	catch(Exception $e)
 	{
@@ -74,17 +75,15 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 }
 else if($inputPost->getUserAction() == UserAction::UPDATE)
 {
-	$specification = PicoSpecification::getInstanceOf(Field::of()->lokasiProyekId, $inputPost->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
+	$specification = PicoSpecification::getInstanceOf(Field::of()->rekomendasiPekerjaanId, $inputPost->getRekomendasiPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS));
 	$specification->addAnd($dataFilter);
-	$lokasiProyek = new LokasiProyek(null, $database);
-	$updater = $lokasiProyek->where($specification)
-		->setNama($inputPost->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
-		->setKodeLokasi($inputPost->getKodeLokasi(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
-		->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
-		->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
-		->setLatitude($inputPost->getLatitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true))
-		->setLongitude($inputPost->getLongitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true))
-		->setAtitude($inputPost->getAtitude(PicoFilterConstant::FILTER_SANITIZE_NUMBER_FLOAT, false, false, true))
+	$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
+	$updater = $rekomendasiPekerjaan->where($specification)
+		->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setBukuHarianId($inputPost->getBukuHarianId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setPermasalahanId($inputPost->getPermasalahanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setRekomendasiId($inputPost->getRekomendasiId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
 		->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true))
 	;
 	$updater->setAdminUbah($currentAction->getUserId());
@@ -93,8 +92,8 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 	try
 	{
 		$updater->update();
-		$newId = $inputPost->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
-		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->lokasi_proyek_id, $newId);
+		$newId = $inputPost->getRekomendasiPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS);
+		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->rekomendasi_pekerjaan_id, $newId);
 	}
 	catch(Exception $e)
 	{
@@ -105,13 +104,13 @@ else if($inputPost->getUserAction() == UserAction::ACTIVATE)
 {
 	if($inputPost->countableCheckedRowId())
 	{
-		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
+		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS) as $rowId)
 		{
-			$lokasiProyek = new LokasiProyek(null, $database);
+			$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
 			try
 			{
-				$lokasiProyek->where(PicoSpecification::getInstance()
-					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->lokasiProyekId, $rowId))
+				$rekomendasiPekerjaan->where(PicoSpecification::getInstance()
+					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->rekomendasiPekerjaanId, $rowId))
 					->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->aktif, true))
 					->addAnd($dataFilter)
 				)
@@ -134,13 +133,13 @@ else if($inputPost->getUserAction() == UserAction::DEACTIVATE)
 {
 	if($inputPost->countableCheckedRowId())
 	{
-		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
+		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS) as $rowId)
 		{
-			$lokasiProyek = new LokasiProyek(null, $database);
+			$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
 			try
 			{
-				$lokasiProyek->where(PicoSpecification::getInstance()
-					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->lokasiProyekId, $rowId))
+				$rekomendasiPekerjaan->where(PicoSpecification::getInstance()
+					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->rekomendasiPekerjaanId, $rowId))
 					->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->aktif, false))
 					->addAnd($dataFilter)
 				)
@@ -163,16 +162,16 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 {
 	if($inputPost->countableCheckedRowId())
 	{
-		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
+		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS) as $rowId)
 		{
 			try
 			{
 				$specification = PicoSpecification::getInstance()
-					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->lokasiProyekId, $rowId))
+					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->rekomendasiPekerjaanId, $rowId))
 					->addAnd($dataFilter)
 					;
-				$lokasiProyek = new LokasiProyek(null, $database);
-				$lokasiProyek->where($specification)
+				$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
+				$rekomendasiPekerjaan->where($specification)
 					->delete();
 			}
 			catch(Exception $e)
@@ -186,7 +185,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new LokasiProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -195,21 +194,9 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getNama();?></td>
-						<td>
-							<input autocomplete="off" class="form-control" type="text" name="nama" id="nama" required="required"/>
-						</td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getKodeLokasi();?></td>
-						<td>
-							<input autocomplete="off" class="form-control" type="text" name="kode_lokasi" id="kode_lokasi"/>
-						</td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
 						<td>
-							<select class="form-control" name="proyek_id" id="proyek_id">
+							<select class="form-control" name="proyek_id" id="proyek_id" onchange="window.location='?user_action=create&proyek_id='+this.value">
 								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
 								<?php echo AppFormBuilder::getInstance()->createSelectOption(new ProyekMin(null, $database), 
 								PicoSpecification::getInstance()
@@ -217,7 +204,24 @@ require_once $appInclude->mainAppHeader(__DIR__);
 									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
 									->add(new PicoSort(Field::of()->proyekId, PicoSort::ORDER_TYPE_DESC)), 
-								Field::of()->proyekId, Field::of()->nama)
+								Field::of()->proyekId, Field::of()->nama, $inputGet->getProyekId())
+								; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getBukuHarian();?></td>
+						<td>
+							<select class="form-control" name="buku_harian_id" id="buku_harian_id">
+								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new BukuHarianMin(null, $database), 
+								PicoSpecification::getInstance()
+									->addAnd(new PicoPredicate(Field::of()->aktif, true))
+									->addAnd(new PicoPredicate(Field::of()->draft, true))
+									->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId())), 
+								PicoSortable::getInstance()
+									->add(new PicoSort(Field::of()->tanggal, PicoSort::ORDER_TYPE_DESC)), 
+								Field::of()->bukuHarianId, Field::of()->tanggal)
 								; ?>
 							</select>
 						</td>
@@ -232,29 +236,48 @@ require_once $appInclude->mainAppHeader(__DIR__);
 									->addAnd(new PicoPredicate(Field::of()->aktif, true))
 									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
-									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC))
-									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC)), 
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
 								Field::of()->supervisorId, Field::of()->nama)
+								->setTextNodeFormat('"%s (%s)", nama, jabatan.nama')
 								; ?>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getLatitude();?></td>
+						<td><?php echo $appEntityLanguage->getPermasalahan();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="number" step="any" name="latitude" id="latitude"/>
+							<select class="form-control" name="permasalahan_id" id="permasalahan_id">
+								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new PermasalahanMin(null, $database), 
+								PicoSpecification::getInstance()
+									->addAnd(new PicoPredicate(Field::of()->aktif, true))
+									->addAnd(new PicoPredicate(Field::of()->draft, false))
+									->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId())), 
+								PicoSortable::getInstance()
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+								Field::of()->permasalahanId, Field::of()->permasalahan)
+								; ?>
+							</select>
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getLongitude();?></td>
+						<td><?php echo $appEntityLanguage->getRekomendasi();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="number" step="any" name="longitude" id="longitude"/>
-						</td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getAtitude();?></td>
-						<td>
-							<input autocomplete="off" class="form-control" type="number" step="any" name="atitude" id="atitude"/>
+							<select class="form-control" name="rekomendasi_id" id="rekomendasi_id">
+								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new RekomendasiMin(null, $database), 
+								PicoSpecification::getInstance()
+									->addAnd(new PicoPredicate(Field::of()->aktif, true))
+									->addAnd(new PicoPredicate(Field::of()->draft, false))
+									->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId())), 
+								PicoSortable::getInstance()
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+								Field::of()->rekomendasiId, Field::of()->rekomendasi)
+								; ?>
+							</select>
 						</td>
 					</tr>
 					<tr>
@@ -284,14 +307,14 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else if($inputGet->getUserAction() == UserAction::UPDATE)
 {
-	$specification = PicoSpecification::getInstanceOf(Field::of()->lokasiProyekId, $inputGet->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
+	$specification = PicoSpecification::getInstanceOf(Field::of()->rekomendasiPekerjaanId, $inputGet->getRekomendasiPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS));
 	$specification->addAnd($dataFilter);
-	$lokasiProyek = new LokasiProyek(null, $database);
+	$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
 	try{
-		$lokasiProyek->findOne($specification);
-		if($lokasiProyek->issetLokasiProyekId())
+		$rekomendasiPekerjaan->findOne($specification);
+		if($rekomendasiPekerjaan->issetRekomendasiPekerjaanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new LokasiProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -299,18 +322,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 		<form name="updateform" id="updateform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
-					<tr>
-						<td><?php echo $appEntityLanguage->getNama();?></td>
-						<td>
-							<input class="form-control" type="text" name="nama" id="nama" value="<?php echo $lokasiProyek->getNama();?>" autocomplete="off" required="required"/>
-						</td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getKodeLokasi();?></td>
-						<td>
-							<input class="form-control" type="text" name="kode_lokasi" id="kode_lokasi" value="<?php echo $lokasiProyek->getKodeLokasi();?>" autocomplete="off"/>
-						</td>
-					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
 						<td>
@@ -322,7 +333,24 @@ require_once $appInclude->mainAppHeader(__DIR__);
 									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
 									->add(new PicoSort(Field::of()->proyekId, PicoSort::ORDER_TYPE_DESC)), 
-								Field::of()->proyekId, Field::of()->nama, $lokasiProyek->getProyekId())
+								Field::of()->proyekId, Field::of()->nama, $rekomendasiPekerjaan->getProyekId())
+								; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getBukuHarian();?></td>
+						<td>
+							<select class="form-control" name="buku_harian_id" id="buku_harian_id">
+								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new BukuHarianMin(null, $database), 
+								PicoSpecification::getInstance()
+									->addAnd(new PicoPredicate(Field::of()->aktif, true))
+									->addAnd(new PicoPredicate(Field::of()->draft, true))
+									->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId())), 
+								PicoSortable::getInstance()
+									->add(new PicoSort(Field::of()->tanggal, PicoSort::ORDER_TYPE_DESC)), 
+								Field::of()->bukuHarianId, Field::of()->tanggal, $rekomendasiPekerjaan->getBukuHarianId())
 								; ?>
 							</select>
 						</td>
@@ -337,35 +365,52 @@ require_once $appInclude->mainAppHeader(__DIR__);
 									->addAnd(new PicoPredicate(Field::of()->aktif, true))
 									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
-									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC))
-									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC)), 
-								Field::of()->supervisorId, Field::of()->nama, $lokasiProyek->getSupervisorId())
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+								Field::of()->supervisorId, Field::of()->nama, $rekomendasiPekerjaan->getSupervisorId())
+								->setTextNodeFormat('"%s (%s)", nama, jabatan.nama')
 								; ?>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getLatitude();?></td>
+						<td><?php echo $appEntityLanguage->getPermasalahan();?></td>
 						<td>
-							<input class="form-control" type="number" step="any" name="latitude" id="latitude" value="<?php echo $lokasiProyek->getLatitude();?>" autocomplete="off"/>
+							<select class="form-control" name="permasalahan_id" id="permasalahan_id">
+								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new PermasalahanMin(null, $database), 
+								PicoSpecification::getInstance()
+									->addAnd(new PicoPredicate(Field::of()->aktif, true))
+									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
+								PicoSortable::getInstance()
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+								Field::of()->permasalahanId, Field::of()->permasalahan, $rekomendasiPekerjaan->getPermasalahanId())
+								; ?>
+							</select>
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getLongitude();?></td>
+						<td><?php echo $appEntityLanguage->getRekomendasi();?></td>
 						<td>
-							<input class="form-control" type="number" step="any" name="longitude" id="longitude" value="<?php echo $lokasiProyek->getLongitude();?>" autocomplete="off"/>
-						</td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getAtitude();?></td>
-						<td>
-							<input class="form-control" type="number" step="any" name="atitude" id="atitude" value="<?php echo $lokasiProyek->getAtitude();?>" autocomplete="off"/>
+							<select class="form-control" name="rekomendasi_id" id="rekomendasi_id">
+								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new RekomendasiMin(null, $database), 
+								PicoSpecification::getInstance()
+									->addAnd(new PicoPredicate(Field::of()->aktif, true))
+									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
+								PicoSortable::getInstance()
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+								Field::of()->rekomendasiId, Field::of()->rekomendasi, $rekomendasiPekerjaan->getRekomendasiId())
+								; ?>
+							</select>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
 						<td>
-							<label><input class="form-check-input" type="checkbox" name="aktif" id="aktif" value="1" <?php echo $lokasiProyek->createCheckedAktif();?>/> <?php echo $appEntityLanguage->getAktif();?></label>
+							<label><input class="form-check-input" type="checkbox" name="aktif" id="aktif" value="1" <?php echo $rekomendasiPekerjaan->createCheckedAktif();?>/> <?php echo $appEntityLanguage->getAktif();?></label>
 						</td>
 					</tr>
 				</tbody>
@@ -377,7 +422,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<td>
 							<button type="submit" class="btn btn-success" name="user_action" value="update"><?php echo $appLanguage->getButtonSave();?></button>
 							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonCancel();?></button>
-							<input type="hidden" name="lokasi_proyek_id" value="<?php echo $lokasiProyek->getLokasiProyekId();?>"/>
+							<input type="hidden" name="rekomendasi_pekerjaan_id" value="<?php echo $rekomendasiPekerjaan->getRekomendasiPekerjaanId();?>"/>
 						</td>
 					</tr>
 				</tbody>
@@ -408,9 +453,9 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else if($inputGet->getUserAction() == UserAction::DETAIL)
 {
-	$specification = PicoSpecification::getInstanceOf(Field::of()->lokasiProyekId, $inputGet->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
+	$specification = PicoSpecification::getInstanceOf(Field::of()->rekomendasiPekerjaanId, $inputGet->getRekomendasiPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS));
 	$specification->addAnd($dataFilter);
-	$lokasiProyek = new LokasiProyek(null, $database);
+	$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
 	try{
 		$subqueryMap = array(
 		"proyekId" => array(
@@ -421,6 +466,14 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 			"objectName" => "proyek",
 			"propertyName" => "nama"
 		), 
+		"bukuHarianId" => array(
+			"columnName" => "buku_harian_id",
+			"entityName" => "BukuHarianMin",
+			"tableName" => "buku_harian",
+			"primaryKey" => "buku_harian_id",
+			"objectName" => "buku_harian",
+			"propertyName" => "tanggal"
+		), 
 		"supervisorId" => array(
 			"columnName" => "supervisor_id",
 			"entityName" => "SupervisorMin",
@@ -428,12 +481,28 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 			"primaryKey" => "supervisor_id",
 			"objectName" => "supervisor",
 			"propertyName" => "nama"
+		), 
+		"permasalahanId" => array(
+			"columnName" => "permasalahan_id",
+			"entityName" => "PermasalahanMin",
+			"tableName" => "permasalahan",
+			"primaryKey" => "permasalahan_id",
+			"objectName" => "permasalahan",
+			"propertyName" => "permasalahan"
+		), 
+		"rekomendasiId" => array(
+			"columnName" => "rekomendasi_id",
+			"entityName" => "RekomendasiMin",
+			"tableName" => "rekomendasi",
+			"primaryKey" => "rekomendasi_id",
+			"objectName" => "rekomendasi",
+			"propertyName" => "rekomendasi"
 		)
 		);
-		$lokasiProyek->findOne($specification, null, $subqueryMap);
-		if($lokasiProyek->issetLokasiProyekId())
+		$rekomendasiPekerjaan->findOne($specification, null, $subqueryMap);
+		if($rekomendasiPekerjaan->issetRekomendasiPekerjaanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new LokasiProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -441,10 +510,10 @@ require_once $appInclude->mainAppHeader(__DIR__);
 <div class="page page-jambi page-detail">
 	<div class="jambi-wrapper">
 		<?php
-		if(UserAction::isRequireNextAction($inputGet) && UserAction::isRequireApproval($lokasiProyek->getWaitingFor()))
+		if(UserAction::isRequireNextAction($inputGet) && UserAction::isRequireApproval($rekomendasiPekerjaan->getWaitingFor()))
 		{
 				?>
-				<div class="alert alert-info"><?php echo UserAction::getWaitingForMessage($appLanguage, $lokasiProyek->getWaitingFor());?></div>
+				<div class="alert alert-info"><?php echo UserAction::getWaitingForMessage($appLanguage, $rekomendasiPekerjaan->getWaitingFor());?></div>
 				<?php
 		}
 		?>
@@ -453,36 +522,44 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getNama();?></td>
-						<td><?php echo $lokasiProyek->getNama();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getKodeLokasi();?></td>
-						<td><?php echo $lokasiProyek->getKodeLokasi();?></td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $lokasiProyek->issetProyek() ? $lokasiProyek->getProyek()->getNama() : "";?></td>
+						<td><?php echo $rekomendasiPekerjaan->issetProyek() ? $rekomendasiPekerjaan->getProyek()->getNama() : "";?></td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getBukuHarian();?></td>
+						<td><?php echo $rekomendasiPekerjaan->issetBukuHarian() ? $rekomendasiPekerjaan->getBukuHarian()->getTanggal() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
-						<td><?php echo $lokasiProyek->issetSupervisor() ? $lokasiProyek->getSupervisor()->getNama() : "";?></td>
+						<td><?php echo $rekomendasiPekerjaan->issetSupervisor() ? $rekomendasiPekerjaan->getSupervisor()->getNama() : "";?></td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getLatitude();?></td>
-						<td><?php echo $lokasiProyek->getLatitude();?></td>
+						<td><?php echo $appEntityLanguage->getPermasalahan();?></td>
+						<td><?php echo $rekomendasiPekerjaan->issetPermasalahan() ? $rekomendasiPekerjaan->getPermasalahan()->getPermasalahan() : "";?></td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getLongitude();?></td>
-						<td><?php echo $lokasiProyek->getLongitude();?></td>
+						<td><?php echo $appEntityLanguage->getRekomendasi();?></td>
+						<td><?php echo $rekomendasiPekerjaan->issetRekomendasi() ? $rekomendasiPekerjaan->getRekomendasi()->getRekomendasi() : "";?></td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getAtitude();?></td>
-						<td><?php echo $lokasiProyek->getAtitude();?></td>
+						<td><?php echo $appEntityLanguage->getWaktuBuat();?></td>
+						<td><?php echo $rekomendasiPekerjaan->getWaktuBuat();?></td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getWaktuUbah();?></td>
+						<td><?php echo $rekomendasiPekerjaan->getWaktuUbah();?></td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getIpBuat();?></td>
+						<td><?php echo $rekomendasiPekerjaan->getIpBuat();?></td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getIpUbah();?></td>
+						<td><?php echo $rekomendasiPekerjaan->getIpUbah();?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
-						<td><?php echo $lokasiProyek->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
+						<td><?php echo $rekomendasiPekerjaan->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 				</tbody>
 			</table>
@@ -492,11 +569,11 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<td></td>
 						<td>
 							<?php if($userPermission->isAllowedUpdate()){ ?>
-							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->lokasi_proyek_id, $lokasiProyek->getLokasiProyekId());?>';"><?php echo $appLanguage->getButtonUpdate();?></button>
+							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->rekomendasi_pekerjaan_id, $rekomendasiPekerjaan->getRekomendasiPekerjaanId());?>';"><?php echo $appLanguage->getButtonUpdate();?></button>
 							<?php } ?>
 		
 							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonBackToList();?></button>
-							<input type="hidden" name="lokasi_proyek_id" value="<?php echo $lokasiProyek->getLokasiProyekId();?>"/>
+							<input type="hidden" name="rekomendasi_pekerjaan_id" value="<?php echo $rekomendasiPekerjaan->getRekomendasiPekerjaanId();?>"/>
 						</td>
 					</tr>
 				</tbody>
@@ -527,20 +604,18 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new LokasiProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
-	"proyekId" => PicoSpecification::filter("proyekId", "number"),
-	"supervisorId" => PicoSpecification::filter("supervisorId", "number")
+	"proyekId" => PicoSpecification::filter("proyekId", "fulltext"),
+	"supervisorId" => PicoSpecification::filter("supervisorId", "fulltext")
 );
 $sortOrderMap = array(
-	"nama" => "nama",
-	"kodeLokasi" => "kodeLokasi",
 	"proyekId" => "proyekId",
+	"bukuHarianId" => "bukuHarianId",
 	"supervisorId" => "supervisorId",
-	"latitude" => "latitude",
-	"longitude" => "longitude",
-	"atitude" => "atitude",
+	"permasalahanId" => "permasalahanId",
+	"rekomendasiId" => "rekomendasiId",
 	"aktif" => "aktif"
 );
 
@@ -554,13 +629,13 @@ $specification->addAnd($dataFilter);
 // Pay attention to security issues
 $sortable = PicoSortable::fromUserInput($inputGet, $sortOrderMap, array(
 	array(
-		"sortBy" => "lokasiProyekId", 
+		"sortBy" => "waktuBuat", 
 		"sortType" => PicoSort::ORDER_TYPE_DESC
 	)
 ));
 
 $pageable = new PicoPageable(new PicoPage($inputGet->getPage(), $dataControlConfig->getPageSize()), $sortable);
-$dataLoader = new LokasiProyek(null, $database);
+$dataLoader = new RekomendasiPekerjaan(null, $database);
 
 $subqueryMap = array(
 "proyekId" => array(
@@ -571,6 +646,14 @@ $subqueryMap = array(
 	"objectName" => "proyek",
 	"propertyName" => "nama"
 ), 
+"bukuHarianId" => array(
+	"columnName" => "buku_harian_id",
+	"entityName" => "BukuHarianMin",
+	"tableName" => "buku_harian",
+	"primaryKey" => "buku_harian_id",
+	"objectName" => "buku_harian",
+	"propertyName" => "tanggal"
+), 
 "supervisorId" => array(
 	"columnName" => "supervisor_id",
 	"entityName" => "SupervisorMin",
@@ -578,6 +661,22 @@ $subqueryMap = array(
 	"primaryKey" => "supervisor_id",
 	"objectName" => "supervisor",
 	"propertyName" => "nama"
+), 
+"permasalahanId" => array(
+	"columnName" => "permasalahan_id",
+	"entityName" => "PermasalahanMin",
+	"tableName" => "permasalahan",
+	"primaryKey" => "permasalahan_id",
+	"objectName" => "permasalahan",
+	"propertyName" => "permasalahan"
+), 
+"rekomendasiId" => array(
+	"columnName" => "rekomendasi_id",
+	"entityName" => "RekomendasiMin",
+	"tableName" => "rekomendasi",
+	"primaryKey" => "rekomendasi_id",
+	"objectName" => "rekomendasi",
+	"propertyName" => "rekomendasi"
 )
 );
 
@@ -591,28 +690,32 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 	$pageData = $dataLoader->findAll($specification, null, $sortable, true, $subqueryMap, MagicObject::FIND_OPTION_NO_COUNT_DATA | MagicObject::FIND_OPTION_NO_FETCH_DATA);
 	$exporter->write($pageData, $fileName, $sheetName, array(
 		$appLanguage->getNumero() => $headerFormat->asNumber(),
-		$appEntityLanguage->getLokasiProyekId() => $headerFormat->getLokasiProyekId(),
-		$appEntityLanguage->getNama() => $headerFormat->getNama(),
-		$appEntityLanguage->getKodeLokasi() => $headerFormat->getKodeLokasi(),
+		$appEntityLanguage->getRekomendasiPekerjaanId() => $headerFormat->getRekomendasiPekerjaanId(),
 		$appEntityLanguage->getProyek() => $headerFormat->asString(),
+		$appEntityLanguage->getBukuHarian() => $headerFormat->asString(),
 		$appEntityLanguage->getSupervisor() => $headerFormat->asString(),
-		$appEntityLanguage->getLatitude() => $headerFormat->getLatitude(),
-		$appEntityLanguage->getLongitude() => $headerFormat->getLongitude(),
-		$appEntityLanguage->getAtitude() => $headerFormat->getAtitude(),
+		$appEntityLanguage->getPermasalahan() => $headerFormat->asString(),
+		$appEntityLanguage->getRekomendasi() => $headerFormat->asString(),
+		$appEntityLanguage->getWaktuBuat() => $headerFormat->getWaktuBuat(),
+		$appEntityLanguage->getWaktuUbah() => $headerFormat->getWaktuUbah(),
+		$appEntityLanguage->getIpBuat() => $headerFormat->getIpBuat(),
+		$appEntityLanguage->getIpUbah() => $headerFormat->getIpUbah(),
 		$appEntityLanguage->getAktif() => $headerFormat->asString()
 	), 
 	function($index, $row, $appLanguage){
 		
 		return array(
 			sprintf("%d", $index + 1),
-			$row->getLokasiProyekId(),
-			$row->getNama(),
-			$row->getKodeLokasi(),
+			$row->getRekomendasiPekerjaanId(),
 			$row->issetProyek() ? $row->getProyek()->getNama() : "",
+			$row->issetBukuHarian() ? $row->getBukuHarian()->getTanggal() : "",
 			$row->issetSupervisor() ? $row->getSupervisor()->getNama() : "",
-			$row->getLatitude(),
-			$row->getLongitude(),
-			$row->getAtitude(),
+			$row->issetPermasalahan() ? $row->getPermasalahan()->getPermasalahan() : "",
+			$row->issetRekomendasi() ? $row->getRekomendasi()->getRekomendasi() : "",
+			$row->getWaktuBuat(),
+			$row->getWaktuUbah(),
+			$row->getIpBuat(),
+			$row->getIpUbah(),
 			$row->optionAktif($appLanguage->getYes(), $appLanguage->getNo())
 		);
 	});
@@ -653,9 +756,10 @@ require_once $appInclude->mainAppHeader(__DIR__);
 									->addAnd(new PicoPredicate(Field::of()->aktif, true))
 									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
-									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC))
-									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC)), 
+									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
 								Field::of()->supervisorId, Field::of()->nama, $inputGet->getSupervisorId())
+								->setTextNodeFormat('"%s (%s)", nama, jabatan.nama')
 								; ?>
 							</select>
 					</span>
@@ -703,8 +807,8 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<thead>
 							<tr>
 								<?php if($userPermission->isAllowedBatchAction()){ ?>
-								<td class="data-controll data-selector" data-key="lokasi_proyek_id">
-									<input type="checkbox" class="checkbox check-master" data-selector=".checkbox-lokasi-proyek-id"/>
+								<td class="data-controll data-selector" data-key="rekomendasi_pekerjaan_id">
+									<input type="checkbox" class="checkbox check-master" data-selector=".checkbox-rekomendasi-pekerjaan-id"/>
 								</td>
 								<?php } ?>
 								<?php if($userPermission->isAllowedUpdate()){ ?>
@@ -718,13 +822,11 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								</td>
 								<?php } ?>
 								<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
-								<td data-col-name="nama" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getNama();?></a></td>
-								<td data-col-name="kode_lokasi" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getKodeLokasi();?></a></td>
 								<td data-col-name="proyek_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getProyek();?></a></td>
+								<td data-col-name="buku_harian_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getBukuHarian();?></a></td>
 								<td data-col-name="supervisor_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getSupervisor();?></a></td>
-								<td data-col-name="latitude" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getLatitude();?></a></td>
-								<td data-col-name="longitude" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getLongitude();?></a></td>
-								<td data-col-name="atitude" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAtitude();?></a></td>
+								<td data-col-name="permasalahan_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getPermasalahan();?></a></td>
+								<td data-col-name="rekomendasi_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getRekomendasi();?></a></td>
 								<td data-col-name="aktif" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAktif();?></a></td>
 							</tr>
 						</thead>
@@ -732,36 +834,34 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
 							<?php 
 							$dataIndex = 0;
-							while($lokasiProyek = $pageData->fetch())
+							while($rekomendasiPekerjaan = $pageData->fetch())
 							{
 								$dataIndex++;
 							?>
 		
-							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $lokasiProyek->optionAktif('true', 'false');?>">
+							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $rekomendasiPekerjaan->optionAktif('true', 'false');?>">
 								<?php if($userPermission->isAllowedBatchAction()){ ?>
-								<td class="data-selector" data-key="lokasi_proyek_id">
-									<input type="checkbox" class="checkbox check-slave checkbox-lokasi-proyek-id" name="checked_row_id[]" value="<?php echo $lokasiProyek->getLokasiProyekId();?>"/>
+								<td class="data-selector" data-key="rekomendasi_pekerjaan_id">
+									<input type="checkbox" class="checkbox check-slave checkbox-rekomendasi-pekerjaan-id" name="checked_row_id[]" value="<?php echo $rekomendasiPekerjaan->getRekomendasiPekerjaanId();?>"/>
 								</td>
 								<?php } ?>
 								<?php if($userPermission->isAllowedUpdate()){ ?>
 								<td>
-									<a class="edit-control" href="<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->lokasi_proyek_id, $lokasiProyek->getLokasiProyekId());?>"><span class="fa fa-edit"></span></a>
+									<a class="edit-control" href="<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->rekomendasi_pekerjaan_id, $rekomendasiPekerjaan->getRekomendasiPekerjaanId());?>"><span class="fa fa-edit"></span></a>
 								</td>
 								<?php } ?>
 								<?php if($userPermission->isAllowedDetail()){ ?>
 								<td>
-									<a class="detail-control field-master" href="<?php echo $currentModule->getRedirectUrl(UserAction::DETAIL, Field::of()->lokasi_proyek_id, $lokasiProyek->getLokasiProyekId());?>"><span class="fa fa-folder"></span></a>
+									<a class="detail-control field-master" href="<?php echo $currentModule->getRedirectUrl(UserAction::DETAIL, Field::of()->rekomendasi_pekerjaan_id, $rekomendasiPekerjaan->getRekomendasiPekerjaanId());?>"><span class="fa fa-folder"></span></a>
 								</td>
 								<?php } ?>
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
-								<td data-col-name="nama"><?php echo $lokasiProyek->getNama();?></td>
-								<td data-col-name="kode_lokasi"><?php echo $lokasiProyek->getKodeLokasi();?></td>
-								<td data-col-name="proyek_id"><?php echo $lokasiProyek->issetProyek() ? $lokasiProyek->getProyek()->getNama() : "";?></td>
-								<td data-col-name="supervisor_id"><?php echo $lokasiProyek->issetSupervisor() ? $lokasiProyek->getSupervisor()->getNama() : "";?></td>
-								<td data-col-name="latitude"><?php echo $lokasiProyek->getLatitude();?></td>
-								<td data-col-name="longitude"><?php echo $lokasiProyek->getLongitude();?></td>
-								<td data-col-name="atitude"><?php echo $lokasiProyek->getAtitude();?></td>
-								<td data-col-name="aktif"><?php echo $lokasiProyek->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
+								<td data-col-name="proyek_id"><?php echo $rekomendasiPekerjaan->issetProyek() ? $rekomendasiPekerjaan->getProyek()->getNama() : "";?></td>
+								<td data-col-name="buku_harian_id"><?php echo $rekomendasiPekerjaan->issetBukuHarian() ? $rekomendasiPekerjaan->getBukuHarian()->getTanggal() : "";?></td>
+								<td data-col-name="supervisor_id"><?php echo $rekomendasiPekerjaan->issetSupervisor() ? $rekomendasiPekerjaan->getSupervisor()->getNama() : "";?></td>
+								<td data-col-name="permasalahan_id"><?php echo $rekomendasiPekerjaan->issetPermasalahan() ? $rekomendasiPekerjaan->getPermasalahan()->getPermasalahan() : "";?></td>
+								<td data-col-name="rekomendasi_id"><?php echo $rekomendasiPekerjaan->issetRekomendasi() ? $rekomendasiPekerjaan->getRekomendasi()->getRekomendasi() : "";?></td>
+								<td data-col-name="aktif"><?php echo $rekomendasiPekerjaan->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 
 							}

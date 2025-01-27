@@ -28,7 +28,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "jenis-pekerjaan", "Jenis Pekerjaan");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "jenis-pekerjaan", $appLanguage->getJenisPekerjaan());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -676,7 +676,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								$dataIndex++;
 							?>
 		
-							<tr data-primary-key="<?php echo $jenisPekerjaan->getJenisPekerjaanId();?>" data-sort-order="<?php echo $jenisPekerjaan->getSortOrder();?>" data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+							<tr data-primary-key="<?php echo $jenisPekerjaan->getJenisPekerjaanId();?>" data-sort-order="<?php echo $jenisPekerjaan->getSortOrder();?>" data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $jenisPekerjaan->optionAktif('true', 'false');?>">
 								<?php if($userPermission->isAllowedSortOrder()){ ?>
 								<td class="data-sort data-sort-body data-sort-handler"></td>
 								<?php } ?>
