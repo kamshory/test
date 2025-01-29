@@ -551,4 +551,10 @@ header .nav-item.dropdown a .icon {
 .note-popover .btn-light:hover {
   background-color: #727272;
   color: #1f1f1f;
+}
+
+table.table td.data-number {
+  width: 20px;
+  padding-right: 2px;
+  text-align: right;
 }/*# sourceMappingURL=custom.css.map */

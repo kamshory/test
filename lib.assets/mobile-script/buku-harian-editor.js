@@ -215,6 +215,7 @@ jQuery(function (e) {
 
     $('#permasalahan-modal').on('shown.bs.modal', function () {
         let modalElem = $('#permasalahan-modal');
+        modalElem.attr('data-mode', 'list');
         modalElem.find('.add-issue, .save-issue, .cancel-issue').prop('disabled', true);
         let proyekId = $(this).attr('data-proyek-id');
         $.ajax({
@@ -228,6 +229,20 @@ jQuery(function (e) {
             error: function () {
                 modalElem.find('.modal-body').html('<div class="alert alert-warning">Terjadi kesalahan dalam memuat data.</div>');
             }
+        });
+    });
+    $('#permasalahan-modal').on('hidden.bs.modal', function (e) {
+        emptyOption($('[data-name="permasalahan_id"]'));
+        let modalElem = $('#permasalahan-modal');
+        modalElem.find('table tbody tr').each(function (e2) {
+            let newValue = $(this).attr('data-permasalahan-id');  
+            let newLabel = $(this).attr('data-permasalahan') + " : " + $(this).attr('data-rekomendasi') + " : " + $(this).attr('data-tindak-lanjut');  
+            let newOption = $('<option>', {
+                value: newValue,  
+                text: newLabel    
+            });
+
+            $('[data-name="permasalahan_id"]').append(newOption);
         });
     });
 
@@ -274,7 +289,7 @@ jQuery(function (e) {
                 while ($('#permasalahan_id option').length > 1) {
                     $('#permasalahan_id option:last').remove();
                 }
-
+                emptyOption($('[data-name="permasalahan_id"]'));
                 modalElem.find('table tbody tr').each(function (e2) {
                     let newValue = $(this).attr('data-permasalahan-id');  
                     let newLabel = $(this).attr('data-permasalahan') + " : " + $(this).attr('data-rekomendasi') + " : " + $(this).attr('data-tindak-lanjut');  
@@ -283,7 +298,7 @@ jQuery(function (e) {
                         text: newLabel    
                     });
 
-                    $('#permasalahan_id').append(newOption);
+                    $('[data-name="permasalahan_id"]').append(newOption);
                 });
             },
             error: function () {
@@ -298,6 +313,7 @@ jQuery(function (e) {
         modalElem.find('[name="permasalahan_id"]').val('');
     });
 
+    /*
     $('#rekomendasi-modal').on('shown.bs.modal', function () {
         let modalElem = $('#rekomendasi-modal');
         modalElem.find('.add-recommendation, .save-recommendation, .cancel-recommendation').prop('disabled', true);
@@ -374,6 +390,7 @@ jQuery(function (e) {
         modalElem.attr('data-mode', 'list');
         modalElem.find('[name="rekomendasi_id"]').val('');
     });
+    */
 
     $.ajax({
         'url': 'lib.mobile-tools/ajax-load-man-power.php',
@@ -402,6 +419,14 @@ jQuery(function (e) {
     });
 
 });
+
+function emptyOption(selector)
+{
+    while(selector.find('option').length > 1)
+    {
+        selector.find('option:last-child').remove();
+    }
+}
 
 function fixMaterial() {
     $('#tabel-material tbody').find('tr').each(function (index) {

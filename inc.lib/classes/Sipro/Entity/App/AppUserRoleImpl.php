@@ -137,13 +137,13 @@ class AppUserRoleImpl extends AppUserRole
     protected $allowedSortOrder;
 	
 	/**
-	 * Allowed Download
+	 * Allowed DownExportload
 	 * 
-	 * @Column(name="allowed_download", type="tinyint(1)", length=1, nullable=true)
-	 * @Label(content="Allowed Download")
+	 * @Column(name="allowed_export", type="tinyint(1)", length=1, nullable=true)
+	 * @Label(content="Allowed Export")
 	 * @var bool
 	 */
-	protected $allowedDownload;
+	protected $allowedExport;
 
     /**
      * Active

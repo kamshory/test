@@ -121,13 +121,13 @@ $subqueryMap = array(
 ?>
     <form action="" method="post" class="data-form-edit">
         <div class="input-area">
-            <textarea class="form-control" name="permasalahan" placeholder="<?php echo $appLanguage->getPlaceholderWriteIssueHere();?>"></textarea>
+            <textarea class="form-control" name="permasalahan" spellcheck="false" placeholder="<?php echo $appLanguage->getPlaceholderWriteIssueHere();?>"></textarea>
         </div>
         <div class="input-area">
-            <textarea class="form-control" name="rekomendasi" placeholder="<?php echo $appLanguage->getPlaceholderWriteRecommendationHere();?>"></textarea>
+            <textarea class="form-control" name="rekomendasi" spellcheck="false" placeholder="<?php echo $appLanguage->getPlaceholderWriteRecommendationHere();?>"></textarea>
         </div>
         <div class="input-area">
-            <textarea class="form-control" name="tindak_lanjut" placeholder="<?php echo $appLanguage->getPlaceholderWriteFollowUpHere();?>"></textarea>
+            <textarea class="form-control" name="tindak_lanjut" spellcheck="false" placeholder="<?php echo $appLanguage->getPlaceholderWriteFollowUpHere();?>"></textarea>
         </div>
         <input type="hidden" name="permasalahan_id">
     </form>
@@ -150,8 +150,6 @@ $subqueryMap = array(
                         </td>
                         <td class="data-controll data-number" width="30"><?php echo $appLanguage->getNumero();?></td>
                         <td data-col-name="permasalahan" class="order-controll"><?php echo $appEntityLanguage->getPermasalahan();?></td>
-                        <td data-col-name="rekomendasi" class="order-controll"><?php echo $appEntityLanguage->getRekomendasi();?></td>
-                        <td data-col-name="tindak-lanjut" class="order-controll"><?php echo $appEntityLanguage->getTindakLanjut();?></td>
                         <td data-col-name="ditutup" class="order-controll" width="80"><label><input type="checkbox" disabled> <?php echo $appEntityLanguage->getDitutup();?></label></td>
                     </tr>
                 </thead>
@@ -177,8 +175,6 @@ $subqueryMap = array(
                         </td>
                         <td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
                         <td data-col-name="permasalahan"><?php echo $permasalahan->getPermasalahan();?></td>
-                        <td data-col-name="rekomendasi"><?php echo $permasalahan->getRekomendasi();?></td>
-                        <td data-col-name="tindak-lanjut"><?php echo $permasalahan->getTindakLanjut();?></td>
                         <td data-col-name="ditutup"><label><input type="checkbox"<?php echo $permasalahan->optionDitutup(" checked", "");?>></label> <?php echo $appEntityLanguage->getDitutup();?></td>
                     </tr>
                     <?php 

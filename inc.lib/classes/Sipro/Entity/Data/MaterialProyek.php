@@ -56,15 +56,6 @@ class MaterialProyek extends MagicObject
 	protected $material;
 
 	/**
-	 * Jumlah
-	 * 
-	 * @Column(name="jumlah", type="float", nullable=true)
-	 * @Label(content="Jumlah")
-	 * @var double
-	 */
-	protected $jumlah;
-
-	/**
 	 * Proyek ID
 	 * 
 	 * @Column(name="proyek_id", type="bigint(20)", length=20, nullable=true)
@@ -81,6 +72,51 @@ class MaterialProyek extends MagicObject
 	 * @var ProyekMin
 	 */
 	protected $proyek;
+	
+	/**
+	 * Buku Harian ID
+	 * 
+	 * @Column(name="buku_harian_id", type="bigint(20)", length=20, nullable=true)
+	 * @Label(content="Buku Harian ID")
+	 * @var int
+	 */
+	protected $bukuHarianId;
+
+	/**
+	 * Buku Harian
+	 * 
+	 * @JoinColumn(name="buku_harian_id", referenceColumnName="buku_harian_id")
+	 * @Label(content="Buku Harian")
+	 * @var BukuHarianMin
+	 */
+	protected $bukuHarian;
+	
+	/**
+	 * Supervisor ID
+	 * 
+	 * @Column(name="supervisor_id", type="bigint(20)", length=20, nullable=true)
+	 * @Label(content="Supervisor ID")
+	 * @var int
+	 */
+	protected $supervisorId;
+
+	/**
+	 * Supervisor
+	 * 
+	 * @JoinColumn(name="supervisor_id", referenceColumnName="supervisor_id")
+	 * @Label(content="Supervisor")
+	 * @var SupervisorMin
+	 */
+	protected $supervisor;
+	
+	/**
+	 * Jumlah
+	 * 
+	 * @Column(name="jumlah", type="float", nullable=true)
+	 * @Label(content="Jumlah")
+	 * @var double
+	 */
+	protected $jumlah;
 
 	/**
 	 * Aktif

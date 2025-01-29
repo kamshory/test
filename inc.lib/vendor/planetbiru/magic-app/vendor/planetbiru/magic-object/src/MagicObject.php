@@ -1038,7 +1038,7 @@ class MagicObject extends stdClass // NOSONAR
      * This method begins a new database transaction. It delegates the actual transaction 
      * initiation to the `transactionalCommand` method, passing the "start" command.
      *
-     * @return self The current instance of the class for method chaining.
+     * @return self Returns the current instance for method chaining.
      * 
      * @throws NoDatabaseConnectionException If there is no active database connection.
      * @throws PDOException If there is an error while starting the transaction.
@@ -1056,7 +1056,7 @@ class MagicObject extends stdClass // NOSONAR
      * changes made during the transaction permanent. It delegates to the `transactionalCommand` method 
      * with the "commit" command.
      *
-     * @return self The current instance of the class for method chaining.
+     * @return self Returns the current instance for method chaining.
      * 
      * @throws NoDatabaseConnectionException If there is no active database connection.
      * @throws PDOException If there is an error during the commit process.
@@ -1073,7 +1073,7 @@ class MagicObject extends stdClass // NOSONAR
      * This method rolls back the current transaction, undoing all database changes made
      * during the transaction. It calls the `transactionalCommand` method with the "rollback" command.
      *
-     * @return self The current instance of the class for method chaining.
+     * @return self Returns the current instance for method chaining.
      * 
      * @throws NoDatabaseConnectionException If there is no active database connection.
      * @throws PDOException If there is an error during the rollback process.
@@ -1261,6 +1261,20 @@ class MagicObject extends stdClass // NOSONAR
     {
         $var = PicoStringUtil::camelize($propertyName);
         return isset($this->{$var}) ? $this->{$var} : null;
+    }
+
+    /**
+     * Check if a property has a value set.
+     *
+     * This method checks if the specified property is set (exists and has a value). It returns true if the property exists and has a value, and false otherwise.
+     *
+     * @param string $propertyName The name of the property to check.
+     * @return bool True if the property is set, false otherwise.
+     */
+    public function hasValue($propertyName)
+    {
+        $var = PicoStringUtil::camelize($propertyName);
+        return isset($this->{$var});
     }
 
     /**

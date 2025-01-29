@@ -129,7 +129,7 @@ table tr td table.tabel-control-2-width tr > td:nth-child(3)
     display: none;
 }
 [name="permasalahan"], [name="rekomendasi"], [name="tindak_lanjut"]{
-    height: 80px;
+    height: 70px;
 }
 .input-area{
     padding-bottom: 10px;
@@ -142,4 +142,10 @@ table tr td table.tabel-control-two-side tr > td:nth-child(2)
 {
     width:30px;
     padding:2px 0px 2px 2px;
+}
+
+.modal-body table tr > td.data-number
+{
+    text-align: right;
+    padding-right: 8px;
 }

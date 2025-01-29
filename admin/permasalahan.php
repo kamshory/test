@@ -26,7 +26,7 @@ use Sipro\Entity\Data\ProyekMin;
 use Sipro\Entity\Data\SupervisorMin;
 use MagicApp\XLSX\DocumentWriter;
 use MagicApp\XLSX\XLSXDataFormat;
-
+use MagicObject\Util\PicoStringUtil;
 
 require_once dirname(__DIR__) . "/inc.app/auth.php";
 
@@ -833,9 +833,9 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<?php } ?>
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="proyek_id"><?php echo $permasalahan->issetProyek() ? $permasalahan->getProyek()->getNama() : "";?></td>
-								<td data-col-name="permasalahan"><?php echo $permasalahan->getPermasalahan();?></td>
-								<td data-col-name="rekomendasi"><?php echo $permasalahan->getRekomendasi();?></td>
-								<td data-col-name="tindak_lanjut"><?php echo $permasalahan->getTindakLanjut();?></td>
+								<td data-col-name="permasalahan"><?php echo nl2br(PicoStringUtil::wordChunk($permasalahan->getPermasalahan(), 35));?></td>
+								<td data-col-name="rekomendasi"><?php echo nl2br(PicoStringUtil::wordChunk($permasalahan->getRekomendasi(), 35));?></td>
+								<td data-col-name="tindak_lanjut"><?php echo nl2br(PicoStringUtil::wordChunk($permasalahan->getTindakLanjut(), 35));?></td>
 								<td data-col-name="supervisor_id"><?php echo $permasalahan->issetSupervisor() ? $permasalahan->getSupervisor()->getNama() : "";?></td>
 								<td data-col-name="ditutup"><?php echo $permasalahan->optionDitutup($appLanguage->getYes(), $appLanguage->getNo());?></td>
 								<td data-col-name="sort_order" class="data-sort-order-column"><?php echo $permasalahan->getSortOrder();?></td>

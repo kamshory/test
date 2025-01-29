@@ -25,9 +25,9 @@ class ManPowerProyek extends MagicObject
 	 * Man Power Proyek ID
 	 * 
 	 * @Id
-	 * @GeneratedValue(strategy=GenerationType.UUID)
+	 * @GeneratedValue(strategy=GenerationType.IDENTITY)
 	 * @NotNull
-	 * @Column(name="man_power_proyek_id", type="bigint(20)", length=20, nullable=false)
+	 * @Column(name="man_power_proyek_id", type="bigint(20)", length=20, nullable=false, extra="auto_increment")
 	 * @Label(content="Man Power Proyek ID")
 	 * @var int
 	 */
@@ -68,7 +68,7 @@ class ManPowerProyek extends MagicObject
 	 * @var BukuHarianMin
 	 */
 	protected $bukuHarian;
-	
+
 	/**
 	 * Supervisor ID
 	 * 

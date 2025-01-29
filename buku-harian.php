@@ -20,7 +20,9 @@ use MagicApp\UserAction;
 use MagicObject\Exceptions\NoRecordFoundException;
 use MagicObject\MagicObject;
 use MagicObject\SetterGetter;
+use Sipro\Entity\Data\AcuanPengawasan;
 use Sipro\Entity\Data\AcuanPengawasanPekerjaan;
+use Sipro\Entity\Data\AcuanPengawasanProyek;
 use Sipro\Entity\Data\BillOfQuantity;
 use Sipro\Entity\Data\BillOfQuantityProyek;
 use Sipro\Entity\Data\BukuHarian;
@@ -32,10 +34,10 @@ use Sipro\Entity\Data\ManPowerProyek;
 use Sipro\Entity\Data\MaterialProyek;
 use Sipro\Entity\Data\Pekerjaan;
 use Sipro\Entity\Data\PeralatanProyek;
+use Sipro\Entity\Data\Permasalahan;
 use Sipro\Entity\Data\PermasalahanMin;
 use Sipro\Entity\Data\ProgresProyek;
 use Sipro\Entity\Data\Proyek;
-use Sipro\Entity\Data\RekomendasiMin;
 use Sipro\Entity\Data\RekomendasiPekerjaan;
 use Sipro\Entity\Data\SupervisorProyek;
 use Sipro\Entity\Data\TipePondasi;
@@ -72,7 +74,7 @@ function savePermasalahanRekomendasi($database, $currentAction, $proyekId, $buku
 		try
 		{
 			$rekomendasiPekerjaan->findOneByProyekIdAndBukuHarianIdAndPermasalahanIdAndRekomendasiId($proyekId, $bukuHarianId, $permasalahanId, $rekomendasiId);
-			$ids[] = $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
+			$ids[] = (int) $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
 		}
 		catch(Exception $e)
 		{
@@ -90,13 +92,19 @@ function savePermasalahanRekomendasi($database, $currentAction, $proyekId, $buku
 			$rekomendasiPekerjaan->setWaktuUbah($currentAction->getTime());
 			$rekomendasiPekerjaan->setIpUbah($currentAction->getIp());
 			$rekomendasiPekerjaan->insert();
-			$ids[] = $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
+			$ids[] = (int) $rekomendasiPekerjaan->getRekomendasiPekerjaanId();
 		}
 	}
 
 	// Clean up
 	$rekomendasiPekerjaan = new RekomendasiPekerjaan(null, $database);
-	$rekomendasiPekerjaan->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->rekomendasiPekerjaanId, $ids)))
+	$rekomendasiPekerjaan->where(
+		PicoSpecification::getInstance()
+			->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->rekomendasiPekerjaanId, $ids))
+			->addAnd([Field::of()->proyekId, $proyekId])
+			->addAnd([Field::of()->bukuHarianId, $bukuHarianId])
+			->addAnd([Field::of()->supervisorId, $currentAction->getSupervisorId()])
+	)
 		->delete();
 }
 
@@ -112,7 +120,7 @@ function saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $bodIds, $
 		try
 		{
 			$billOfQuantityProyek->findOneByProyekIdAndBukuHarianIdAndBillOfQuantityId($proyekId, $bukuHarianId, $billOfQuantityId);
-			$ids[] = $billOfQuantityProyek->getBillOfQuantityProyekId();
+			$ids[] = (int) $billOfQuantityProyek->getBillOfQuantityProyekId();
 		}
 		catch(Exception $e)
 		{
@@ -136,8 +144,6 @@ function saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $bodIds, $
 				$billOfQuantityProyek->setVolumeProyek($volumeProyek);
 				$billOfQuantityProyek->setVolume($volume);
 				$billOfQuantityProyek->setPersen($persen);
-
-
 				$billOfQuantityProyek->setAktif(true);
 				$billOfQuantityProyek->setWaktuBuat($currentAction->getTime());
 				$billOfQuantityProyek->setIpBuat($currentAction->getIp());
@@ -148,7 +154,7 @@ function saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $bodIds, $
 				$billOfQuantity->setVolume($volumeProyek);
 				$billOfQuantity->update();
 
-				$ids[] = $billOfQuantityProyek->getBillOfQuantityProyekId();
+				$ids[] = (int) $billOfQuantityProyek->getBillOfQuantityProyekId();
 			}
 			catch(Exception $e2)
 			{
@@ -159,7 +165,13 @@ function saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $bodIds, $
 
 	// Clean up
 	$billOfQuantityProyek = new BillOfQuantityProyek(null, $database);
-	$billOfQuantityProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->billOfQuantityProyekId, $ids)))
+	$billOfQuantityProyek->where(
+		PicoSpecification::getInstance()
+			->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->billOfQuantityProyekId, $ids))
+			->addAnd([Field::of()->proyekId, $proyekId])
+			->addAnd([Field::of()->bukuHarianId, $bukuHarianId])
+			->addAnd([Field::of()->supervisorId, $currentAction->getSupervisorId()])
+	)
 		->delete();
 }
 
@@ -170,13 +182,36 @@ function saveAcuanPengawasan($database, $currentAction, $proyekId, $bukuHarianId
 	{
 		try
 		{
-			$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
+			$acuanPengawasanId = $acuanPengawasanIds[$i];
+			$acuanPengawasanProyek = new AcuanPengawasanProyek(null, $database);
+			$acuanPengawasanProyek->setProyekId($proyekId);
+			$acuanPengawasanProyek->setBukuHarianId($bukuHarianId);
+			$acuanPengawasanProyek->setAcuanPengawasanId($acuanPengawasanId);
+			$acuanPengawasanProyek->setSupervisorId($currentAction->getSupervisorId());
+			$acuanPengawasanProyek->setAktif(true);
+			$acuanPengawasanProyek->setWaktuBuat($currentAction->getTime());
+			$acuanPengawasanProyek->setIpBuat($currentAction->getIp());
+			$acuanPengawasanProyek->setWaktuUbah($currentAction->getTime());
+			$acuanPengawasanProyek->setIpUbah($currentAction->getIp());
+			$acuanPengawasanProyek->insert();
+
+			$ids[] = (int) $acuanPengawasanProyek->getAcuanPengawasanProyekId();
 		}
 		catch(Exception $e)
 		{
-
+			// Do nothing
 		}
 	}
+	// Clean up
+	$acuanPengawasanProyek = new AcuanPengawasanProyek(null, $database);
+	$acuanPengawasanProyek->where(
+		PicoSpecification::getInstance()
+			->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->acuanPengawasanProyekId, $ids))
+			->addAnd([Field::of()->proyekId, $proyekId])
+			->addAnd([Field::of()->bukuHarianId, $bukuHarianId])
+			->addAnd([Field::of()->supervisorId, $currentAction->getSupervisorId()])
+	)
+		->delete();
 }
 
 function saveManPower($database, $currentAction, $proyekId, $bukuHarianId, $manPowerIds, $jumlahManPowers)
@@ -191,7 +226,7 @@ function saveManPower($database, $currentAction, $proyekId, $bukuHarianId, $manP
 		try
 		{
 			$manPowerProyek->findOneByProyekIdAndBukuHarianIdAndManPowerId($proyekId, $bukuHarianId, $manPowerId);
-			$ids[] = $manPowerProyek->getManPowerProyekId();
+			$ids[] = (int) $manPowerProyek->getManPowerProyekId();
 		}
 		catch(Exception $e)
 		{
@@ -209,13 +244,19 @@ function saveManPower($database, $currentAction, $proyekId, $bukuHarianId, $manP
 			$manPowerProyek->setWaktuUbah($currentAction->getTime());
 			$manPowerProyek->setIpUbah($currentAction->getIp());
 			$manPowerProyek->insert();
-			$ids[] = $manPowerProyek->getManPowerProyekId();
+			$ids[] = (int) $manPowerProyek->getManPowerProyekId();
 		}
 	}
 
 	// Clean up
 	$manPowerProyek = new ManPowerProyek(null, $database);
-	$manPowerProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->manPowerProyekId, $ids)))
+	$manPowerProyek->where(
+		PicoSpecification::getInstance()
+			->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->manPowerProyekId, $ids))
+			->addAnd([Field::of()->proyekId, $proyekId])
+			->addAnd([Field::of()->bukuHarianId, $bukuHarianId])
+			->addAnd([Field::of()->supervisorId, $currentAction->getSupervisorId()])
+	)
 		->delete();
 }
 
@@ -231,7 +272,7 @@ function savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $per
 		try
 		{
 			$peralatanProyek->findOneByProyekIdAndBukuHarianIdAndPeralatanId($proyekId, $bukuHarianId, $peralatanId);
-			$ids[] = $peralatanProyek->getManPowerProyekId();
+			$ids[] = (int) $peralatanProyek->getPeralatanProyekId();
 		}
 		catch(Exception $e)
 		{
@@ -241,7 +282,7 @@ function savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $per
 			$peralatanProyek->setProyekId($proyekId);
 			$peralatanProyek->setBukuHarianId($bukuHarianId);
 			$peralatanProyek->setSupervisorId($currentAction->getSupervisorId());
-			$peralatanProyek->setPeralatan($peralatanId);
+			$peralatanProyek->setPeralatanId($peralatanId);
 			$peralatanProyek->setJumlah($jumlah);
 			$peralatanProyek->setAktif(true);
 			$peralatanProyek->setWaktuBuat($currentAction->getTime());
@@ -249,13 +290,19 @@ function savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $per
 			$peralatanProyek->setWaktuUbah($currentAction->getTime());
 			$peralatanProyek->setIpUbah($currentAction->getIp());
 			$peralatanProyek->insert();
-			$ids[] = $peralatanProyek->getManPowerProyekId();
+			$ids[] = (int) $peralatanProyek->getPeralatanProyekId();
 		}
 	}
 
 	// Clean up
 	$peralatanProyek = new PeralatanProyek(null, $database);
-	$peralatanProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->peralatanProyekId, $ids)))
+	$peralatanProyek->where(
+		PicoSpecification::getInstance()
+			->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->peralatanProyekId, $ids))
+			->addAnd([Field::of()->proyekId, $proyekId])
+			->addAnd([Field::of()->bukuHarianId, $bukuHarianId])
+			->addAnd([Field::of()->supervisorId, $currentAction->getSupervisorId()])
+	)
 		->delete();
 }
 
@@ -271,7 +318,7 @@ function saveMaterial($database, $currentAction, $proyekId, $bukuHarianId, $mate
 		try
 		{
 			$materialProyek->findOneByProyekIdAndBukuHarianIdAndMaterialId($proyekId, $bukuHarianId, $materialId);
-			$ids[] = $materialProyek->getMaterialProyekId();
+			$ids[] = (int) $materialProyek->getMaterialProyekId();
 		}
 		catch(Exception $e)
 		{
@@ -289,73 +336,23 @@ function saveMaterial($database, $currentAction, $proyekId, $bukuHarianId, $mate
 			$materialProyek->setWaktuUbah($currentAction->getTime());
 			$materialProyek->setIpUbah($currentAction->getIp());
 			$materialProyek->insert();
-			$ids[] = $materialProyek->getMaterialProyekId();
+			$ids[] = (int) $materialProyek->getMaterialProyekId();
 		}
 	}
 
 	// Clean up
 	$materialProyek = new MaterialProyek(null, $database);
-	$materialProyek->where(PicoSpecification::getInstance()->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->materialProyekId, $ids)))
+	$materialProyek->where(
+		PicoSpecification::getInstance()
+			->addAnd(PicoPredicate::getInstance()->notEquals(Field::of()->materialProyekId, $ids))
+			->addAnd([Field::of()->proyekId, $proyekId])
+			->addAnd([Field::of()->bukuHarianId, $bukuHarianId])
+			->addAnd([Field::of()->supervisorId, $currentAction->getSupervisorId()])
+	)
 		->delete();
 }
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
-
-
-	/*
-	{
-		"proyekId": "168",
-		"tanggal": "2025-01-28",
-		"lokasiProyekId": [
-			"5490"
-		],
-		"kegiatan": "gerge</p>",
-		"files": "",
-		"permasalahanId": [
-			"3",
-			"7"
-		],
-		"rekomendasiId": [
-			"2",
-			"1"
-		],
-		"billOfQuantityId": "9",
-		"boqId": [
-			"11"
-		],
-		"jumlahBoq": [
-			"3"
-		],
-		"acuanPengawasanId": [
-			"5"
-		],
-		"manPowerId": [
-			"1"
-		],
-		"jumlahManPower": [
-			"7"
-		],
-		"peralatanId": [
-			"461"
-		],
-		"jumlahPeralatan": [
-			"1"
-		],
-		"materialId": [
-			"485"
-		],
-		"jumlahMaterial": [
-			"1"
-		],
-		"latitude": "",
-		"longitude": "",
-		"altitude": "",
-		"userAction": "create"
-	}
-  */
-
-
-	
     $proyekId = $inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_UINT, false, false, true);
 
     $bukuHarian = new BukuHarian(null, $database);
@@ -377,65 +374,12 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 
 	$bukuHarianId = $bukuHarian->getBukuHarianId();
 
-	/*
-	"permasalahanId": [
-			"3",
-			"7"
-		],
-		"rekomendasiId": [
-			"2",
-			"1"
-		],
-	*/
 	savePermasalahanRekomendasi($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getPermasalahanId(), $inputPost->getRekomendasiId());
-
-	/*
-	"boqId": [
-			"11"
-		],
-		"jumlahBoq": [
-			"3"
-		],
-	*/
 	saveBoq($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getBoqId(), $inputPost->getJumlahBoq());
-	
-	/*
-	"acuanPengawasanId": [
-			"5"
-		],
-	*/
 	saveAcuanPengawasan($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getAcuanPengawasanId());
-	
-	/*
-	"manPowerId": [
-			"1"
-		],
-		"jumlahManPower": [
-			"7"
-		],
-	*/
 	saveManPower($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getManPowerId(), $inputPost->getJumlahManPower());
-
-	/*
-	"peralatanId": [
-			"461"
-		],
-		"jumlahPeralatan": [
-			"1"
-		],
-	*/
 	savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getPeralatanId(), $inputPost->getJumlahPeralatan());
-
-
-	/*
-	"materialId": [
-			"485"
-		],
-		"jumlahMaterial": [
-			"1"
-		],
-	*/
-	savePeralatan($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getMaterialId(), $inputPost->getJumlahMaterial());
+	saveMaterial($database, $currentAction, $proyekId, $bukuHarianId, $inputPost->getMaterialId(), $inputPost->getJumlahMaterial());
 	
 	$currentModule->redirectTo(UserAction::DETAIL, Field::of()->buku_harian_id, $bukuHarianId);
 	
@@ -1295,7 +1239,7 @@ $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_IN
 								<tbody>
 									<tr>
 										<td>
-											<select class="form-control" data-name="permasalahan_id">
+											<select class="form-control" data-name="permasalahan_id" name="permasalahan_id[0]">
 												<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
 												<?php echo AppFormBuilder::getInstance()->createSelectOption(new PermasalahanMin(null, $database), 
 												PicoSpecification::getInstance()
@@ -2240,14 +2184,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 						<td><?php echo $appEntityLanguage->getTanggal();?></td>
 						<td><?php echo $bukuHarian->getTanggal();?></td>
 					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getPermasalahan();?></td>
-						<td><?php echo $bukuHarian->getPermasalahan();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getRekomendasi();?></td>
-						<td><?php echo $bukuHarian->getRekomendasi();?></td>
-					</tr>
+
 
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuBuat();?></td>
@@ -2261,173 +2198,322 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				</tbody>
 			</table>
 
+			<h4>Kegiatan</h4>
+
+			<?php echo $bukuHarian->getKegiatan();?>
+
+			<h4>Permasalahan dan Rekomendasi</h4>
 			<?php 
-
-
-				$pekerjaanFinder = new Pekerjaan(null, $database);
-				$appEntityLanguagePekerjaan = new AppEntityLanguage(new Pekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
-
-				try
-				{
-					$pageData = $pekerjaanFinder->findByBukuHarianId($bukuHarian->getBukuHarianId());
-					if($pageData->getTotalResult() > 0)
+			$specificationRekomendasiPekerjaan = PicoSpecification::getInstance()
+			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
+			$appEntityLanguagePermasalahan = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$dataLoader = new RekomendasiPekerjaan(null, $database);
+			try{
+			$pageData = $dataLoader->findAll($specificationRekomendasiPekerjaan, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+			if($pageData->getTotalResult() > 0)
+			{		
+				
+			?>
+			<table class="table">
+				<thead>
+					<tr>
+						<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
+						<td><?php echo $appEntityLanguagePermasalahan->getPermasalahan();?></td>
+						<td><?php echo $appEntityLanguagePermasalahan->getRekomendasi();?></td>
+					</tr>
+				</thead>
+			
+				<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
+					<?php 
+					$dataIndex = 0;
+					while($rekomendasiPerekraan = $pageData->fetch())
 					{
-						?>
-						<h4>Pekerjaan</h4>
-						<?php
-					foreach($pageData->getResult() as $pekerjaan)
-					{
-						?>
-						<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
-				<tbody>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getPekerjaanId();?></td>
-						<td><?php echo $pekerjaan->getPekerjaanId();?></td>
+						$dataIndex++;
+						$permasalahan = $rekomendasiPerekraan->issetPermasalahan() ? $rekomendasiPerekraan->getPermasalahan() : new Permasalahan();
+					?>
+
+					<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+						<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
+						<td data-col-name="bill_of_quantity_id"><?php echo $permasalahan->getPermasalahan();?></td>
+						<td data-col-name="volume"><?php echo $permasalahan->getRekomendasi();?></td>
 					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getProyekId();?></td>
-						<td><?php echo $pekerjaan->getProyekId();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getBukuHarianId();?></td>
-						<td><?php echo $pekerjaan->getBukuHarianId();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getSupervisorId();?></td>
-						<td><?php echo $pekerjaan->getSupervisorId();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getJenisPekerjaan();?></td>
-						<td><?php echo $pekerjaan->issetJenisPekerjaan() ? $pekerjaan->getJenisPekerjaan()->getNama() : "";?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getLokasiProyek();?></td>
-						<td><?php echo $pekerjaan->issetLokasiProyek() ? $pekerjaan->getLokasiProyek()->getNama() : "";?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getLatitude();?></td>
-						<td><?php echo $pekerjaan->getLatitude();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getLongitude();?></td>
-						<td><?php echo $pekerjaan->getLongitude();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getAtitude();?></td>
-						<td><?php echo $pekerjaan->getAtitude();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getTipePondasi();?></td>
-						<td><?php echo $pekerjaan->issetTipePondasi() ? $pekerjaan->getTipePondasi()->getNama() : "";?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getKelasTower();?></td>
-						<td><?php echo $pekerjaan->issetKelasTower() ? $pekerjaan->getKelasTower()->getNama() : "";?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getKegiatan();?></td>
-						<td><?php echo $pekerjaan->getKegiatan();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getJumlahPekerja();?></td>
-						<td><?php echo $pekerjaan->getJumlahPekerja();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getAcuanPengawasan();?></td>
-						<td><?php echo $pekerjaan->getAcuanPengawasan();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getBillOfQuantityId();?></td>
-						<td><?php echo $pekerjaan->getBillOfQuantityId();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getWaktuBuat();?></td>
-						<td><?php echo $pekerjaan->getWaktuBuat();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getWaktuUbah();?></td>
-						<td><?php echo $pekerjaan->getWaktuUbah();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getIpBuat();?></td>
-						<td><?php echo $pekerjaan->getIpBuat();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getIpUbah();?></td>
-						<td><?php echo $pekerjaan->getIpUbah();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguagePekerjaan->getAktif();?></td>
-						<td><?php echo $pekerjaan->getAktif();?></td>
-					</tr>
+					<?php 
+					}
+					?>
+
 				</tbody>
 			</table>
 			<?php
-					}
-				}
-				}
-				catch(Exception $e)
-				{
-
-				}
-				
-				?>
+			}
+			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
 			
-				<h4>Bill Of Quantity</h4>
-				<?php 
-				$specificationBoq = PicoSpecification::getInstance()
-				->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-				$appEntityLanguageBoq = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
-				$dataLoader = new BillOfQuantityProyek(null, $database);
-				try{
-				$pageData = $dataLoader->findAll($specificationBoq, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
-				if($pageData->getTotalResult() > 0)
-				{		
-				    
-				?>
-				<table class="table">
-					<thead>
-						<tr>
-							<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
-							<td><?php echo $appEntityLanguageBoq->getBillOfQuantity();?></td>
-							<td><?php echo $appEntityLanguageBoq->getVolume();?></td>
-							<td><?php echo $appEntityLanguageBoq->getVolumeProyek();?></td>
-							<td><?php echo $appEntityLanguageBoq->getPersen();?></td>
-						</tr>
-					</thead>
+			?>
+			
+			<h4>Bill Of Quantity</h4>
+			<?php 
+			$specificationBoq = PicoSpecification::getInstance()
+			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
+			$appEntityLanguageBoq = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$dataLoader = new BillOfQuantityProyek(null, $database);
+			try{
+			$pageData = $dataLoader->findAll($specificationBoq, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+			if($pageData->getTotalResult() > 0)
+			{		
 				
-					<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
-						<?php 
-						$dataIndex = 0;
-						while($billOfQuantityProyek = $pageData->fetch())
-						{
-							$dataIndex++;
-						?>
-	
-						<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
-							<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
-							<td data-col-name="bill_of_quantity_id"><?php echo $billOfQuantityProyek->issetBillOfQuantity() ? $billOfQuantityProyek->getBillOfQuantity()->getNama() : "";?></td>
-							<td data-col-name="volume"><?php echo $billOfQuantityProyek->getVolume();?></td>
-							<td data-col-name="volume_proyek"><?php echo $billOfQuantityProyek->getVolumeProyek();?></td>
-							<td data-col-name="persen"><?php echo $billOfQuantityProyek->getPersen();?></td>
-						</tr>
-						<?php 
-						}
-						?>
-	
-					</tbody>
-				</table>
-				<?php
-				}
-				}
-				catch(Exception $e)
-				{
-					// Do nothing
-				}
-				
-				?>
+			?>
+			<table class="table">
+				<thead>
+					<tr>
+						<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
+						<td><?php echo $appEntityLanguageBoq->getBillOfQuantity();?></td>
+						<td><?php echo $appEntityLanguageBoq->getVolume();?></td>
+						<td><?php echo $appEntityLanguageBoq->getVolumeProyek();?></td>
+						<td width="20%"><?php echo $appEntityLanguageBoq->getPersen();?></td>
+					</tr>
+				</thead>
+			
+				<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
+					<?php 
+					$dataIndex = 0;
+					while($billOfQuantityProyek = $pageData->fetch())
+					{
+						$dataIndex++;
+					?>
 
-				<h4>Laporan Cuaca</h4>
+					<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+						<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
+						<td data-col-name="bill_of_quantity_id"><?php echo $billOfQuantityProyek->issetBillOfQuantity() ? $billOfQuantityProyek->getBillOfQuantity()->getNama() : "";?></td>
+						<td data-col-name="volume"><?php echo $billOfQuantityProyek->getVolume();?></td>
+						<td data-col-name="volume_proyek"><?php echo $billOfQuantityProyek->getVolumeProyek();?></td>
+						<td data-col-name="persen"><?php echo $billOfQuantityProyek->getPersen();?></td>
+					</tr>
+					<?php 
+					}
+					?>
+
+				</tbody>
+			</table>
+			<?php
+			}
+			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
+			
+			?>
+
+			<h4>Acuan Pengawasan Proyek</h4>
+			<?php 
+			$specificationAcuanPengawasanProyek = PicoSpecification::getInstance()
+			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
+			$appEntityLanguageAcuanPengawasanProyek = new AppEntityLanguage(new AcuanPengawasanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageAcuanPengawasan = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$dataLoader = new AcuanPengawasanProyek(null, $database);
+			try{
+			$pageData = $dataLoader->findAll($specificationAcuanPengawasanProyek, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+			if($pageData->getTotalResult() > 0)
+			{		
+				
+			?>
+			<table class="table">
+				<thead>
+					<tr>
+						<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
+						<td><?php echo $appEntityLanguageAcuanPengawasanProyek->getAcuanPengawasan();?></td>
+						<td><?php echo $appEntityLanguageAcuanPengawasan->getJenisHirarkiKontrak();?></td>
+						<td><?php echo $appEntityLanguageAcuanPengawasan->getSatusAcuanPengawasan();?></td>
+					</tr>
+				</thead>
+			
+				<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
+					<?php 
+					$dataIndex = 0;
+					while($acuanPengawasanProyek = $pageData->fetch())
+					{
+						$dataIndex++;
+
+						$acuanPengawasan = $acuanPengawasanProyek->issetAcuanPengawasan() ? $acuanPengawasanProyek->getAcuanPengawasan() : new AcuanPengawasan();
+					?>
+
+					<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+						<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
+						<td data-col-name="bill_of_quantity_id"><?php echo $acuanPengawasan->getNama();?></td>
+						<td data-col-name="jenis_hirarki_kontrak"><?php echo $acuanPengawasan->issetJenisHirarkiKontrak() ? $acuanPengawasan->getJenisHirarkiKontrak()->getNama() : "";?></td>
+						<td data-col-name="jenis_hirarki_kontrak"><?php echo $acuanPengawasan->issetStatusAcuanPengawasan() ? $acuanPengawasan->getStatusAcuanPengawasan()->getNama() : "";?></td>
+					</tr>
+					<?php 
+					}
+					?>
+
+				</tbody>
+			</table>
+			<?php
+			}
+			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
+			
+			?>
+
+
+			<h4>Man Power</h4>
+			<?php 
+			$specificationManPower = PicoSpecification::getInstance()
+			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
+			$appEntityLanguageManPowerProyek = new AppEntityLanguage(new ManPowerProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$dataLoader = new ManPowerProyek(null, $database);
+			try{
+			$pageData = $dataLoader->findAll($specificationManPower, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+			if($pageData->getTotalResult() > 0)
+			{		
+				
+			?>
+			<table class="table">
+				<thead>
+					<tr>
+						<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
+						<td><?php echo $appEntityLanguageManPowerProyek->getNama();?></td>
+						<td width="20%"><?php echo $appEntityLanguageManPowerProyek->getJumlahPekerja();?></td>
+					</tr>
+				</thead>
+			
+				<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
+					<?php 
+					$dataIndex = 0;
+					while($manPowerProyek = $pageData->fetch())
+					{
+						$dataIndex++;
+					?>
+
+					<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+						<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
+						<td data-col-name="bill_of_quantity_id"><?php echo $manPowerProyek->issetManPower() ? $manPowerProyek->getManPower()->getNama() : "";?></td>
+						<td data-col-name="volume_proyek"><?php echo $manPowerProyek->getJumlahPekerja();?></td>
+					</tr>
+					<?php 
+					}
+					?>
+
+				</tbody>
+			</table>
+			<?php
+			}
+			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
+			
+			?>
+
+			<h4>Material</h4>
+			<?php 
+			$specificationMaterial = PicoSpecification::getInstance()
+			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
+			$appEntityLanguageMaterialProyek = new AppEntityLanguage(new MaterialProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$dataLoader = new MaterialProyek(null, $database);
+			try{
+			$pageData = $dataLoader->findAll($specificationMaterial, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+			if($pageData->getTotalResult() > 0)
+			{		
+				
+			?>
+			<table class="table">
+				<thead>
+					<tr>
+						<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
+						<td><?php echo $appEntityLanguageMaterialProyek->getNama();?></td>
+						<td width="20%"><?php echo $appEntityLanguageMaterialProyek->getJumlah();?></td>
+					</tr>
+				</thead>
+			
+				<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
+					<?php 
+					$dataIndex = 0;
+					while($materialProyek = $pageData->fetch())
+					{
+						$dataIndex++;
+					?>
+
+					<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+						<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
+						<td data-col-name="bill_of_quantity_id"><?php echo $materialProyek->issetMaterial() ? $materialProyek->getMaterial()->getNama() : "";?></td>
+						<td data-col-name="volume_proyek"><?php echo $materialProyek->getJumlah();?></td>
+					</tr>
+					<?php 
+					}
+					?>
+
+				</tbody>
+			</table>
+			<?php
+			}
+			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
+			
+			?>
+
+			<h4>Peralatan</h4>
+			<?php 
+			$specificationPeralatan = PicoSpecification::getInstance()
+			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
+			$appEntityLanguagePeralatanProyek = new AppEntityLanguage(new PeralatanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$dataLoader = new PeralatanProyek(null, $database);
+			try{
+			$pageData = $dataLoader->findAll($specificationPeralatan, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
+			if($pageData->getTotalResult() > 0)
+			{		
+				
+			?>
+			<table class="table">
+				<thead>
+					<tr>
+						<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
+						<td><?php echo $appEntityLanguagePeralatanProyek->getNama();?></td>
+						<td width="20%"><?php echo $appEntityLanguagePeralatanProyek->getJumlah();?></td>
+					</tr>
+				</thead>
+			
+				<tbody data-offset="<?php echo $pageData->getDataOffset();?>">
+					<?php 
+					$dataIndex = 0;
+					while($peralatanProyek = $pageData->fetch())
+					{
+						$dataIndex++;
+					?>
+
+					<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+						<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
+						<td data-col-name="bill_of_quantity_id"><?php echo $peralatanProyek->issetPeralatan() ? $peralatanProyek->getPeralatan()->getNama() : "";?></td>
+						<td data-col-name="volume_proyek"><?php echo $peralatanProyek->getJumlah();?></td>
+					</tr>
+					<?php 
+					}
+					?>
+
+				</tbody>
+			</table>
+			<?php
+			}
+			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
+			
+			?>
+
+			<h4>Laporan Cuaca</h4>
 				
 			
 			<?php

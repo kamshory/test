@@ -67,6 +67,7 @@ if($inputPost->getUserAction() == UserAction::UPDATE)
 					->setAllowedDelete(getValue($inputPostArray,    Field::of()->allowedDelete,    $rowId))
 					->setAllowedApprove(getValue($inputPostArray,   Field::of()->allowedApprove,   $rowId))
 					->setAllowedSortOrder(getValue($inputPostArray, Field::of()->allowedSortOrder, $rowId))
+					->setAllowedExport(getValue($inputPostArray,    Field::of()->allowedExport,    $rowId))
 					->update()
 					;
 				$hakAkses->updateModule($rowId);
@@ -165,6 +166,10 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getAllowedSortOrder();?></td>
 						<td><?php echo $hakAkses->optionAllowedSortOrder($appLanguage->getYes(), $appLanguage->getNo());?></td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getAllowedExport();?></td>
+						<td><?php echo $hakAkses->optionAllowedExport($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
@@ -324,7 +329,8 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td><label><input type="checkbox" name="allowed_list" class="checkbox check-master" data-selector=".checkbox-allowed-update"> <?php echo $appEntityLanguage->getUpdate();?><label></td>
 								<td><label><input type="checkbox" name="allowed_list" class="checkbox check-master" data-selector=".checkbox-allowed-delete"> <?php echo $appEntityLanguage->getDelete();?><label></td>
 								<td><label><input type="checkbox" name="allowed_list" class="checkbox check-master" data-selector=".checkbox-allowed-approve"> <?php echo $appEntityLanguage->getApprove();?><label></td>
-								<td><label><input type="checkbox" name="allowed_list" class="checkbox check-master" data-selector=".checkbox-allowed-order"> <?php echo $appEntityLanguage->getSortOrder();?><label></td>
+								<td><label><input type="checkbox" name="allowed_list" class="checkbox check-master" data-selector=".checkbox-allowed-sort-order"> <?php echo $appEntityLanguage->getSortOrder();?><label></td>
+								<td><label><input type="checkbox" name="allowed_list" class="checkbox check-master" data-selector=".checkbox-allowed-export"> <?php echo $appEntityLanguage->getExport();?><label></td>
 								<td><label><input type="checkbox" name="allowed_all" class="checkbox check-all-row"> <?php echo $appLanguage->getAll();?><label></td>
 							</tr>
 						</thead>
@@ -369,12 +375,13 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td data-col-name="modul"><?php echo $modul->getNama();?></td>
 								<td data-col-name="modul"><?php echo $modul->getUrl();?></td>
 								<td data-col-name="allowed_list"><label><input type="checkbox" name="allowed_list[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-list" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getList();?></label></td>
-								<td data-col-name="allowed_detail"><label><input type="checkbox" name="allowed_detail[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-detail" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getDetail();?></label></td>
-								<td data-col-name="allowed_create"><label><input type="checkbox" name="allowed_create[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-create" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getCreate();?></label></td>
-								<td data-col-name="allowed_update"><label><input type="checkbox" name="allowed_update[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-update" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getUpdate();?></label></td>
-								<td data-col-name="allowed_delete"><label><input type="checkbox" name="allowed_delete[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-delete" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getDelete();?></label></td>
-								<td data-col-name="allowed_approve"><label><input type="checkbox" name="allowed_approve[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-approve" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getApprove();?></label></td>
-								<td data-col-name="allowed_sort_order"><label><input type="checkbox" name="allowed_sort_order[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-order" value="1"<?php echo $hakAkses->optionAllowedList('checked', '');?>> <?php echo $appEntityLanguage->getSortOrder();?></label></td>
+								<td data-col-name="allowed_detail"><label><input type="checkbox" name="allowed_detail[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-detail" value="1"<?php echo $hakAkses->optionAllowedDetail('checked', '');?>> <?php echo $appEntityLanguage->getDetail();?></label></td>
+								<td data-col-name="allowed_create"><label><input type="checkbox" name="allowed_create[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-create" value="1"<?php echo $hakAkses->optionAllowedCreate('checked', '');?>> <?php echo $appEntityLanguage->getCreate();?></label></td>
+								<td data-col-name="allowed_update"><label><input type="checkbox" name="allowed_update[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-update" value="1"<?php echo $hakAkses->optionAllowedUpdate('checked', '');?>> <?php echo $appEntityLanguage->getUpdate();?></label></td>
+								<td data-col-name="allowed_delete"><label><input type="checkbox" name="allowed_delete[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-delete" value="1"<?php echo $hakAkses->optionAllowedDelete('checked', '');?>> <?php echo $appEntityLanguage->getDelete();?></label></td>
+								<td data-col-name="allowed_approve"><label><input type="checkbox" name="allowed_approve[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-approve" value="1"<?php echo $hakAkses->optionAllowedApprove('checked', '');?>> <?php echo $appEntityLanguage->getApprove();?></label></td>
+								<td data-col-name="allowed_sort_order"><label><input type="checkbox" name="allowed_sort_order[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-sort-order" value="1"<?php echo $hakAkses->optionAllowedSortOrder('checked', '');?>> <?php echo $appEntityLanguage->getSortOrder();?></label></td>
+								<td data-col-name="allowed_export"><label><input type="checkbox" name="allowed_export[<?php echo $hakAkses->getHakAksesId();?>]" class="checkbox check-slave checkbox-allowed-export" value="1"<?php echo $hakAkses->optionAllowedExport('checked', '');?>> <?php echo $appEntityLanguage->getExport();?></label></td>
 								<td data-col-name="allowed_all"><label><input type="checkbox" class="checkbox check-all-column"> <?php echo $appLanguage->getAll();?></label></td>
 							</tr>
 							<?php 
