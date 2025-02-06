@@ -83,22 +83,22 @@ class GaleriProyek extends MagicObject
 	protected $bukuHarian;
 
 	/**
-	 * Pekerjaan ID
+	 * Bill Of Quantity ID
 	 * 
-	 * @Column(name="pekerjaan_id", type="bigint(20)", length=20, nullable=true)
-	 * @Label(content="Pekerjaan ID")
+	 * @Column(name="bill_of_quantity_id", type="bigint(20)", length=20, nullable=true)
+	 * @Label(content="Bill Of Quantity ID")
 	 * @var int
 	 */
-	protected $pekerjaanId;
+	protected $billOfQuantityId;
 
 	/**
 	 * Pekerjaan
 	 * 
-	 * @JoinColumn(name="pekerjaan_id", referenceColumnName="pekerjaan_id")
-	 * @Label(content="Pekerjaan")
-	 * @var PekerjaanMin
+	 * @JoinColumn(name="bill_of_quantity_id", referenceColumnName="bill_of_quantity_id")
+	 * @Label(content="Bill Of Quantity")
+	 * @var BillOfQuantityMin
 	 */
-	protected $pekerjaan;
+	protected $billOfQuantity;
 
 	/**
 	 * Supervisor ID

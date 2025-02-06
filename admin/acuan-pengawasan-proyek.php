@@ -23,7 +23,6 @@ use Sipro\AppIncludeImpl;
 use Sipro\Entity\Data\AcuanPengawasanProyek;
 use Sipro\Entity\Data\ProyekMin;
 use Sipro\Entity\Data\BukuHarianMin;
-use Sipro\Entity\Data\BukuHarian;
 use Sipro\Entity\Data\AcuanPengawasan;
 use Sipro\Entity\Data\SupervisorMin;
 use MagicApp\XLSX\DocumentWriter;
@@ -670,7 +669,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				<span class="filter-group">
 					<span class="filter-label"><?php echo $appEntityLanguage->getProyek();?></span>
 					<span class="filter-control">
-							<select class="form-control" name="proyek_id" onchange="window.location='?proyek_id='+this.value">
+							<select class="form-control" name="proyek_id">
 								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
 								<?php echo AppFormBuilder::getInstance()->createSelectOption(new ProyekMin(null, $database), 
 								PicoSpecification::getInstance()

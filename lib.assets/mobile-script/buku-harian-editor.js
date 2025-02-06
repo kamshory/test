@@ -235,13 +235,14 @@ jQuery(function (e) {
         emptyOption($('[data-name="permasalahan_id"]'));
         let modalElem = $('#permasalahan-modal');
         modalElem.find('table tbody tr').each(function (e2) {
+            let currentValue = $(this).attr('data-value') || '';
             let newValue = $(this).attr('data-permasalahan-id');  
             let newLabel = $(this).attr('data-permasalahan') + " : " + $(this).attr('data-rekomendasi') + " : " + $(this).attr('data-tindak-lanjut');  
             let newOption = $('<option>', {
                 value: newValue,  
-                text: newLabel    
+                text: newLabel,
+                selected: currentValue == newValue  
             });
-
             $('[data-name="permasalahan_id"]').append(newOption);
         });
     });
@@ -291,11 +292,13 @@ jQuery(function (e) {
                 }
                 emptyOption($('[data-name="permasalahan_id"]'));
                 modalElem.find('table tbody tr').each(function (e2) {
+                    let currentValue = $(this).attr('data-value') || '';
                     let newValue = $(this).attr('data-permasalahan-id');  
                     let newLabel = $(this).attr('data-permasalahan') + " : " + $(this).attr('data-rekomendasi') + " : " + $(this).attr('data-tindak-lanjut');  
                     let newOption = $('<option>', {
                         value: newValue,  
-                        text: newLabel    
+                        text: newLabel,
+                        selected: currentValue == newValue    
                     });
 
                     $('[data-name="permasalahan_id"]').append(newOption);
@@ -313,85 +316,6 @@ jQuery(function (e) {
         modalElem.find('[name="permasalahan_id"]').val('');
     });
 
-    /*
-    $('#rekomendasi-modal').on('shown.bs.modal', function () {
-        let modalElem = $('#rekomendasi-modal');
-        modalElem.find('.add-recommendation, .save-recommendation, .cancel-recommendation').prop('disabled', true);
-        let proyekId = $(this).attr('data-proyek-id');
-        $.ajax({
-            url: 'lib.mobile-tools/ajax-load-rekomendasi.php',
-            method: 'GET',
-            data: { proyek_id: proyekId },
-            success: function (response) {
-                modalElem.find('.modal-body').html(response);
-                modalElem.find('.add-recommendation, .save-recommendation, .cancel-recommendation').prop('disabled', false);
-            },
-            error: function () {
-                modalElem.find('.modal-body').html('<div class="alert alert-warning">Terjadi kesalahan dalam memuat data.</div>');
-            }
-        });
-    });
-
-    $(document).on('click', '.add-recommendation', function (e) {
-        let modalElem = $(this).closest('.modal');
-        modalElem.attr('data-mode', 'edit');
-        modalElem.find('[name="rekomendasi_id"]').val('');
-    });
-
-    $(document).on('click', '.edit-recommendation', function (e) {
-        let modalElem = $(this).closest('.modal');
-        modalElem.attr('data-mode', 'edit');
-        modalElem.find('[name="rekomendasi_id"]').val($(this).closest('tr').attr('data-rekomendasi-id'));
-        modalElem.find('[name="rekomendasi"]').val($(this).closest('tr').attr('data-rekomendasi'));
-        console.log($(this).closest('tr').attr('data-rekomendasi'))
-    });
-
-    $(document).on('click', '.save-recommendation', function (e) {
-        let modalElem = $(this).closest('.modal');
-        modalElem.find('.add-recommendation, .save-recommendation, .cancel-recommendation').prop('disabled', true);
-        let proyek_id = modalElem.attr('data-proyek-id');
-        let rekomendasi_id = modalElem.find('[name="rekomendasi_id"]').val();
-        let rekomendasi = modalElem.find('[name="rekomendasi"]').val();
-        let url = 'lib.mobile-tools/ajax-load-rekomendasi.php?proyek_id=' + proyek_id;
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: { proyek_id: proyek_id, rekomendasi: rekomendasi, rekomendasi_id: rekomendasi_id },
-            success: function (response) {
-                modalElem.find('.modal-body').html(response);
-                modalElem.find('.add-recommendation, .save-recommendation, .cancel-recommendation').prop('disabled', false);
-                modalElem.attr('data-mode', 'list');
-
-                while ($('#rekomendasi_id option').length > 1) {
-                    $('#rekomendasi_id option:last').remove();
-                }
-
-                modalElem.find('table tbody tr').each(function (e2) {
-                    let newValue = $(this).attr('data-rekomendasi-id');  
-                    let newLabel = $(this).attr('data-rekomendasi');  
-                    let newOption = $('<option>', {
-                        value: newValue,  
-                        text: newLabel
-                    });
-
-                    $('#rekomendasi_id').append(newOption);
-                });
-
-            },
-            error: function () {
-                $('.modal-body').html('<div class="alert alert-warning">Terjadi kesalahan dalam memuat data.</div>');
-            }
-        });
-    });
-
-    $(document).on('click', '.cancel-recommendation', function (e) {
-        let modalElem = $(this).closest('.modal');
-        modalElem.attr('data-mode', 'list');
-        modalElem.find('[name="rekomendasi_id"]').val('');
-    });
-    */
-
     $.ajax({
         'url': 'lib.mobile-tools/ajax-load-man-power.php',
         'type': 'GET',
@@ -401,11 +325,36 @@ jQuery(function (e) {
             let select = $('.resource-man-power');
             select.empty();
             select.append(data);
+            $('#tabel-man-power tbody tr').each(function(){
+                let currentValue = $(this).attr('data-value') || '';
+                if(currentValue != '')
+                {
+                    $(this).find('select').val(currentValue);
+                }
+            });
         }
     });
 
-    $('.resource-peralatan').load('lib.mobile-tools/ajax-load-peralatan.php');
-    $('.resource-material').load('lib.mobile-tools/ajax-load-material.php');
+    $('.resource-peralatan').load('lib.mobile-tools/ajax-load-peralatan.php', function(){
+        $('#tabel-peralatan tbody tr').each(function(){
+            let tr = $(this);
+            let currentValue = tr.attr('data-value') || '';
+            if(currentValue != '')
+            {
+                tr.find('select').val(currentValue);
+            }
+        });
+    });
+    $('.resource-material').load('lib.mobile-tools/ajax-load-material.php', function(){
+        $('#tabel-material tbody tr').each(function(){
+            let tr = $(this);
+            let currentValue = tr.attr('data-value') || '';
+            if(currentValue != '')
+            {
+                tr.find('select').val(currentValue);
+            }
+        });
+    });
     loadAcuanPengawasan();
 
     document.querySelector('#tabel-boq').addEventListener('change', function (event) {

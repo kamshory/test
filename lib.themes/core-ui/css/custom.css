@@ -135,6 +135,7 @@ a {
 
 .table-row td {
   white-space: nowrap;
+  padding: 0.35rem 0.6rem;
 }
 
 .table-row td.data-controll {
@@ -173,17 +174,11 @@ a {
   cursor: move;
 }
 
-.table-row td {
-  padding: 0.5rem 0.6rem;
-}
-
 .filter-form select {
   max-width: 200px;
 }
 
 [data-order-method=asc],
-[data-order-method=asc],
-[data-order-method=desc],
 [data-order-method=desc] {
   position: relative;
 }
@@ -245,10 +240,6 @@ td[data-order-method=desc] {
 
 .header.header-sticky {
   border-bottom: none;
-}
-
-.table-row td {
-  padding: 0.35rem 0.6rem;
 }
 
 .pb-container {

@@ -25,11 +25,11 @@ class RekomendasiPekerjaan extends MagicObject
 	 * Rekomendasi Pekerjaan ID
 	 * 
 	 * @Id
-	 * @GeneratedValue(strategy=GenerationType.UUID)
+	 * @GeneratedValue(strategy=GenerationType.IDENTITY)
 	 * @NotNull
-	 * @Column(name="rekomendasi_pekerjaan_id", type="varchar(40)", length=40, nullable=false)
+	 * @Column(name="rekomendasi_pekerjaan_id", type="bigint(20)", length=20, nullable=false, extra="auto_increment")
 	 * @Label(content="Rekomendasi Pekerjaan ID")
-	 * @var string
+	 * @var int
 	 */
 	protected $rekomendasiPekerjaanId;
 

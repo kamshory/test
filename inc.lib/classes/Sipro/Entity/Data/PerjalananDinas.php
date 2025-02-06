@@ -5,8 +5,13 @@ namespace Sipro\Entity\Data;
 use MagicObject\MagicObject;
 
 /**
- * PerjalananDinas is entity of table perjalanan_dinas. You can join this entity to other entity using annotation JoinColumn. 
- * Don't forget to add "use" statement if the entity is outside the namespace.
+ * The PerjalananDinas class represents an entity in the "perjalanan_dinas" table.
+ *
+ * This entity maps to the "perjalanan_dinas" table in the database and supports ORM (Object-Relational Mapping) operations. 
+ * You can establish relationships with other entities using the JoinColumn annotation. 
+ * Ensure to include the appropriate "use" statement if related entities are defined in a different namespace.
+ * 
+ * For detailed guidance on using the MagicObject ORM, refer to the official tutorial:
  * @link https://github.com/Planetbiru/MagicObject/blob/main/tutorial.md#orm
  * 
  * @package Sipro\Entity\Data
@@ -42,7 +47,7 @@ class PerjalananDinas extends MagicObject
 	 * 
 	 * @JoinColumn(name="jenis_perjalanan_dinas_id", referenceColumnName="jenis_perjalanan_dinas_id")
 	 * @Label(content="Jenis Perjalanan Dinas")
-	 * @var JenisPerjalananDinas
+	 * @var JenisPerjalananDinasMin
 	 */
 	protected $jenisPerjalananDinas;
 
@@ -65,10 +70,10 @@ class PerjalananDinas extends MagicObject
 	protected $supervisor;
 
 	/**
-	 * Nomor SPPD
+	 * Nomor Sppd
 	 * 
 	 * @Column(name="nomor_sppd", type="varchar(50)", length=50, nullable=true)
-	 * @Label(content="Nomor SPPD")
+	 * @Label(content="Nomor Sppd")
 	 * @var string
 	 */
 	protected $nomorSppd;
@@ -94,7 +99,7 @@ class PerjalananDinas extends MagicObject
 	/**
 	 * Kode Lokasi
 	 * 
-	 * @Column(name="kode_lokasi", type="varchar(50)", length=50, nullable=true)
+	 * @Column(name="kode_lokasi", type="varchar(45)", length=45, nullable=true)
 	 * @Label(content="Kode Lokasi")
 	 * @var string
 	 */
@@ -186,7 +191,7 @@ class PerjalananDinas extends MagicObject
 	 * 
 	 * @JoinColumn(name="admin_buat", referenceColumnName="user_id")
 	 * @Label(content="Pembuat")
-	 * @var User
+	 * @var UserMin
 	 */
 	protected $pembuat;
 
@@ -204,7 +209,7 @@ class PerjalananDinas extends MagicObject
 	 * 
 	 * @JoinColumn(name="admin_ubah", referenceColumnName="user_id")
 	 * @Label(content="Pengubah")
-	 * @var User
+	 * @var UserMin
 	 */
 	protected $pengubah;
 

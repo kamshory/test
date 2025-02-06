@@ -141,6 +141,7 @@ a {
 
 .table-row td {
     white-space: nowrap;
+    padding: 0.35rem 0.6rem;
 }
 
 .table-row td.data-controll {
@@ -182,17 +183,13 @@ a {
     cursor: move;
 }
 
-.table-row td {
-    padding: 0.5rem 0.6rem;
-}
+
 
 .filter-form select {
     max-width: 200px;
 }
 
 [data-order-method="asc"],
-[data-order-method="asc"],
-[data-order-method="desc"],
 [data-order-method="desc"] {
     position: relative;
 }
@@ -257,10 +254,6 @@ td[data-order-method="desc"] {
     border-bottom: none;
 }
 
-.table-row td{
-    padding: 0.35rem 0.6rem;
-}
-
 
 $background: #2c303a;
     
@@ -302,8 +295,6 @@ $background: #2c303a;
     from { width: 0 }
     to   { width: 100% }
 }
-
-
 
 @keyframes progressAnimation {
     0%   { width: 5%; background-color: #F9BCCA;}
@@ -356,7 +347,6 @@ $red: #ff2d55;
     linear-gradient(to right, $purple, $red, $green, $turquoise, $blue, $light-blue);
     }
 }
-
 
 .jambi-wrapper .filter-section .input-datetime-wrapper.date,
 .jambi-wrapper .filter-section .input-datetime-wrapper.time,

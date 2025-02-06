@@ -18,9 +18,11 @@ use MagicApp\UserAction;
 use MagicApp\AppUserPermission;
 use Sipro\Entity\Data\GaleriProyek;
 use Sipro\AppIncludeImpl;
+use Sipro\Entity\Data\BillOfQuantityMin;
 use Sipro\Entity\Data\ProyekMin;
 use Sipro\Entity\Data\LokasiProyekMin;
 use Sipro\Entity\Data\BukuHarianMin;
+use Sipro\Entity\Data\GaleriProyekList;
 use Sipro\Entity\Data\PekerjaanMin;
 
 require_once dirname(__DIR__) . "/inc.app/auth.php";
@@ -44,7 +46,7 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 	$galeriProyek->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$galeriProyek->setLokasiProyekId($inputPost->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$galeriProyek->setBukuHarianId($inputPost->getBukuHarianId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
-	$galeriProyek->setPekerjaanId($inputPost->getPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
+	$galeriProyek->setBillOfQuantityId($inputPost->getBillOfQuantityId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$galeriProyek->setNama($inputPost->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$galeriProyek->setFile($inputPost->getFile(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$galeriProyek->setMd5($inputPost->getMd5(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
@@ -73,7 +75,7 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 	$galeriProyek->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$galeriProyek->setLokasiProyekId($inputPost->getLokasiProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$galeriProyek->setBukuHarianId($inputPost->getBukuHarianId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
-	$galeriProyek->setPekerjaanId($inputPost->getPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
+	$galeriProyek->setBillOfQuantityId($inputPost->getBillOfQuantityId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$galeriProyek->setNama($inputPost->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$galeriProyek->setFile($inputPost->getFile(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$galeriProyek->setMd5($inputPost->getMd5(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
@@ -364,18 +366,18 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
+						<td><?php echo $appEntityLanguage->getBillOfQuantity();?></td>
 						<td>
-							<select class="form-control" name="pekerjaan_id" id="pekerjaan_id">
+							<select class="form-control" name="bill_of_quantity_id" id="bill_of_quantity_id">
 								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<?php echo AppFormBuilder::getInstance()->createSelectOption(new PekerjaanMin(null, $database), 
+								<?php echo AppFormBuilder::getInstance()->createSelectOption(new BillOfQuantityMin(null, $database), 
 								PicoSpecification::getInstance()
 									->addAnd(new PicoPredicate(Field::of()->aktif, true))
 									->addAnd(new PicoPredicate(Field::of()->draft, true)), 
 								PicoSortable::getInstance()
 									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
 									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
-								Field::of()->pekerjaanId, Field::of()->kegiatan, $galeriProyek->getPekerjaanId())
+								Field::of()->billOfQuantityId, Field::of()->nama, $galeriProyek->getBillOfQuantityId())
 								; ?>
 							</select>
 						</td>
@@ -705,9 +707,29 @@ require_once $appInclude->mainAppHeader(__DIR__);
 							</select>
 					</span>
 				</span>
+				
 				<?php
 				if($inputGet->getProyekId() != "")
 				{
+					$boqs = null;
+					try
+					{
+						$boq = new GaleriProyekList(null, $database);
+						$res = $boq->getBoq($inputGet->getProyekId());
+						if(!empty($res))
+						{
+							$boqs = array();
+							foreach($res as $val)
+							{
+								$boqs[] = intval($val->bill_of_quantity_id);
+							}
+							
+						}
+					}
+					catch(Exception $e)
+					{
+						// do nothing
+					}
 				?>
 				<span class="filter-group">
 					<span class="filter-label"><?php echo $appEntityLanguage->getLokasiProyek();?></span>
@@ -726,9 +748,29 @@ require_once $appInclude->mainAppHeader(__DIR__);
 							</select>
 					</span>
 				</span>
+					
+				<span class="filter-group">
+					<span class="filter-label"><?php echo $appEntityLanguage->getBillOfQuantity();?></span>
+					<span class="filter-control">
+					<select class="form-control" name="bill_of_quantity_id" id="bill_of_quantity_id">
+						<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
+						<?php echo AppFormBuilder::getInstance()->createSelectOption(new BillOfQuantityMin(null, $database), 
+						PicoSpecification::getInstance()
+							->addAnd(new PicoPredicate(Field::of()->aktif, true))
+							->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId()))
+							->addAnd(new PicoPredicate(Field::of()->billOfQuantityId, $boqs))
+							, 
+						PicoSortable::getInstance()
+							->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
+							->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
+						Field::of()->billOfQuantityId, Field::of()->nama, $inputGet->getBillOfQuantityId())
+						; ?>
+					</select>
+				</span>
 				<?php
 				}
 				?>
+
 				
 				<span class="filter-group">
 					<button type="submit" class="btn btn-success"><?php echo $appLanguage->getButtonSearch();?></button>
@@ -857,6 +899,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			$specMap = array(
 			    "proyekId" => PicoSpecification::filter("proyekId", "number"),
 				"lokasiProyekId" => PicoSpecification::filter("lokasiProyekId", "number"),
+				"billOfQuantityId" => PicoSpecification::filter("billOfQuantityId", "number"),
 				"supervisorId" => PicoSpecification::filter("supervisorId", "number")
 			);
 			$sortOrderMap = array(

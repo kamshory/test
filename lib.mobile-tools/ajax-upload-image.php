@@ -49,7 +49,7 @@ else
 	$files = new PicoUploadFile();
 	
 	$bukuHarianId = $inputPost->getBukuHarianId();
-	$pekerjaanId = $inputPost->getPekerjaanId();
+	$billOfQuantityId = $inputPost->getBillOfQuantityId();
 
 	if(isset($files->image) && $bukuHarianId)
 	{
@@ -63,7 +63,6 @@ else
 			$proyekId = $bukuHarian->getProyekId();
 			$lokasiProyekId = $bukuHarian->getLokasiProyekId();
 			
-			error_log($appConfig->getUpload()->getGallery());
 			$targetDir = $appConfig->getUpload()->getGallery()."/projects/$proyekId";
 			if(!file_exists($targetDir))
 			{
@@ -144,7 +143,6 @@ else
 					}
 					// create thumbnail
 					$th100 = str_replace(array(".jpg", ".png", ".gif"), "_100.jpg", $newname);
-					//$th100 = $newname;
 					ImageUtil::createThumbImage($targetDir."/".$newname, $targetDir."/".$th100, 100, 100, true, 80);
 					$type = addslashes($info['mime']);
 					$width = $info[0];
@@ -165,7 +163,7 @@ else
 					$galeryProyek->setProyekId($proyekId);
 					$galeryProyek->setLokasiProyekId($lokasiProyekId);
 					$galeryProyek->setBukuHarianId($bukuHarianId);
-					$galeryProyek->setPekerjaanId($pekerjaanId);
+					$galeryProyek->setBillOfQuantityId($billOfQuantityId);
 					$galeryProyek->setSupervisorId($supervisorId);
 					$galeryProyek->setOriginalName($newname);
 					$galeryProyek->setBasename($basename);

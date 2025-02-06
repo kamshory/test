@@ -30,7 +30,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "acuan-pengawasan-pekerjaan", "Acuan Pengawasan Pekerjaan");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "acuan-pengawasan-pekerjaan", $appLanguage->getAcuanPengawasanPekerjaan());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -45,7 +45,6 @@ $dataFilter = null;
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
 	$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
-	$acuanPengawasanPekerjaan->setAcuanPengawasanPekerjaanId($inputPost->getAcuanPengawasanPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$acuanPengawasanPekerjaan->setPekerjaanId($inputPost->getPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$acuanPengawasanPekerjaan->setAcuanPengawasanId($inputPost->getAcuanPengawasanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$acuanPengawasanPekerjaan->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
@@ -72,7 +71,6 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 	$specification->addAnd($dataFilter);
 	$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
 	$updater = $acuanPengawasanPekerjaan->where($specification)
-		->setAcuanPengawasanPekerjaanId($inputPost->getAcuanPengawasanPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setPekerjaanId($inputPost->getPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setAcuanPengawasanId($inputPost->getAcuanPengawasanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true))
@@ -83,11 +81,7 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 	try
 	{
 		$updater->update();
-
-		// update primary key value
-		$newId = $inputPost->getAppBuilderNewPkAcuanPengawasanPekerjaanId();
-		$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
-		$acuanPengawasanPekerjaan->where($specification)->setAcuanPengawasanPekerjaanId($newId)->update();
+		$newId = $inputPost->getAcuanPengawasanPekerjaanId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
 		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->acuan_pengawasan_pekerjaan_id, $newId);
 	}
 	catch(Exception $e)
@@ -189,12 +183,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getAcuanPengawasanPekerjaanId();?></td>
-						<td>
-							<input autocomplete="off" class="form-control" type="number" step="1" name="acuan_pengawasan_pekerjaan_id" id="acuan_pengawasan_pekerjaan_id"/>
-						</td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
 						<td>
 							<select class="form-control" name="pekerjaan_id" id="pekerjaan_id">
@@ -231,7 +219,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="number" step="1" name="aktif" id="aktif"/>
+							<label><input class="form-check-input" type="checkbox" name="aktif" id="aktif" value="1"/> <?php echo $appEntityLanguage->getAktif();?></label>
 						</td>
 					</tr>
 				</tbody>
@@ -271,12 +259,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getAcuanPengawasanPekerjaanId();?></td>
-						<td>
-							<input class="form-control" type="number" step="1" name="app_builder_new_pk_acuan_pengawasan_pekerjaan_id" id="acuan_pengawasan_pekerjaan_id" value="<?php echo $acuanPengawasanPekerjaan->getAcuanPengawasanPekerjaanId();?>" autocomplete="off"/>
-						</td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
 						<td>
 							<select class="form-control" name="pekerjaan_id" id="pekerjaan_id">
@@ -313,7 +295,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
 						<td>
-							<input class="form-control" type="number" step="1" name="aktif" id="aktif" value="<?php echo $acuanPengawasanPekerjaan->getAktif();?>" autocomplete="off"/>
+							<label><input class="form-check-input" type="checkbox" name="aktif" id="aktif" value="1" <?php echo $acuanPengawasanPekerjaan->createCheckedAktif();?>/> <?php echo $appEntityLanguage->getAktif();?></label>
 						</td>
 					</tr>
 				</tbody>
@@ -401,10 +383,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getAcuanPengawasanPekerjaanId();?></td>
-						<td><?php echo $acuanPengawasanPekerjaan->getAcuanPengawasanPekerjaanId();?></td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
 						<td><?php echo $acuanPengawasanPekerjaan->issetPekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getNama() : "";?></td>
 					</tr>
@@ -414,7 +392,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
-						<td><?php echo $acuanPengawasanPekerjaan->getAktif();?></td>
+						<td><?php echo $acuanPengawasanPekerjaan->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 				</tbody>
 			</table>
@@ -465,7 +443,6 @@ $specMap = array(
 	"acuanPengawasanId" => PicoSpecification::filter("acuanPengawasanId", "number")
 );
 $sortOrderMap = array(
-	"acuanPengawasanPekerjaanId" => "acuanPengawasanPekerjaanId",
 	"pekerjaanId" => "pekerjaanId",
 	"acuanPengawasanId" => "acuanPengawasanId",
 	"aktif" => "aktif"
@@ -481,7 +458,7 @@ $specification->addAnd($dataFilter);
 // Pay attention to security issues
 $sortable = PicoSortable::fromUserInput($inputGet, $sortOrderMap, array(
 	array(
-		"sortBy" => "pekerjaanId", 
+		"sortBy" => "acuanPengawasanPekerjaanId", 
 		"sortType" => PicoSort::ORDER_TYPE_DESC
 	)
 ));
@@ -585,7 +562,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								</td>
 								<?php } ?>
 								<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
-								<td data-col-name="acuan_pengawasan_pekerjaan_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAcuanPengawasanPekerjaanId();?></a></td>
 								<td data-col-name="pekerjaan_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getPekerjaan();?></a></td>
 								<td data-col-name="acuan_pengawasan_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAcuanPengawasan();?></a></td>
 								<td data-col-name="aktif" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAktif();?></a></td>
@@ -600,7 +576,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								$dataIndex++;
 							?>
 		
-							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>">
+							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $acuanPengawasanPekerjaan->optionAktif('true', 'false');?>">
 								<?php if($userPermission->isAllowedBatchAction()){ ?>
 								<td class="data-selector" data-key="acuan_pengawasan_pekerjaan_id">
 									<input type="checkbox" class="checkbox check-slave checkbox-acuan-pengawasan-pekerjaan-id" name="checked_row_id[]" value="<?php echo $acuanPengawasanPekerjaan->getAcuanPengawasanPekerjaanId();?>"/>
@@ -617,10 +593,9 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								</td>
 								<?php } ?>
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
-								<td data-col-name="acuan_pengawasan_pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->getAcuanPengawasanPekerjaanId();?></td>
 								<td data-col-name="pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->issetPekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getNama() : "";?></td>
 								<td data-col-name="acuan_pengawasan_id"><?php echo $acuanPengawasanPekerjaan->issetAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
-								<td data-col-name="aktif"><?php echo $acuanPengawasanPekerjaan->getAktif();?></td>
+								<td data-col-name="aktif"><?php echo $acuanPengawasanPekerjaan->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 
 							}

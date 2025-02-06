@@ -169,13 +169,4 @@ class KuotaCuti extends MagicObject
 	 */
 	protected $aktif;
 
-	/**
-	 * Sort Order
-	 * 
-	 * @Column(name="sort_order", type="int(11)", length=11, nullable=true)
-	 * @Label(content="Sort Order")
-	 * @var int
-	 */
-	protected $sortOrder;
-
 }

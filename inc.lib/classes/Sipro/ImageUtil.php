@@ -154,7 +154,9 @@ class ImageUtil
             $latitude = "-";
             $longitude = "-";
             $altitude = "-";
-            $altref = "";
+            $altref = null;
+            $reallat = null;
+            $reallong = null;      
 
             if (isset($exif['GPS'])) {
                 $gpsinfo = $exif['GPS'];
@@ -194,7 +196,7 @@ class ImageUtil
                 'real_longitude' => $reallong,
                 'altitude' => $altitude,
                 'altref' => $altref,
-                'capture_info' => self::get_capture_info($exif)
+                'capture_info' => self::getCaptureInfo($exif)
             );
         }
         return null;
@@ -320,7 +322,7 @@ class ImageUtil
      * 
      * @return array|null Returns an associative array of capture information or null if no data is found.
      */
-    public static function get_capture_info($exif)
+    public static function getCaptureInfo($exif)
     {
         /* 
         Copyright 2013 Kamshory Developer

@@ -3,6 +3,7 @@
 namespace Sipro\Entity\Data;
 
 use MagicObject\MagicObject;
+use stdClass;
 
 /**
  * GaleriProyek is entity of table galeri_proyek. You can join this entity to other entity using annotation JoinColumn. 
@@ -258,4 +259,19 @@ class GaleriProyekList extends MagicObject
 	 */
 	protected $aktif;
 
+	/**
+     * Get bill of quantity
+     *
+     * @param int $proyekId The proyek ID.
+     * @return stdClass[]
+     * @query("
+      SELECT DISTINCT bill_of_quantity_id 
+      FROM galeri_proyek 
+      WHERE proyek_id = :proyekId 
+     ")
+     */
+    public function getBoq($proyekId)
+    {
+        return $this->executeNativeQuery();
+    }
 }

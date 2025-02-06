@@ -29,7 +29,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "periode", "Periode");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "periode", $appLanguage->getPeriode());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -202,7 +202,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getDefaultData();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="number" step="1" name="default_data" id="default_data"/>
+							<label><input class="form-check-input" type="checkbox" name="default_data" id="default_data" value="1"/> <?php echo $appEntityLanguage->getDefaultData();?></label>
 						</td>
 					</tr>
 					<tr>
@@ -262,7 +262,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getDefaultData();?></td>
 						<td>
-							<input class="form-control" type="number" step="1" name="default_data" id="default_data" value="<?php echo $periode->getDefaultData();?>" autocomplete="off"/>
+							<label><input class="form-check-input" type="checkbox" name="default_data" id="default_data" value="1" <?php echo $periode->createCheckedDefaultData();?>/> <?php echo $appEntityLanguage->getDefaultData();?></label>
 						</td>
 					</tr>
 					<tr>
@@ -348,7 +348,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getDefaultData();?></td>
-						<td><?php echo $periode->getDefaultData();?></td>
+						<td><?php echo $periode->optionDefaultData($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuBuat();?></td>
@@ -466,7 +466,7 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 		$appLanguage->getNumero() => $headerFormat->asNumber(),
 		$appEntityLanguage->getPeriodeId() => $headerFormat->getPeriodeId(),
 		$appEntityLanguage->getNama() => $headerFormat->getNama(),
-		$appEntityLanguage->getDefaultData() => $headerFormat->getDefaultData(),
+		$appEntityLanguage->getDefaultData() => $headerFormat->asString(),
 		$appEntityLanguage->getWaktuBuat() => $headerFormat->getWaktuBuat(),
 		$appEntityLanguage->getIpBuat() => $headerFormat->getIpBuat(),
 		$appEntityLanguage->getAdminBuat() => $headerFormat->getAdminBuat(),
@@ -481,7 +481,7 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 			sprintf("%d", $index + 1),
 			$row->getPeriodeId(),
 			$row->getNama(),
-			$row->getDefaultData(),
+			$row->optionDefaultData($appLanguage->getYes(), $appLanguage->getNo()),
 			$row->getWaktuBuat(),
 			$row->getIpBuat(),
 			$row->getAdminBuat(),
@@ -606,7 +606,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="periode_id"><?php echo $periode->getPeriodeId();?></td>
 								<td data-col-name="nama"><?php echo $periode->getNama();?></td>
-								<td data-col-name="default_data"><?php echo $periode->getDefaultData();?></td>
+								<td data-col-name="default_data"><?php echo $periode->optionDefaultData($appLanguage->getYes(), $appLanguage->getNo());?></td>
 								<td data-col-name="aktif"><?php echo $periode->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 

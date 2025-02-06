@@ -196,7 +196,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
 						<td>
-							<select class="form-control" name="proyek_id" id="proyek_id" onchange="window.location='?user_action=create&proyek_id='+this.value">
+							<select class="form-control" name="proyek_id" id="proyek_id">
 								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
 								<?php echo AppFormBuilder::getInstance()->createSelectOption(new ProyekMin(null, $database), 
 								PicoSpecification::getInstance()
@@ -204,7 +204,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
 									->add(new PicoSort(Field::of()->proyekId, PicoSort::ORDER_TYPE_DESC)), 
-								Field::of()->proyekId, Field::of()->nama, $inputGet->getProyekId())
+								Field::of()->proyekId, Field::of()->nama)
 								; ?>
 							</select>
 						</td>
@@ -252,8 +252,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<?php echo AppFormBuilder::getInstance()->createSelectOption(new PermasalahanMin(null, $database), 
 								PicoSpecification::getInstance()
 									->addAnd(new PicoPredicate(Field::of()->aktif, true))
-									->addAnd(new PicoPredicate(Field::of()->draft, false))
-									->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId())), 
+									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
 									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
 									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 
@@ -270,8 +269,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<?php echo AppFormBuilder::getInstance()->createSelectOption(new RekomendasiMin(null, $database), 
 								PicoSpecification::getInstance()
 									->addAnd(new PicoPredicate(Field::of()->aktif, true))
-									->addAnd(new PicoPredicate(Field::of()->draft, false))
-									->addAnd(new PicoPredicate(Field::of()->proyekId, $inputGet->getProyekId())), 
+									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
 								PicoSortable::getInstance()
 									->add(new PicoSort(Field::of()->sortOrder, PicoSort::ORDER_TYPE_ASC))
 									->add(new PicoSort(Field::of()->nama, PicoSort::ORDER_TYPE_ASC)), 

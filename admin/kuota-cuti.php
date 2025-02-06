@@ -30,7 +30,7 @@ require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 
-$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "kuota-cuti", "Kuota Cuti");
+$currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "kuota-cuti", $appLanguage->getKuotaCuti());
 $userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
@@ -45,7 +45,6 @@ $dataFilter = null;
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
 	$kuotaCuti = new KuotaCuti(null, $database);
-	$kuotaCuti->setSortOrder($inputPost->getSortOrder(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$kuotaCuti->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$kuotaCuti->setJenisCutiId($inputPost->getJenisCutiId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$kuotaCuti->setTahun($inputPost->getTahun(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
@@ -76,7 +75,6 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 	$specification->addAnd($dataFilter);
 	$kuotaCuti = new KuotaCuti(null, $database);
 	$updater = $kuotaCuti->where($specification)
-		->setSortOrder($inputPost->getSortOrder(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setJenisCutiId($inputPost->getJenisCutiId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setTahun($inputPost->getTahun(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
@@ -193,12 +191,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getSortOrder();?></td>
-						<td>
-							<input autocomplete="off" class="form-control" type="number" step="1" name="sort_order" id="sort_order"/>
-						</td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
 						<td>
 							<select class="form-control" name="supervisor_id" id="supervisor_id">
@@ -298,12 +290,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 		<form name="updateform" id="updateform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
-					<tr>
-						<td><?php echo $appEntityLanguage->getSortOrder();?></td>
-						<td>
-							<input class="form-control" type="number" step="1" name="sort_order" id="sort_order" value="<?php echo $kuotaCuti->getSortOrder();?>" autocomplete="off"/>
-						</td>
-					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
 						<td>
@@ -453,10 +439,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
-						<td><?php echo $appEntityLanguage->getSortOrder();?></td>
-						<td><?php echo $kuotaCuti->getSortOrder();?></td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
 						<td><?php echo $kuotaCuti->issetSupervisor() ? $kuotaCuti->getSupervisor()->getNama() : "";?></td>
 					</tr>
@@ -558,7 +540,6 @@ $specMap = array(
 	"jenisCutiId" => PicoSpecification::filter("jenisCutiId", "number")
 );
 $sortOrderMap = array(
-	"sortOrder" => "sortOrder",
 	"supervisorId" => "supervisorId",
 	"jenisCutiId" => "jenisCutiId",
 	"tahun" => "tahun",
@@ -580,6 +561,10 @@ $sortable = PicoSortable::fromUserInput($inputGet, $sortOrderMap, array(
 	array(
 		"sortBy" => "tahun", 
 		"sortType" => PicoSort::ORDER_TYPE_DESC
+	),
+	array(
+		"sortBy" => "supervisorId", 
+		"sortType" => PicoSort::ORDER_TYPE_ASC
 	)
 ));
 
@@ -700,7 +685,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								</td>
 								<?php } ?>
 								<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
-								<td data-col-name="sort_order" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getSortOrder();?></a></td>
 								<td data-col-name="supervisor_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getSupervisor();?></a></td>
 								<td data-col-name="jenis_cuti_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getJenisCuti();?></a></td>
 								<td data-col-name="tahun" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getTahun();?></a></td>
@@ -736,7 +720,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								</td>
 								<?php } ?>
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
-								<td data-col-name="sort_order"><?php echo $kuotaCuti->getSortOrder();?></td>
 								<td data-col-name="supervisor_id"><?php echo $kuotaCuti->issetSupervisor() ? $kuotaCuti->getSupervisor()->getNama() : "";?></td>
 								<td data-col-name="jenis_cuti_id"><?php echo $kuotaCuti->issetJenisCuti() ? $kuotaCuti->getJenisCuti()->getNama() : "";?></td>
 								<td data-col-name="tahun"><?php echo $kuotaCuti->getTahun();?></td>

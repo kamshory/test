@@ -45,8 +45,7 @@ class AcuanPengawasan extends MagicObject
 	/**
 	 * Nomor
 	 * 
-	 * @NotNull
-	 * @Column(name="nomor", type="varchar(50)", length=50, nullable=false)
+	 * @Column(name="nomor", type="varchar(50)", length=50, nullable=true)
 	 * @Label(content="Nomor")
 	 * @var string
 	 */
@@ -55,8 +54,7 @@ class AcuanPengawasan extends MagicObject
 	/**
 	 * Proyek ID
 	 * 
-	 * @NotNull
-	 * @Column(name="proyek_id", type="varchar(50)", length=50, nullable=false)
+	 * @Column(name="proyek_id", type="varchar(50)", length=50, nullable=true)
 	 * @Label(content="Proyek ID")
 	 * @var string
 	 */
@@ -74,8 +72,7 @@ class AcuanPengawasan extends MagicObject
 	/**
 	 * Jenis Hirarki Kontrak ID
 	 * 
-	 * @NotNull
-	 * @Column(name="jenis_hirarki_kontrak_id", type="bigint(20)", length=20, nullable=false)
+	 * @Column(name="jenis_hirarki_kontrak_id", type="bigint(20)", length=20, nullable=true)
 	 * @Label(content="Jenis Hirarki Kontrak ID")
 	 * @var int
 	 */
@@ -93,8 +90,7 @@ class AcuanPengawasan extends MagicObject
 	/**
 	 * Bill Of Quantity ID
 	 * 
-	 * @NotNull
-	 * @Column(name="bill_of_quantity_id", type="bigint(20)", length=20, nullable=false)
+	 * @Column(name="bill_of_quantity_id", type="bigint(20)", length=20, nullable=true)
 	 * @Label(content="Bill Of Quantity ID")
 	 * @var int
 	 */

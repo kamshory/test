@@ -131,7 +131,6 @@ $subqueryMap = array(
         </div>
         <input type="hidden" name="permasalahan_id">
     </form>
-
     
     <form action="" method="post" class="data-form-list">
 
