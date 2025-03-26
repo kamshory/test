@@ -1,0 +1,151 @@
+table tr td table.tabel-control{
+    width: 100%;
+}
+table tr td table.tabel-control tr > td:nth-child(1)
+{
+    width:auto;
+    padding:2px 2px 2px 0px;
+}
+table tr td table.tabel-control tr > td:nth-child(2)
+{
+    width:100px;
+    padding:2px 2px 2px 2px;
+}
+table tr td table.tabel-control tr > td:nth-child(3)
+{
+    width:30px;
+    padding:2px 0px 2px 2px;
+}
+table tr td table.tabel-control tr > td select, 
+table tr td table.tabel-control tr > td input[type="number"], 
+table tr td table.tabel-control tr > td input[type="button"]{
+    width:100%;
+    min-width:100%;
+    box-sizing:border-box;
+}
+table tr td table.tabel-control tr > td input[type="button"]{
+    color:#FFFFFF !important;
+    font-family:unand;
+}
+
+table tr td table.tabel-control-2-width tr > td select, 
+table tr td table.tabel-control-2-width tr > td input[type="number"], 
+table tr td table.tabel-control-2-width tr > td input[type="button"]{
+    width:100%;
+    min-width:100%;
+    box-sizing:border-box;
+}
+table tr td table.tabel-control-2-width thead tr > td:nth-child(1),
+table tr td table.tabel-control-2-width thead tr > td:nth-child(2)
+{
+    padding:2px 0px 2px 2px;
+    position: relative;
+}
+table tr td table.tabel-control-2-width tr > td:nth-child(3)
+{
+    width:30px;
+    padding:2px 0px 2px 2px;
+}
+
+@media screen and (max-width:479px){
+    [data-table-type="two-cols"] tr td table.tabel-control tr td:nth-child(1), 
+    [data-table-type="two-cols"] tr td table.tabel-control tr td:nth-child(2),
+    [data-table-type="two-cols"] tr td table.tabel-control tr td:nth-child(3){
+        display:table-cell;
+    }
+}
+.data-pekerjaan{
+    margin-top:10px;
+}
+.list-in-cell.type-check {
+    margin: 0;
+    list-style-type: none;
+    padding: 0 0 0 2px;
+}
+
+.item-pekerjaan{
+    padding:0 0 8px 0;
+}
+.separator{
+    margin-top:5px;
+    margin-bottom:5px;
+    border-bottom:1px solid #EEEEEE;
+    height:1px;
+    box-sizing:border-box;
+}
+.cuaca-container{
+    padding:10px 0;
+}
+.detail-proyek{
+    margin-bottom:10px;
+}
+.item-pekerjaan{
+    padding:0 0 8px 0;
+}
+.separator{
+    margin-top:5px;
+    margin-bottom:5px;
+    border-bottom:1px solid #EEEEEE;
+    height:1px;
+    box-sizing:border-box;
+}
+.cuaca-container{
+    padding:10px 0;
+}
+.detail-proyek{
+    margin-bottom:10px;
+}
+
+.form-control.input-inline.time-picker{
+    display:inline-block;
+    width:110px;
+}
+.form-control.select-cuaca{
+    display:inline-block;
+    width:auto;
+}
+
+[data-mode="list"] .data-form-edit
+{
+    display: none;
+}
+[data-mode="list"] .data-form-list
+{
+    display: block;
+}
+[data-mode="edit"] .data-form-list
+{
+    display: none;
+}
+[data-mode="edit"] .data-form-edit
+{
+    display: block;
+}
+[data-mode="list"] .save-issue, [data-mode="list"] .cancel-issue,
+[data-mode="list"] .save-recommendation, [data-mode="list"] .cancel-recommendation {
+    display: none;
+}
+[data-mode="edit"] .add-issue, [data-mode="edit"] .add-recommendation {
+    display: none;
+}
+[name="permasalahan"], [name="rekomendasi"], [name="tindak_lanjut"]{
+    height: 70px;
+}
+.input-area{
+    padding-bottom: 10px;
+}
+
+.tabel-control-two-side{
+    width: 100%;
+}
+table tr td table.tabel-control-two-side tr > td:nth-child(2)
+{
+    width:30px;
+    padding:2px 0px 2px 2px;
+}
+
+.modal-body table tr > td.data-number
+{
+    text-align: right;
+    padding-right: 8px;
+}

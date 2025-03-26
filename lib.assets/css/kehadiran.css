@@ -1,0 +1,66 @@
+#videoContainer {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    width: 320px;
+    height: 426px;
+    background-color: rgb(206, 226, 243);
+}
+
+#video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Pusatkan video */
+    min-width: 100%;
+    /* Pastikan video mengisi lebar container */
+    min-height: 100%;
+    /* Pastikan video mengisi tinggi container */
+    box-sizing: border-box;
+}
+canvas {
+    box-sizing: border-box;
+}
+
+#croppedCanvas {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+.selfie-container{
+    width: 320px;
+    height: 426px;
+    margin: auto;
+}
+.selfie-inner{
+    width: 320px;
+    height: 426px;
+    padding: 0;
+    position: relative;
+}
+
+.button-container{
+    width: 100%;
+    padding: 6px 0px 16px 0px;
+    text-align: center;
+}
+
+.lokasi-kehadiran{
+    padding: 0 0 10px 0;
+    width: 320px;
+    margin: auto;
+}
+
+.lokasi-kehadiran select.form-control, .lokasi-kehadiran textarea.form-control
+{
+    width: 100%;
+    box-sizing: border-box;
+    margin: 2px 0;
+}
+.lokasi-kehadiran textarea.form-control
+{
+    height: 80px;
+    display: none;
+}

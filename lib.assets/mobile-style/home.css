@@ -1,0 +1,44 @@
+.form-control{
+	padding:3px 0;
+}
+img{
+	max-width:100%;
+	height:auto;
+}
+[data-role="collapsible-content"] ul,
+[data-role="collapsible-content"] ol{
+	margin:0 0 0 0px;
+	padding:0 0 0 30px;
+}
+[data-role="collapsible-content"] li{
+	margin:0;
+}
+.static-map-container{
+	padding:4px 0;
+}
+.static-map-container img{
+	vertical-align:bottom;
+}
+.list-in-cell{
+margin: 0;
+padding: 0;
+list-style: none;
+}
+ul.list-in-cell.type-check{
+	list-style-type:none;
+	padding:0;
+	margin:0;
+}
+ul.list-in-cell.type-check li{
+	padding:0;
+	margin:0;
+}
+ul.list-in-cell.type-list{
+	list-style-type:decimal;
+	padding:0;
+	margin:0 0 0 20px;
+}
+ul.list-in-cell.type-list li{
+	padding:0;
+	margin:0;
+}

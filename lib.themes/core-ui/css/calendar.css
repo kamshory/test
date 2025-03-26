@@ -1,0 +1,93 @@
+.form-with-calendar {
+    max-width: 400px;
+    margin: auto;
+}
+
+.calender-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.calendar-btn {
+    width: 100px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 3px;
+}
+
+.calendar-btn:hover {
+    background-color: #0056b3;
+}
+
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    font-family: Arial, sans-serif;
+    margin: 20px 0px 10px 0px;
+    font-size: 12px;
+}
+
+.month {
+    grid-column: span 7;
+    text-align: center;
+    background-color: #9dcfe8;
+    padding: 5px;
+    color: #484848;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.day {
+    font-weight: bold;
+    text-align: center;
+    color: #5a5a5a;
+}
+
+.date-button {
+    padding: 4px 0;
+    text-align: center;
+    border: 1px solid #d1d1d1;
+    border-radius: 3px;
+    background-color: #f0f8ff;
+    cursor: pointer;
+    font-size: 12px;
+    color: #333;
+}
+
+.date-button[data-weekend="true"] {
+    color: #d63384;
+    background-color: #ffebee;
+    border-color: #eac9ce;
+}
+
+.date-button[data-holiday="true"] {
+    background-color: #ea6c6c;
+    color: #fff;
+    border-color: #cc9096;
+}
+
+.date-button[data-weekday="true"]:hover {
+    background-color: #e6f7ff;
+}
+
+.date-button.date-selected[data-weekday="true"] {
+    background-color: #1a92b7;
+    color: white;
+    border-color: #148bb0;
+}
+
+.date-button[disabled] {
+    cursor: not-allowed;
+}
+
+
+.selected-date {
+    display: none;
+}

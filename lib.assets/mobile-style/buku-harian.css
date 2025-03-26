@@ -1,0 +1,107 @@
+@charset "utf-8";
+.cuaca{
+	position:relative;
+	width:280px;
+	height:280px;
+	margin-bottom:10px;
+}
+.cuaca img{
+	vertical-align:bottom;
+}
+.icon-cuaca{
+	width:34px;
+	height:34px;
+	position:absolute;
+}
+.icon-cuaca[data-value="cerah"]{
+	background:url(images/cerah.png) no-repeat center center;
+}
+.icon-cuaca[data-value="berawan"]{
+	background:url(images/berawan.png) no-repeat center center;
+}
+.icon-cuaca[data-value="hujan"]{
+	background:url(images/hujan.png) no-repeat center center;
+}
+.icon-cuaca[data-value="hujan-lebat"]{
+	background:url(images/hujan-lebat.png) no-repeat center center;
+}
+.menu-cuaca{
+	border:1px solid #DDDDDD;
+	border-radius:4px;
+	padding-top:10px;
+	padding-bottom:10px;
+	position:absolute;
+	width:200px;
+	box-sizing:border-box;
+	background-color:#FFFFFF;
+	display:none;
+}
+.menu-cuaca ul{
+	margin:0;
+	padding:0;
+	list-style-type:none;
+}
+
+.menu-cuaca ul li{
+	margin:0;
+	padding:0;
+	border-bottom:1px solid #DDDDDD;
+	background-color:#FAFAFA;
+	background-position:6px center;
+	background-repeat:no-repeat;
+}
+.menu-cuaca ul li.menu-cuaca-item[data-value="cerah"]{
+	background-image:url(images/cerah.png);
+}
+.menu-cuaca ul li.menu-cuaca-item[data-value="berawan"]{
+	background-image:url(images/berawan.png);
+}
+.menu-cuaca ul li.menu-cuaca-item[data-value="hujan"]{
+	background-image:url(images/hujan.png);
+}
+.menu-cuaca ul li.menu-cuaca-item[data-value="hujan-lebat"]{
+	background-image:url(images/hujan-lebat.png);
+}
+.menu-cuaca ul li.menu-cuaca-item[data-value="hapus"]{
+	background-image:url(images/hapus.png);
+}
+
+.menu-cuaca ul li:first-child{
+	border-top:1px solid #DDDDDD;
+}
+.menu-cuaca ul li a{
+	display:block;
+	padding:8px 10px 8px 44px;
+	text-decoration:none;
+	color:#555555;
+}
+.menu-cuaca ul li:hover{
+	background-color:#FFFFFF;
+}
+.cuaca-container{
+	width:280px;
+	margin:auto;
+}
+.cuaca-title{
+	text-align:center;
+	padding:4px 0;
+}
+@media screen and (min-width:780px)
+{
+[data-role="content"] [data-role="tab"]{
+margin:-16px -16px 0 -16px
+}
+}
+@media screen and (max-width:779px)
+{
+[data-role="content"] [data-role="tab"]{
+margin:-10px -10px 0 -10px
+}
+}
+[data-role="content"] [data-role="tab"][data-flexible="true"]{
+	width:auto;
+}
+[data-role="content"] [data-role="tab"][data-flexible="true"] [data-role="tab-nav"] a{
+	padding:8px 0;
+
+}

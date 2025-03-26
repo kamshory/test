@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "psr-0": {
+            "Sipro\\": "classes\/",
+            "AppBuilder\\": "classes\/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.0",
+        "phpmailer/phpmailer": "^6.9",
+        "planetbiru/magic-app": "^3.7"
+    }
+}

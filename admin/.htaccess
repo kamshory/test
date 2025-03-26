@@ -1,0 +1,15 @@
+Options -Indexes
+
+
+<IfModule mod_rewrite.c>
+RewriteEngine on
+
+RewriteRule ^lib.themes/(.*)$  ../lib.themes/$1 [L,NC,QSA]
+RewriteRule ^lib.assets/(.*)$  ../lib.assets/$1 [L,NC,QSA]
+RewriteRule ^lib.captcha/(.*)$  ../lib.captcha/$1 [L,NC,QSA]
+RewriteRule ^lib.gallery/(.*)$  ../lib.gallery/$1 [L,NC,QSA]
+RewriteRule ^lib.signature/(.*)$  ../lib.signature/$1 [L,NC,QSA]
+RewriteRule ^lib.profile-picture/(.*)$  ../lib.profile-picture/$1 [L,NC,QSA]
+RewriteRule ^lib.attendance/(.*)$  ../lib.attendance/$1 [L,NC,QSA]
+
+</IfModule>
