@@ -70,6 +70,24 @@ class PerjalananDinas extends MagicObject
 	protected $tsk;
 
 	/**
+	 * Proyek ID
+	 * 
+	 * @Column(name="proyek_id", type="bigint(20)", length=20, nullable=true)
+	 * @Label(content="Proyek ID")
+	 * @var int
+	 */
+	protected $proyekId;
+
+	/**
+	 * Proyek
+	 * 
+	 * @JoinColumn(name="proyek_id", referenceColumnName="proyek_id")
+	 * @Label(content="Proyek")
+	 * @var ProyekMin
+	 */
+	protected $proyek;
+
+	/**
 	 * Supervisor ID
 	 * 
 	 * @Column(name="supervisor_id", type="bigint(20)", length=20, nullable=true)
@@ -185,6 +203,17 @@ class PerjalananDinas extends MagicObject
 	 * @var string
 	 */
 	protected $atasBebanBiaya;
+
+	/**
+	 * Status Perjalanan Dinas
+	 * 
+	 * @NotNull
+	 * @Column(name="status_perjalanan_dinas", type="text", defaultValue="P", nullable=false)
+	 * @DefaultColumn(value="P")
+	 * @Label(content="Status Perjalanan Dinas")
+	 * @var string
+	 */
+	protected $statusPerjalananDinas;
 
 	/**
 	 * Dibayar

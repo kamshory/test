@@ -219,19 +219,19 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getNama();?></td>
 						<td>
-							<input type="text" class="form-control" name="nama" id="nama" autocomplete="off" required="required"/>
+							<input type="text" class="form-control" name="nama" id="nama" value="" autocomplete="off" required="required"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getKodeHari();?></td>
 						<td>
-							<input type="text" class="form-control" name="kode_hari" id="kode_hari" autocomplete="off"/>
+							<input type="text" class="form-control" name="kode_hari" id="kode_hari" value="" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSortOrder();?></td>
 						<td>
-							<input type="number" step="1" class="form-control" name="sort_order" id="sort_order" autocomplete="off"/>
+							<input type="number" step="1" class="form-control" name="sort_order" id="sort_order" value="" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
@@ -397,7 +397,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuBuat();?></td>
-						<td><?php echo $akhirPekan->dateFormatWaktuBuat('j F Y H:i:s');?></td>
+						<td><?php echo $akhirPekan->getWaktuBuat();?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getIpBuat();?></td>
@@ -409,7 +409,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuUbah();?></td>
-						<td><?php echo $akhirPekan->dateFormatWaktuUbah('j F Y H:i:s');?></td>
+						<td><?php echo $akhirPekan->getWaktuUbah();?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getIpUbah();?></td>

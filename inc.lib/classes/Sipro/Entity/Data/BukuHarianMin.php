@@ -401,7 +401,7 @@ class BukuHarianMin extends MagicObject
 	 * 
 	 * @Column(name="latitude", type="double", nullable=true)
 	 * @Label(content="Latitude")
-	 * @var double
+	 * @var float
 	 */
 	protected $latitude;
 
@@ -410,7 +410,7 @@ class BukuHarianMin extends MagicObject
 	 * 
 	 * @Column(name="longitude", type="double", nullable=true)
 	 * @Label(content="Longitude")
-	 * @var double
+	 * @var float
 	 */
 	protected $longitude;
 
@@ -419,7 +419,7 @@ class BukuHarianMin extends MagicObject
 	 * 
 	 * @Column(name="altitude", type="double", nullable=true)
 	 * @Label(content="Altitude")
-	 * @var double
+	 * @var float
 	 */
 	protected $altitude;
 
