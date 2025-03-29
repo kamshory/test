@@ -195,8 +195,8 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
                   foreach($listProyek as $bh)
                   {
                     $proyekId = $bh[0]->getProyekId();
-                    $namaProyek = $bh[0]->issetProyek() ? $bh[0]->getProyek()->getNama() : "";
-                    $waktuBuatProyek = $bh[0]->issetProyek() ? $bh[0]->getProyek()->getWaktuBuat() : "";
+                    $namaProyek = $bh[0]->hasValueProyek() ? $bh[0]->getProyek()->getNama() : "";
+                    $waktuBuatProyek = $bh[0]->hasValueProyek() ? $bh[0]->getProyek()->getWaktuBuat() : "";
                     if(strlen($namaProyek) > 50)
                     {
                       $namaProyek = substr($namaProyek, 0, 50);

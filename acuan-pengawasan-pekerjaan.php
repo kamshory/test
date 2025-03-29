@@ -202,7 +202,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
 	try{
 		$acuanPengawasanPekerjaan->findOneByAcuanPengawasanPekerjaanId($inputGet->getAcuanPengawasanPekerjaanId());
-		if($acuanPengawasanPekerjaan->issetAcuanPengawasanPekerjaanId())
+		if($acuanPengawasanPekerjaan->hasValueAcuanPengawasanPekerjaanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -312,7 +312,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$acuanPengawasanPekerjaan->findOneWithPrimaryKeyValue($inputGet->getAcuanPengawasanPekerjaanId(), $subqueryMap);
-		if($acuanPengawasanPekerjaan->issetAcuanPengawasanPekerjaanId())
+		if($acuanPengawasanPekerjaan->hasValueAcuanPengawasanPekerjaanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -335,11 +335,11 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
-						<td><?php echo $acuanPengawasanPekerjaan->issetPekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
+						<td><?php echo $acuanPengawasanPekerjaan->hasValuePekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAcuanPengawasan();?></td>
-						<td><?php echo $acuanPengawasanPekerjaan->issetAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
+						<td><?php echo $acuanPengawasanPekerjaan->hasValueAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
@@ -579,8 +579,8 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<?php } ?>
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="acuan_pengawasan_pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->getAcuanPengawasanPekerjaanId();?></td>
-								<td data-col-name="pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->issetPekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
-								<td data-col-name="acuan_pengawasan_id"><?php echo $acuanPengawasanPekerjaan->issetAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
+								<td data-col-name="pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->hasValuePekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
+								<td data-col-name="acuan_pengawasan_id"><?php echo $acuanPengawasanPekerjaan->hasValueAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
 								<td data-col-name="aktif"><?php echo $acuanPengawasanPekerjaan->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 

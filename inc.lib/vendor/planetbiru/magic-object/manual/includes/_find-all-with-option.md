@@ -97,7 +97,7 @@ class EntityAlbum extends MagicObject
 	 * 
 	 * @Column(name="duration", type="float", nullable=true)
 	 * @Label(content="Duration")
-	 * @var float
+	 * @var double
 	 */
 	protected $duration;
 

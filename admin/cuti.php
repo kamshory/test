@@ -984,7 +984,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<table class="table table-row table-sort-by-column">
 						<thead>
 							<tr>
-								<?php if($userPermission->isAllowedBatchAction() || $userPermission->isAllowedApprove()){ ?>
+								<?php if($userPermission->isAllowedBatchAction()){ ?>
 								<td class="data-controll data-selector" data-key="cuti_id">
 									<input type="checkbox" class="checkbox check-master" data-selector=".checkbox-cuti-id"/>
 								</td>
@@ -1019,7 +1019,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 							?>
 		
 							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $cuti->optionAktif('true', 'false');?>">
-								<?php if($userPermission->isAllowedBatchAction() || $userPermission->isAllowedApprove()){ ?>
+								<?php if($userPermission->isAllowedBatchAction()){ ?>
 								<td class="data-selector" data-key="cuti_id">
 									<input type="checkbox" class="checkbox check-slave checkbox-cuti-id" name="checked_row_id[]" value="<?php echo $cuti->getCutiId();?>"<?php echo $cuti->equalsStatusCuti('P') ? '' : ' disabled';?>/>
 								</td>

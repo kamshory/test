@@ -185,7 +185,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$material = new Material(null, $database);
 	try{
 		$material->findOneByMaterialIdAndSupervisorId($inputGet->getMaterialId(), $currentLoggedInSupervisor->getSupervisorId());
-		if($material->issetMaterialId())
+		if($material->hasValueMaterialId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
@@ -278,7 +278,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$material->findOneWithPrimaryKeyValue($inputGet->getMaterialId(), $subqueryMap);
-		if($material->issetMaterialId())
+		if($material->hasValueMaterialId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";

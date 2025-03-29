@@ -61,7 +61,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		);
 		//$proyek->findOneWithPrimaryKeyValue($inputGet->getProyekId(), $subqueryMap);
 		$proyek->find($inputGet->getProyekId());
-		if($proyek->issetProyekId())
+		if($proyek->hasValueProyekId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Proyek(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
@@ -116,7 +116,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getKtsk();?></td>
-						<td><?php echo $proyek->issetKtsk() ? $proyek->getKtsk()->getNama() : "";?></td>
+						<td><?php echo $proyek->hasValueKtsk() ? $proyek->getKtsk()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getTanggalMulai();?></td>
@@ -334,7 +334,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="nama"><?php echo $proyek->getNama();?></td>
 								<td data-col-name="kode_lokasi"><?php echo $proyek->getKodeLokasi();?></td>
-								<td data-col-name="ktsk_id"><?php echo $proyek->issetKtsk() ? $proyek->getKtsk()->getNama() : "";?></td>
+								<td data-col-name="ktsk_id"><?php echo $proyek->hasValueKtsk() ? $proyek->getKtsk()->getNama() : "";?></td>
 								<td data-col-name="tanggal_mulai"><?php echo $proyek->getTanggalMulai();?></td>
 								<td data-col-name="tanggal_selesai"><?php echo $proyek->getTanggalSelesai();?></td>
 								<td data-col-name="aktif"><?php echo $proyek->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>

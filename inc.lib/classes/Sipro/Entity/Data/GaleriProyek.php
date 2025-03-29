@@ -190,7 +190,7 @@ class GaleriProyek extends MagicObject
 	 * 
 	 * @Column(name="latitude", type="double", nullable=true)
 	 * @Label(content="Latitude")
-	 * @var float
+	 * @var double
 	 */
 	protected $latitude;
 
@@ -199,7 +199,7 @@ class GaleriProyek extends MagicObject
 	 * 
 	 * @Column(name="longitude", type="double", nullable=true)
 	 * @Label(content="Longitude")
-	 * @var float
+	 * @var double
 	 */
 	protected $longitude;
 
@@ -208,7 +208,7 @@ class GaleriProyek extends MagicObject
 	 * 
 	 * @Column(name="altitude", type="double", nullable=true)
 	 * @Label(content="Altitude")
-	 * @var float
+	 * @var double
 	 */
 	protected $altitude;
 

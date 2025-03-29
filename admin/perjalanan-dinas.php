@@ -26,8 +26,7 @@ use Sipro\Entity\Data\TskMin;
 use Sipro\Entity\Data\SupervisorMin;
 use MagicApp\XLSX\DocumentWriter;
 use MagicApp\XLSX\XLSXDataFormat;
-use Sipro\Entity\Data\ProyekMin;
-use Sipro\Util\CalendarUtil;
+
 
 require_once dirname(__DIR__) . "/inc.app/auth.php";
 
@@ -46,24 +45,11 @@ if(!$userPermission->allowedAccess($inputGet, $inputPost))
 
 $dataFilter = null;
 
-if($currentUser->getTskId() != 0)
-{
-	$dataFilter = PicoSpecification::getInstance()
-	->addAnd(PicoPredicate::getInstance()->equals(Field::of()->tskId, $currentUser->getTskId()))
-	;
-}
-
 if($inputPost->getUserAction() == UserAction::CREATE)
 {
-	$dari = $inputPost->getDari(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
-	$hingga = $inputPost->getHingga(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
-	$hariKerja = CalendarUtil::getWorkingDays($database, $dari, $hingga);
-	$detil = implode(", ", $hariKerja);
-
 	$perjalananDinas = new PerjalananDinas(null, $database);
 	$perjalananDinas->setJenisPerjalananDinasId($inputPost->getJenisPerjalananDinasId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$perjalananDinas->setTskId($inputPost->getTskId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
-	$perjalananDinas->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$perjalananDinas->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true));
 	$perjalananDinas->setNomorSppd($inputPost->getNomorSppd(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$perjalananDinas->setAsal($inputPost->getAsal(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
@@ -72,12 +58,8 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 	$perjalananDinas->setAlatAngkutan($inputPost->getAlatAngkutan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$perjalananDinas->setKeperluan($inputPost->getKeperluan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$perjalananDinas->setKeterangan($inputPost->getKeterangan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
-
-	$perjalananDinas->setDari($dari);
-	$perjalananDinas->setHingga($hingga);
-	$perjalananDinas->setDetil($detil);
-
-	$perjalananDinas->setStatusPerjalananDinas($inputPost->getStatusPerjalananDinas(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$perjalananDinas->setDari($inputPost->getDari(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
+	$perjalananDinas->setHingga($inputPost->getHingga(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$perjalananDinas->setDibayar($inputPost->getDibayar(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
 	$perjalananDinas->setWaktuDibayar($inputPost->getWaktuDibayar(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true));
 	$perjalananDinas->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true));
@@ -100,18 +82,12 @@ if($inputPost->getUserAction() == UserAction::CREATE)
 }
 else if($inputPost->getUserAction() == UserAction::UPDATE)
 {
-	$dari = $inputPost->getDari(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
-	$hingga = $inputPost->getHingga(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
-	$hariKerja = CalendarUtil::getWorkingDays($database, $dari, $hingga);
-	$detil = implode(", ", $hariKerja);
-
 	$specification = PicoSpecification::getInstanceOf(Field::of()->perjalananDinasId, $inputPost->getPerjalananDinasId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT));
 	$specification->addAnd($dataFilter);
 	$perjalananDinas = new PerjalananDinas(null, $database);
 	$updater = $perjalananDinas->where($specification)
 		->setJenisPerjalananDinasId($inputPost->getJenisPerjalananDinasId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setTskId($inputPost->getTskId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
-		->setProyekId($inputPost->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setSupervisorId($inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true))
 		->setNomorSppd($inputPost->getNomorSppd(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
 		->setAsal($inputPost->getAsal(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
@@ -120,10 +96,8 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 		->setAlatAngkutan($inputPost->getAlatAngkutan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
 		->setKeperluan($inputPost->getKeperluan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
 		->setKeterangan($inputPost->getKeterangan(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
-		->setDari($dari)
-		->setHingga($hingga)
-		->setDetil($detil)
-		->setStatusPerjalananDinas($inputPost->getStatusPerjalananDinas(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setDari($inputPost->getDari(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
+		->setHingga($inputPost->getHingga(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
 		->setDibayar($inputPost->getDibayar(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true))
 		->setWaktuDibayar($inputPost->getWaktuDibayar(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true))
 		->setAktif($inputPost->getAktif(PicoFilterConstant::FILTER_SANITIZE_BOOL, false, false, true))
@@ -225,60 +199,6 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 	}
 	$currentModule->redirectToItself();
 }
-
-else if($inputPost->getUserAction() == UserAction::APPROVE)
-{
-	if($inputPost->countableCheckedRowId())
-	{
-		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
-		{
-			error_log($rowId);
-			try
-			{
-				$specification = PicoSpecification::getInstance()
-					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->perjalananDinasId, $rowId))
-					->addAnd($dataFilter)
-					;
-				$perjalananDinas = new PerjalananDinas(null, $database);
-				$perjalananDinas->where($specification)
-					->setStatusPerjalananDinas('A')
-					->update();
-			}
-			catch(Exception $e)
-			{
-				// Do something here to handle exception
-				error_log($e->getMessage());
-			}
-		}
-	}
-	$currentModule->redirectToItself();
-}
-else if($inputPost->getUserAction() == UserAction::REJECT)
-{
-	if($inputPost->countableCheckedRowId())
-	{
-		foreach($inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT) as $rowId)
-		{
-			try
-			{
-				$specification = PicoSpecification::getInstance()
-					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->perjalananDinasId, $rowId))
-					->addAnd($dataFilter)
-					;
-				$perjalananDinas = new PerjalananDinas(null, $database);
-				$perjalananDinas->where($specification)
-					->setStatusPerjalananDinas('R')
-					->update();
-			}
-			catch(Exception $e)
-			{
-				// Do something here to handle exception
-				error_log($e->getMessage());
-			}
-		}
-	}
-	$currentModule->redirectToItself();
-}
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
 $appEntityLanguage = new AppEntityLanguage(new PerjalananDinas(), $appConfig, $currentUser->getLanguageId());
@@ -325,22 +245,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td>
-							<select class="form-control" name="proyek_id" id="proyek_id">
-								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<?php echo AppFormBuilder::getInstance()->createSelectOption(new ProyekMin(null, $database), 
-								PicoSpecification::getInstance()
-									->addAnd(new PicoPredicate(Field::of()->aktif, true))
-									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
-								PicoSortable::getInstance()
-									->add(new PicoSort(Field::of()->proyekId, PicoSort::ORDER_TYPE_DESC)), 
-								Field::of()->proyekId, Field::of()->nama)
-								; ?>
-							</select>
-						</td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
 						<td>
 							<select class="form-control" name="supervisor_id" id="supervisor_id">
@@ -361,25 +265,25 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getNomorSppd();?></td>
 						<td>
-							<input type="text" class="form-control" name="nomor_sppd" id="nomor_sppd" value="" autocomplete="off"/>
+							<input type="text" class="form-control" name="nomor_sppd" value="" id="nomor_sppd" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAsal();?></td>
 						<td>
-							<input type="text" class="form-control" name="asal" id="asal" value="" autocomplete="off"/>
+							<input type="text" class="form-control" name="asal" value="" id="asal" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getTujuan();?></td>
 						<td>
-							<input type="text" class="form-control" name="tujuan" id="tujuan" value="" autocomplete="off"/>
+							<input type="text" class="form-control" name="tujuan" value="" id="tujuan" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getKodeLokasi();?></td>
 						<td>
-							<input type="text" class="form-control" name="kode_lokasi" id="kode_lokasi" value="" autocomplete="off"/>
+							<input type="text" class="form-control" name="kode_lokasi" value="" id="kode_lokasi" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
@@ -403,25 +307,13 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getDari();?></td>
 						<td>
-							<input type="date" class="form-control" name="dari" id="dari" value="" autocomplete="off"/>
+							<input type="date" class="form-control" name="dari" value="" id="dari" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getHingga();?></td>
 						<td>
-							<input type="date" class="form-control" name="hingga" id="hingga" value="" autocomplete="off"/>
-						</td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getStatusPerjalananDinas();?></td>
-						<td>
-							<select class="form-control" name="status_perjalanan_dinas" id="status_perjalanan_dinas">
-								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<option value="P">Pending</option>
-								<option value="A">Disetujui</option>
-								<option value="R">Ditolak</option>
-								<option value="C">Dibatalkan</option>
-							</select>
+							<input type="date" class="form-control" name="hingga" value="" id="hingga" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
@@ -433,7 +325,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuDibayar();?></td>
 						<td>
-							<input type="datetime-local" class="form-control" name="waktu_dibayar" id="waktu_dibayar" value="" autocomplete="off"/>
+							<input type="datetime-local" class="form-control" name="waktu_dibayar" value="" id="waktu_dibayar" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
@@ -514,22 +406,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td>
-							<select class="form-control" name="proyek_id" id="proyek_id">
-								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<?php echo AppFormBuilder::getInstance()->createSelectOption(new ProyekMin(null, $database), 
-								PicoSpecification::getInstance()
-									->addAnd(new PicoPredicate(Field::of()->aktif, true))
-									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
-								PicoSortable::getInstance()
-									->add(new PicoSort(Field::of()->proyekId, PicoSort::ORDER_TYPE_DESC)), 
-								Field::of()->proyekId, Field::of()->nama, $perjalananDinas->getProyekId())
-								; ?>
-							</select>
-						</td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
 						<td>
 							<select class="form-control" name="supervisor_id" id="supervisor_id">
@@ -599,18 +475,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<td><?php echo $appEntityLanguage->getHingga();?></td>
 						<td>
 							<input type="date" class="form-control" name="hingga" id="hingga" value="<?php echo $perjalananDinas->getHingga();?>" autocomplete="off"/>
-						</td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getStatusPerjalananDinas();?></td>
-						<td>
-							<select class="form-control" name="status_perjalanan_dinas" id="status_perjalanan_dinas" data-value="<?php echo $perjalananDinas->getStatusPerjalananDinas();?>">
-								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<option value="P" <?php echo AppFormBuilder::selected($perjalananDinas->getStatusPerjalananDinas(), 'P');?>>Pending</option>
-								<option value="A" <?php echo AppFormBuilder::selected($perjalananDinas->getStatusPerjalananDinas(), 'A');?>>Disetujui</option>
-								<option value="R" <?php echo AppFormBuilder::selected($perjalananDinas->getStatusPerjalananDinas(), 'R');?>>Ditolak</option>
-								<option value="C" <?php echo AppFormBuilder::selected($perjalananDinas->getStatusPerjalananDinas(), 'C');?>>Dibatalkan</option>
-							</select>
 						</td>
 					</tr>
 					<tr>
@@ -692,14 +556,6 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 			"objectName" => "tsk",
 			"propertyName" => "nama"
 		), 
-		"proyekId" => array(
-			"columnName" => "proyek_id",
-			"entityName" => "ProyekMin",
-			"tableName" => "proyek",
-			"primaryKey" => "proyek_id",
-			"objectName" => "proyek",
-			"propertyName" => "nama"
-		), 
 		"supervisorId" => array(
 			"columnName" => "supervisor_id",
 			"entityName" => "SupervisorMin",
@@ -731,12 +587,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 $appEntityLanguage = new AppEntityLanguage(new PerjalananDinas(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
-			$mapForStatusPerjalananDinas = array(
-				"P" => array("value" => "P", "label" => "Pending", "group" => "", "selected" => false),
-				"A" => array("value" => "A", "label" => "Disetujui", "group" => "", "selected" => false),
-				"R" => array("value" => "R", "label" => "Ditolak", "group" => "", "selected" => false),
-				"C" => array("value" => "C", "label" => "Dibatalkan", "group" => "", "selected" => false)
-			);
+			
 ?>
 <div class="page page-jambi page-detail">
 	<div class="jambi-wrapper">
@@ -759,10 +610,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getTsk();?></td>
 						<td><?php echo $perjalananDinas->issetTsk() ? $perjalananDinas->getTsk()->getNama() : "";?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $perjalananDinas->issetProyek() ? $perjalananDinas->getProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
@@ -813,16 +660,12 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<td><?php echo $perjalananDinas->getAtasBebanBiaya();?></td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getStatusPerjalananDinas();?></td>
-						<td><?php echo isset($mapForStatusPerjalananDinas) && isset($mapForStatusPerjalananDinas[$perjalananDinas->getStatusPerjalananDinas()]) && isset($mapForStatusPerjalananDinas[$perjalananDinas->getStatusPerjalananDinas()]["label"]) ? $mapForStatusPerjalananDinas[$perjalananDinas->getStatusPerjalananDinas()]["label"] : "";?></td>
-					</tr>
-					<tr>
 						<td><?php echo $appEntityLanguage->getDibayar();?></td>
 						<td><?php echo $perjalananDinas->optionDibayar($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuDibayar();?></td>
-						<td><?php echo $perjalananDinas->dateFormatWaktuDibayar('j F Y H:i:s');?></td>
+						<td><?php echo $perjalananDinas->getWaktuDibayar();?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAdminBuat();?></td>
@@ -896,23 +739,15 @@ require_once $appInclude->mainAppFooter(__DIR__);
 else 
 {
 $appEntityLanguage = new AppEntityLanguage(new PerjalananDinas(), $appConfig, $currentUser->getLanguageId());
-$mapForStatusPerjalananDinas = array(
-	"P" => array("value" => "P", "label" => "Pending", "group" => "", "selected" => false),
-	"A" => array("value" => "A", "label" => "Disetujui", "group" => "", "selected" => false),
-	"R" => array("value" => "R", "label" => "Ditolak", "group" => "", "selected" => false),
-	"C" => array("value" => "C", "label" => "Dibatalkan", "group" => "", "selected" => false)
-);
+
 $specMap = array(
 	"jenisPerjalananDinasId" => PicoSpecification::filter("jenisPerjalananDinasId", "number"),
 	"tskId" => PicoSpecification::filter("tskId", "number"),
-	"proyekId" => PicoSpecification::filter("proyekId", "number"),
-	"supervisorId" => PicoSpecification::filter("supervisorId", "number"),
-	"statusPerjalananDinas" => PicoSpecification::filter("statusPerjalananDinas", "fulltext")
+	"supervisorId" => PicoSpecification::filter("supervisorId", "number")
 );
 $sortOrderMap = array(
 	"jenisPerjalananDinasId" => "jenisPerjalananDinasId",
 	"tskId" => "tskId",
-	"proyekId" => "proyekId",
 	"supervisorId" => "supervisorId",
 	"nomorSppd" => "nomorSppd",
 	"asal" => "asal",
@@ -921,7 +756,6 @@ $sortOrderMap = array(
 	"detil" => "detil",
 	"dari" => "dari",
 	"hingga" => "hingga",
-	"statusPerjalananDinas" => "statusPerjalananDinas",
 	"aktif" => "aktif"
 );
 
@@ -958,14 +792,6 @@ $subqueryMap = array(
 	"tableName" => "tsk",
 	"primaryKey" => "tsk_id",
 	"objectName" => "tsk",
-	"propertyName" => "nama"
-), 
-"proyekId" => array(
-	"columnName" => "proyek_id",
-	"entityName" => "ProyekMin",
-	"tableName" => "proyek",
-	"primaryKey" => "proyek_id",
-	"objectName" => "proyek",
 	"propertyName" => "nama"
 ), 
 "supervisorId" => array(
@@ -1006,7 +832,6 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 		$appLanguage->getNumero() => $headerFormat->asNumber(),
 		$appEntityLanguage->getJenisPerjalananDinas() => $headerFormat->asString(),
 		$appEntityLanguage->getTsk() => $headerFormat->asString(),
-		$appEntityLanguage->getProyek() => $headerFormat->asString(),
 		$appEntityLanguage->getSupervisor() => $headerFormat->asString(),
 		$appEntityLanguage->getNomorSppd() => $headerFormat->getNomorSppd(),
 		$appEntityLanguage->getAsal() => $headerFormat->getAsal(),
@@ -1019,7 +844,6 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 		$appEntityLanguage->getDari() => $headerFormat->getDari(),
 		$appEntityLanguage->getHingga() => $headerFormat->getHingga(),
 		$appEntityLanguage->getAtasBebanBiaya() => $headerFormat->getAtasBebanBiaya(),
-		$appEntityLanguage->getStatusPerjalananDinas() => $headerFormat->asString(),
 		$appEntityLanguage->getDibayar() => $headerFormat->asString(),
 		$appEntityLanguage->getWaktuDibayar() => $headerFormat->getWaktuDibayar(),
 		$appEntityLanguage->getAdminBuat() => $headerFormat->asString(),
@@ -1030,12 +854,11 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 		$appEntityLanguage->getIpUbah() => $headerFormat->getIpUbah(),
 		$appEntityLanguage->getAktif() => $headerFormat->asString()
 	), 
-	function($index, $row) use ($appLanguage, $mapForStatusPerjalananDinas) {
+	function($index, $row) use ($appLanguage) {
 		return array(
 			sprintf("%d", $index + 1),
 			$row->issetJenisPerjalananDinas() ? $row->getJenisPerjalananDinas()->getNama() : "",
 			$row->issetTsk() ? $row->getTsk()->getNama() : "",
-			$row->issetProyek() ? $row->getProyek()->getNama() : "",
 			$row->issetSupervisor() ? $row->getSupervisor()->getNama() : "",
 			$row->getNomorSppd(),
 			$row->getAsal(),
@@ -1048,7 +871,6 @@ if($inputGet->getUserAction() == UserAction::EXPORT)
 			$row->getDari(),
 			$row->getHingga(),
 			$row->getAtasBebanBiaya(),
-			isset($mapForStatusPerjalananDinas) && isset($mapForStatusPerjalananDinas[$row->getStatusPerjalananDinas()]) && isset($mapForStatusPerjalananDinas[$row->getStatusPerjalananDinas()]["label"]) ? $mapForStatusPerjalananDinas[$row->getStatusPerjalananDinas()]["label"] : "",
 			$row->optionDibayar($appLanguage->getYes(), $appLanguage->getNo()),
 			$row->getWaktuDibayar(),
 			$row->issetPembuat() ? $row->getPembuat()->getFirstName() : "",
@@ -1108,23 +930,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				</span>
 				
 				<span class="filter-group">
-					<span class="filter-label"><?php echo $appEntityLanguage->getProyek();?></span>
-					<span class="filter-control">
-							<select class="form-control" name="proyek_id">
-								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<?php echo AppFormBuilder::getInstance()->createSelectOption(new ProyekMin(null, $database), 
-								PicoSpecification::getInstance()
-									->addAnd(new PicoPredicate(Field::of()->aktif, true))
-									->addAnd(new PicoPredicate(Field::of()->draft, false)), 
-								PicoSortable::getInstance()
-									->add(new PicoSort(Field::of()->proyekId, PicoSort::ORDER_TYPE_DESC)), 
-								Field::of()->proyekId, Field::of()->nama, $inputGet->getProyekId())
-								; ?>
-							</select>
-					</span>
-				</span>
-				
-				<span class="filter-group">
 					<span class="filter-label"><?php echo $appEntityLanguage->getSupervisor();?></span>
 					<span class="filter-control">
 							<select class="form-control" name="supervisor_id">
@@ -1139,19 +944,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								Field::of()->supervisorId, Field::of()->nama, $inputGet->getSupervisorId())
 								->setTextNodeFormat('"%s (%s)", nama, jabatan.nama')
 								; ?>
-							</select>
-					</span>
-				</span>
-				
-				<span class="filter-group">
-					<span class="filter-label"><?php echo $appEntityLanguage->getStatusPerjalananDinas();?></span>
-					<span class="filter-control">
-							<select class="form-control" name="status_perjalanan_dinas" data-value="<?php echo $inputGet->getStatusPerjalananDinas();?>">
-								<option value=""><?php echo $appLanguage->getLabelOptionSelectOne();?></option>
-								<option value="P" <?php echo AppFormBuilder::selected($inputGet->getStatusPerjalananDinas(), 'P');?>>Pending</option>
-								<option value="A" <?php echo AppFormBuilder::selected($inputGet->getStatusPerjalananDinas(), 'A');?>>Disetujui</option>
-								<option value="R" <?php echo AppFormBuilder::selected($inputGet->getStatusPerjalananDinas(), 'R');?>>Ditolak</option>
-								<option value="C" <?php echo AppFormBuilder::selected($inputGet->getStatusPerjalananDinas(), 'C');?>>Dibatalkan</option>
 							</select>
 					</span>
 				</span>
@@ -1215,7 +1007,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td class="data-controll data-number"><?php echo $appLanguage->getNumero();?></td>
 								<td data-col-name="jenis_perjalanan_dinas_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getJenisPerjalananDinas();?></a></td>
 								<td data-col-name="tsk_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getTsk();?></a></td>
-								<td data-col-name="proyek_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getProyek();?></a></td>
 								<td data-col-name="supervisor_id" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getSupervisor();?></a></td>
 								<td data-col-name="nomor_sppd" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getNomorSppd();?></a></td>
 								<td data-col-name="asal" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAsal();?></a></td>
@@ -1224,7 +1015,6 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td data-col-name="detil" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getDetil();?></a></td>
 								<td data-col-name="dari" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getDari();?></a></td>
 								<td data-col-name="hingga" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getHingga();?></a></td>
-								<td data-col-name="status_perjalanan_dinas" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getStatusPerjalananDinas();?></a></td>
 								<td data-col-name="aktif" class="order-controll"><a href="#"><?php echo $appEntityLanguage->getAktif();?></a></td>
 							</tr>
 						</thead>
@@ -1256,16 +1046,14 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="jenis_perjalanan_dinas_id"><?php echo $perjalananDinas->issetJenisPerjalananDinas() ? $perjalananDinas->getJenisPerjalananDinas()->getNama() : "";?></td>
 								<td data-col-name="tsk_id"><?php echo $perjalananDinas->issetTsk() ? $perjalananDinas->getTsk()->getNama() : "";?></td>
-								<td data-col-name="proyek_id"><?php echo $perjalananDinas->issetProyek() ? $perjalananDinas->getProyek()->getNama() : "";?></td>
 								<td data-col-name="supervisor_id"><?php echo $perjalananDinas->issetSupervisor() ? $perjalananDinas->getSupervisor()->getNama() : "";?></td>
 								<td data-col-name="nomor_sppd"><?php echo $perjalananDinas->getNomorSppd();?></td>
 								<td data-col-name="asal"><?php echo $perjalananDinas->getAsal();?></td>
 								<td data-col-name="tujuan"><?php echo $perjalananDinas->getTujuan();?></td>
 								<td data-col-name="kode_lokasi"><?php echo $perjalananDinas->getKodeLokasi();?></td>
-								<td data-col-name="detil"><?php echo  wordwrap($perjalananDinas->getDetil(), 50, '<br />', true);?></td>
+								<td data-col-name="detil"><?php echo $perjalananDinas->getDetil();?></td>
 								<td data-col-name="dari"><?php echo $perjalananDinas->getDari();?></td>
 								<td data-col-name="hingga"><?php echo $perjalananDinas->getHingga();?></td>
-								<td data-col-name="status_perjalanan_dinas"><?php echo isset($mapForStatusPerjalananDinas) && isset($mapForStatusPerjalananDinas[$perjalananDinas->getStatusPerjalananDinas()]) && isset($mapForStatusPerjalananDinas[$perjalananDinas->getStatusPerjalananDinas()]["label"]) ? $mapForStatusPerjalananDinas[$perjalananDinas->getStatusPerjalananDinas()]["label"] : "";?></td>
 								<td data-col-name="aktif"><?php echo $perjalananDinas->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 
@@ -1277,25 +1065,13 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				</div>
 				<div class="button-wrapper">
 					<div class="button-area">
-						<?php 
-						if($currentUser->getTskId() != 0)
-						{
-							?>
-							<button type="submit" class="btn btn-success" name="user_action" value="approve"><?php echo $appLanguage->getButtonApprove();?></button>
-							<button type="submit" class="btn btn-warning" name="user_action" value="reject"><?php echo $appLanguage->getButtonReject();?></button>
-							<?php
-						}
-						else
-						{
-						if($userPermission->isAllowedUpdate()){ ?>
+						<?php if($userPermission->isAllowedUpdate()){ ?>
 						<button type="submit" class="btn btn-success" name="user_action" value="activate"><?php echo $appLanguage->getButtonActivate();?></button>
 						<button type="submit" class="btn btn-warning" name="user_action" value="deactivate"><?php echo $appLanguage->getButtonDeactivate();?></button>
 						<?php } ?>
 						<?php if($userPermission->isAllowedDelete()){ ?>
 						<button type="submit" class="btn btn-danger" name="user_action" value="delete" data-onclik-message="<?php echo htmlspecialchars($appLanguage->getWarningDeleteConfirmation());?>"><?php echo $appLanguage->getButtonDelete();?></button>
-						<?php }
-						}
-						?>
+						<?php } ?>
 					</div>
 				</div>
 			</form>

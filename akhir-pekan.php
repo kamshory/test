@@ -213,7 +213,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$akhirPekan = new AkhirPekan(null, $database);
 	try{
 		$akhirPekan->findOneByAkhirPekanId($inputGet->getAkhirPekanId());
-		if($akhirPekan->issetAkhirPekanId())
+		if($akhirPekan->hasValueAkhirPekanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -297,7 +297,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 	try{
 		$subqueryMap = null;
 		$akhirPekan->findOneWithPrimaryKeyValue($inputGet->getAkhirPekanId(), $subqueryMap);
-		if($akhirPekan->issetAkhirPekanId())
+		if($akhirPekan->hasValueAkhirPekanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);

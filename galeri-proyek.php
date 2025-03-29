@@ -295,7 +295,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$galeriProyek = new GaleriProyek(null, $database);
 	try{
 		$galeriProyek->findOneByGaleriProyekId($inputGet->getGaleriProyekId());
-		if($galeriProyek->issetGaleriProyekId())
+		if($galeriProyek->hasValueGaleriProyekId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new GaleriProyek(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
@@ -529,7 +529,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$galeriProyek->findOneWithPrimaryKeyValue($inputGet->getGaleriProyekId(), $subqueryMap);
-		if($galeriProyek->issetGaleriProyekId())
+		if($galeriProyek->hasValueGaleriProyekId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new GaleriProyek(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
@@ -543,23 +543,23 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $galeriProyek->issetProyek() ? $galeriProyek->getProyek()->getNama() : "";?></td>
+						<td><?php echo $galeriProyek->hasValueProyek() ? $galeriProyek->getProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getLokasiProyek();?></td>
-						<td><?php echo $galeriProyek->issetLokasiProyek() ? $galeriProyek->getLokasiProyek()->getNama() : "";?></td>
+						<td><?php echo $galeriProyek->hasValueLokasiProyek() ? $galeriProyek->getLokasiProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getBukuHarian();?></td>
-						<td><?php echo $galeriProyek->issetBukuHarian() ? $galeriProyek->getBukuHarian()->getTanggal() : "";?></td>
+						<td><?php echo $galeriProyek->hasValueBukuHarian() ? $galeriProyek->getBukuHarian()->getTanggal() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
-						<td><?php echo $galeriProyek->issetPekerjaan() ? $galeriProyek->getPekerjaan()->getKegiatan() : "";?></td>
+						<td><?php echo $galeriProyek->hasValuePekerjaan() ? $galeriProyek->getPekerjaan()->getKegiatan() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
-						<td><?php echo $galeriProyek->issetSupervisor() ? $galeriProyek->getSupervisor()->getNama() : "";?></td>
+						<td><?php echo $galeriProyek->hasValueSupervisor() ? $galeriProyek->getSupervisor()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getNama();?></td>
@@ -1015,8 +1015,8 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 					<a 
 					data-galeri-proyek-id="<?php echo $galeriProyek->getGaleriProyekId();?>" 
 					data-url="lib.gallery/projects/<?php echo $galeriProyek->getProyekId();?>/<?php echo $galeriProyek->getFile();?>" 
-					data-nama-proyek="<?php echo $galeriProyek->issetProyek()? $galeriProyek->getProyek()->getNama() : "";?>" 
-					data-kegiatan="<?php echo htmlspecialchars(nl2br(htmlspecialchars_decode($galeriProyek->issetPekerjaan()? $galeriProyek->getPekerjaan()->getKegiatan() : "")));?>" 
+					data-nama-proyek="<?php echo $galeriProyek->hasValueProyek()? $galeriProyek->getProyek()->getNama() : "";?>" 
+					data-kegiatan="<?php echo htmlspecialchars(nl2br(htmlspecialchars_decode($galeriProyek->hasValuePekerjaan()? $galeriProyek->getPekerjaan()->getKegiatan() : "")));?>" 
 					data-waktu-upload="<?php echo $galeriProyek->getWaktuBuat();?>" 
 					data-exif='<?php echo str_replace("'", "\\'", $galeriProyek->getExif());?>'
 					href="#<?php echo $galeriProyek->getGaleriProyekId();?>" 

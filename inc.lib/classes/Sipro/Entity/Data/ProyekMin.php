@@ -149,7 +149,7 @@ class ProyekMin extends MagicObject
 	 * 
 	 * @Column(name="persen", type="float", nullable=true)
 	 * @Label(content="Persen")
-	 * @var float
+	 * @var double
 	 */
 	protected $persen;
 

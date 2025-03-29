@@ -206,7 +206,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$hariLibur = new HariLibur(null, $database);
 	try{
 		$hariLibur->findOneByHariLiburId($inputGet->getHariLiburId());
-		if($hariLibur->issetHariLiburId())
+		if($hariLibur->hasValueHariLiburId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -309,7 +309,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$hariLibur->findOneWithPrimaryKeyValue($inputGet->getHariLiburId(), $subqueryMap);
-		if($hariLibur->issetHariLiburId())
+		if($hariLibur->hasValueHariLiburId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -340,7 +340,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getJenisHariLibur();?></td>
-						<td><?php echo $hariLibur->issetJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
+						<td><?php echo $hariLibur->hasValueJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getBuka();?></td>
@@ -581,7 +581,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="tanggal"><?php echo $hariLibur->getTanggal();?></td>
 								<td data-col-name="nama"><?php echo $hariLibur->getNama();?></td>
-								<td data-col-name="jenis_hari_libur_id"><?php echo $hariLibur->issetJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
+								<td data-col-name="jenis_hari_libur_id"><?php echo $hariLibur->hasValueJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
 								<td data-col-name="buka"><?php echo $hariLibur->optionBuka($appLanguage->getYes(), $appLanguage->getNo());?></td>
 								<td data-col-name="aktif"><?php echo $hariLibur->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>

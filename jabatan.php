@@ -206,7 +206,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$jabatan = new Jabatan(null, $database);
 	try{
 		$jabatan->findOneByJabatanId($inputGet->getJabatanId());
-		if($jabatan->issetJabatanId())
+		if($jabatan->hasValueJabatanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Jabatan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -284,7 +284,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 	try{
 		$subqueryMap = null;
 		$jabatan->findOneWithPrimaryKeyValue($inputGet->getJabatanId(), $subqueryMap);
-		if($jabatan->issetJabatanId())
+		if($jabatan->hasValueJabatanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Jabatan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);

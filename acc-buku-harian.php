@@ -105,7 +105,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$bukuHarian->findOneWithPrimaryKeyValue($inputGet->getBukuHarianId(), $subqueryMap);
-		if($bukuHarian->issetBukuHarianId())
+		if($bukuHarian->hasValueBukuHarianId())
 		{
 			$x = array(1=>'cerah', 2=>'berawan', 3=>'hujan', 4=>'hujan-lebat');
 			$data_cuaca = array();
@@ -164,11 +164,11 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
-						<td><?php echo $bukuHarian->issetSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->hasValueSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $bukuHarian->issetProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->hasValueProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getTanggal();?></td>

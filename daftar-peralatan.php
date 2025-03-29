@@ -183,7 +183,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$peralatan = new Peralatan(null, $database);
 	try{
 		$peralatan->findOneByPeralatanIdAndSupervisorId($inputGet->getPeralatanId(), $currentLoggedInSupervisor->getSupervisorId());
-		if($peralatan->issetPeralatanId())
+		if($peralatan->hasValuePeralatanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
@@ -276,7 +276,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$peralatan->findOneWithPrimaryKeyValue($inputGet->getPeralatanId(), $subqueryMap);
-		if($peralatan->issetPeralatanId())
+		if($peralatan->hasValuePeralatanId())
 		{
 $appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";

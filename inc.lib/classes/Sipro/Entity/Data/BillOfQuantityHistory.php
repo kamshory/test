@@ -114,7 +114,7 @@ class BillOfQuantityHistory extends MagicObject
 	 * 
 	 * @Column(name="volume", type="float", nullable=true)
 	 * @Label(content="Volume")
-	 * @var float
+	 * @var double
 	 */
 	protected $volume;
 
@@ -123,7 +123,7 @@ class BillOfQuantityHistory extends MagicObject
 	 * 
 	 * @Column(name="bobot", type="float", nullable=true)
 	 * @Label(content="Bobot")
-	 * @var float
+	 * @var double
 	 */
 	protected $bobot;
 
@@ -132,7 +132,7 @@ class BillOfQuantityHistory extends MagicObject
 	 * 
 	 * @Column(name="volume_proyek", type="float", nullable=true)
 	 * @Label(content="Volume Proyek")
-	 * @var float
+	 * @var double
 	 */
 	protected $volumeProyek;
 
@@ -141,7 +141,7 @@ class BillOfQuantityHistory extends MagicObject
 	 * 
 	 * @Column(name="persen", type="float", nullable=true)
 	 * @Label(content="Persen")
-	 * @var float
+	 * @var double
 	 */
 	protected $persen;
 
@@ -159,7 +159,7 @@ class BillOfQuantityHistory extends MagicObject
 	 * 
 	 * @Column(name="harga", type="float", nullable=true)
 	 * @Label(content="Harga")
-	 * @var float
+	 * @var double
 	 */
 	protected $harga;
 
