@@ -493,7 +493,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 							<td class="<?php echo trim($class); ?> day"><?php
 							if (isset($arrayTanggal[$indeksArrayHari][$indeksArrayProyek]) || CommonUtil::isTrue($arrayHari[$indeksArrayHari]['cuti_dibayar'])) // && !@$arrayHari[$indeksArrayHari]['akhir_pekan'] && !@$arrayHari[$indeksArrayHari]['tanggal_merah'])
 							{
-								$mm = $util->getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek) ^ $util->getNilaiKehadiran($attendances, $indeksArrayHari);
+								$mm = $util->getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek) * $util->getNilaiKehadiran($attendances, $indeksArrayHari);
 								
 								echo number_format($mm, 2, ".", ",");
 								$totalBaris += $mm;
