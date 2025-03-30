@@ -17,11 +17,14 @@ use Sipro\Entity\Data\HariLibur;
 use Sipro\Entity\Data\PerjalananDinas;
 use Sipro\Entity\Data\Proyek;
 use Sipro\Entity\Data\Supervisor;
+use Sipro\Supervisor\Attendance;
 use Sipro\Util\CommonUtil;
 use Sipro\Util\DateUtil;
 use Sipro\Util\TimeSheetUtil;
 
 require_once dirname(__DIR__) . "/inc.app/auth.php";
+
+
 
 if (!isset($inputGet)) {
 	$inputGet = new InputGet();
@@ -29,6 +32,9 @@ if (!isset($inputGet)) {
 
 $supervisorId = $inputGet->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true);
 $periodeId = $inputGet->getPeriodeId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
+
+$util = new Attendance(null, $database);
+$attendances = $util->getAttendance($supervisorId, $periodeId);
 
 $dataFilter = null;
 
@@ -325,27 +331,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 			// do nothing
 		}
 
-		/**
-		 * Get nilai hari
-		 *
-		 * @param array $arrayBukuHarian
-		 * @param array $arrayHari
-		 * @param string $indeksArrayHari
-		 * @param int $indeksArrayProyek
-		 * @return int
-		 */
-		function getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek)
-		{
-			$mm = 0;
-			if (isset($arrayBukuHarian[$indeksArrayHari])) {
-				if ($arrayBukuHarian[$indeksArrayHari] > 0) {
-					$mm = 1 / $arrayBukuHarian[$indeksArrayHari];
-				}
-			} else if ($arrayHari[$indeksArrayHari]['cuti_dibayar'] == 1 && $arrayHari[$indeksArrayHari]['proyek_id'] == $indeksArrayProyek) {
-				$mm = 1;
-			}
-			return $mm;
-		}
+		
 ?>
 	
 	<style type="text/css">
@@ -507,7 +493,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 							<td class="<?php echo trim($class); ?> day"><?php
 							if (isset($arrayTanggal[$indeksArrayHari][$indeksArrayProyek]) || CommonUtil::isTrue($arrayHari[$indeksArrayHari]['cuti_dibayar'])) // && !@$arrayHari[$indeksArrayHari]['akhir_pekan'] && !@$arrayHari[$indeksArrayHari]['tanggal_merah'])
 							{
-								$mm = getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek);
+								$mm = $util->getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek) ^ $util->getNilaiKehadiran($attendances, $indeksArrayHari);
 								
 								echo number_format($mm, 2, ".", ",");
 								$totalBaris += $mm;

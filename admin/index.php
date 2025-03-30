@@ -18,10 +18,11 @@ use Sipro\Entity\Data\Proyek;
 use Sipro\Util\DateUtil;
 use Sipro\Util\ProyekUtil;
 
-require_once dirname(__DIR__) . "/inc.app/auth.php";
 
+require_once dirname(__DIR__) . "/inc.app/auth.php";
 $inputGet = new InputGet();
 $inputPost = new InputPost();
+
 
 $currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "depan", $appLanguage->getDepan());
 $inputGet = new InputGet();
@@ -29,10 +30,8 @@ $inputPost = new InputPost();
 
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
-
 require_once $appInclude->mainAppHeader(__DIR__);
 $appEntityLanguage = new AppEntityLanguage(new Proyek(), $appConfig, $currentUser->getLanguageId());
-
 $baseAssetsUrl = $appConfig->getSite()->getBaseUrl();
 ?>
 <?php

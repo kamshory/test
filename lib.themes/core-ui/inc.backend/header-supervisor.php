@@ -8,7 +8,7 @@ $baseAssetsUrl = $appConfig->getSite()->getBaseUrl();
 
 if(isset($currentModule) && $currentModule->getModuleTitle() != null)
 {
-  $__siteTitle = trim($appConfig->getSite()->getTitle().' - '.$currentModule->getModuleTitle(), ' - ');
+  $__siteTitle = trim($currentModule->getModuleTitle(). ' - '.$appConfig->getSite()->getTitle(), ' - ');
 }
 else
 {
