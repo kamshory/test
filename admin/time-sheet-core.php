@@ -365,7 +365,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 		}
 
 		.travel {
-			background-color: #03F !important;
+			background-color: transparent;
 		}
 
 		tfoot .leave {
