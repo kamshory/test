@@ -332,7 +332,7 @@ class DaftarSimak extends MagicObject
 		$daftarPengawas = [];
 		foreach($pageData->getResult() as $riwayat)
 		{
-			$daftarPengawas[] = $riwayat->issetAdmin() ? $riwayat->getAdmin()->getNamaDepan() : "";
+			$daftarPengawas[] = $riwayat->retrieve('supervisor', 'nama')." - ".$riwayat->retrieve('supervisor', 'jabatan', 'nama');
 		}
 		if(empty($daftarPengawas))
 		{

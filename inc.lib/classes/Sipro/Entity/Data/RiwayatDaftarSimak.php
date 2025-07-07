@@ -43,22 +43,22 @@ class RiwayatDaftarSimak extends MagicObject
 	protected $daftarSimakId;
 
 	/**
-	 * Admin ID
+	 * Supervisor ID
 	 * 
-	 * @Column(name="admin_id", type="bigint(20)", length=20, nullable=true)
-	 * @Label(content="Admin ID")
+	 * @Column(name="supervisor_id", type="bigint(20)", length=20, nullable=true)
+	 * @Label(content="Supervisor ID")
 	 * @var int
 	 */
-	protected $adminId;
+	protected $supervisorId;
 
 	/**
-	 * Admin
+	 * Supervisor
 	 * 
-	 * @JoinColumn(name="admin_id", referenceColumnName="admin_id")
-	 * @Label(content="Admin ID")
-	 * @var AdminMin
+	 * @JoinColumn(name="supervisor_id", referenceColumnName="supervisor_id")
+	 * @Label(content="Supervisor")
+	 * @var SupervisorMin
 	 */
-	protected $admin;
+	protected $supervisor;
 
 	/**
 	 * Waktu Pengisian

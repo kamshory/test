@@ -187,7 +187,7 @@ else if($inputPost->getUserAction() == 'submit')
 		{
 			$riwayatDaftarSimak = new RiwayatDaftarSimak(null, $database);
 			$riwayatDaftarSimak->setDaftarSimakId($daftarSimakId);
-			$riwayatDaftarSimak->setAdminId($currentUser->getAdminId());
+			$riwayatDaftarSimak->setAdminId($currentAction->getSupervisorId());
 			$riwayatDaftarSimak->setWaktuPengisian($currentAction->getTime());
 			$riwayatDaftarSimak->setIpPengisian($currentAction->getIp());
 			$riwayatDaftarSimak->insert();

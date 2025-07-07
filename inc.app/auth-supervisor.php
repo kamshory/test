@@ -1,6 +1,5 @@
 <?php
 
-use MagicApp\AppLanguage;
 use MagicApp\Field;
 use MagicObject\Database\PicoPredicate;
 use MagicObject\Database\PicoSpecification;

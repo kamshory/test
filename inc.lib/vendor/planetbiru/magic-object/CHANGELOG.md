@@ -1171,3 +1171,21 @@ public function validate(
 -   No breaking changes were introduced.
     
 -   Existing codebases will continue to function as-is unless the new functionality is explicitly invoked.
+
+
+# MagicObject Version 3.14.5
+
+## Imrovements
+
+### Enhancement: Flexible Nested Retrieval in `retrieve()` Method
+
+The `retrieve(...$keys)` method now supports multiple input formats for accessing nested object properties:
+
+- Dot notation: `$obj->retrieve('user.profile.name')`
+- Arrow notation: `$obj->retrieve('user->profile->name')`
+- Multiple arguments: `$obj->retrieve('user', 'profile', 'name')`
+
+Each key is automatically camelized for consistent property access.  
+If any key in the chain does not exist or returns `null`, the method will return `null`.
+
+This enhancement improves developer ergonomics when working with deeply nested data structures.
