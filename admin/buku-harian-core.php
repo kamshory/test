@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicObject\Database\PicoPredicate;
 use MagicObject\Database\PicoSort;
@@ -22,13 +22,13 @@ $bukuHarianId = $inputGet->getBukuHarianId(PicoFilterConstant::FILTER_SANITIZE_N
 $bukuHarian = new BukuHarian(null, $database);
 try {
     $bukuHarian->find($bukuHarianId);
-    if ($bukuHarian->hasValueBukuHarianId()) {
+    if ($bukuHarian->issetBukuHarianId()) {
         $tanggal_supervisi = substr($bukuHarian->getWaktuBuat(), 0, 10);
 
-        $appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentUser->getLanguageId());
+        $appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentUser->getLanguageId());
         // define map here
         $proyek = new MagicObject();
-        if ($bukuHarian->hasValueProyek()) {
+        if ($bukuHarian->issetProyek()) {
             $proyek = $bukuHarian->getProyek();
         }
         $umk = new MagicObject();
@@ -40,12 +40,12 @@ try {
         $faksimili = "";
         $alamat = "";
 
-        if ($proyek->hasValueKtsk()) {
+        if ($proyek->issetKtsk()) {
             $ktsk = $proyek->getKtsk();
             
-            if ($ktsk->hasValueTsk()) {
+            if ($ktsk->issetTsk()) {
                 $tsk = $ktsk->getTsk();
-                if($tsk->hasValueUmk())
+                if($tsk->issetUmk())
                 {
                     $umk = $tsk->getUmk();
                 }     
@@ -215,7 +215,7 @@ try {
                 $pageData = $pekerjaanList->findAll($specification, null, $sortable);
                 foreach($pageData->getResult() as $row)
                 {
-                    $jenisPekerjaan = $row->hasValueJenisPekerjaan() ? $row->getJenisPekerjaan()->getNama() : null;
+                    $jenisPekerjaan = $row->issetJenisPekerjaan() ? $row->getJenisPekerjaan()->getNama() : null;
                     if(isset($jenisPekerjaan))
                     {
                         if(!isset($arr[$jenisPekerjaan]))
@@ -274,15 +274,15 @@ try {
                                         <td align="right"><?php echo $key2 + 1; ?></td>
                                         <td>
                                             <div>Pekerjaan : <?php echo $val2->getKegiatan(); ?></div>
-                                            <div>Lokasi : <?php echo $val2->hasValueLokasiProyek() ? $val2->getLokasiProyek()->getNama() : ""; ?></div>
+                                            <div>Lokasi : <?php echo $val2->issetLokasiProyek() ? $val2->getLokasiProyek()->getNama() : ""; ?></div>
                                             <?php
-                                            $kelas_pondasi = $val2->hasValueKelasPondasi() ? $val2->getKelasPondasi()->getNama() : "";
+                                            $kelas_pondasi = $val2->issetKelasPondasi() ? $val2->getKelasPondasi()->getNama() : "";
                                             if ($kelas_pondasi != '') {
                                             ?>
                                                 <div>Tipe Pondasi : <?php echo $kelas_pondasi; ?></div>
                                             <?php
                                             }
-                                            $tipe_tower = $val2->hasValueTipeTower() ? $val2->getTipeTower()->getNama() : "";
+                                            $tipe_tower = $val2->issetTipeTower() ? $val2->getTipeTower()->getNama() : "";
                                             if ($tipe_tower != '') {
                                             ?>
                                                 <div>Kelas Tower : <?php echo $tipe_tower; ?></div>
@@ -388,7 +388,7 @@ try {
                     </td>
                     <td width="60%" align="center" valign="top"><strong>Koordinator</strong>
                         <?php
-                        if ($bukuHarian->hasValueKoordinator()) {
+                        if ($bukuHarian->issetKoordinator()) {
                             
                         ?>
                             <div style="height:120px; overflow:visible" class="image-container signature-container">
@@ -422,7 +422,7 @@ try {
                             }
                         ?>
                         </div>
-                        <div><span id="nama-supervisor"><?php echo $bukuHarian->hasValueSupervisor() ? $bukuHarian->getSupervisor()->getNama() : ""; ?></span></div>
+                        <div><span id="nama-supervisor"><?php echo $bukuHarian->issetSupervisor() ? $bukuHarian->getSupervisor()->getNama() : ""; ?></span></div>
                     </td>
                 </tr>
             </table>

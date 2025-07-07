@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\InputGet;
@@ -15,7 +15,7 @@ $resourceManPower = [];
 $inputGet = new InputGet();
 $inputPost = new InputPost();
 $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
-$appEntityLanguage = new AppEntityLanguage(new ManPower(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new ManPower(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 
 $now = date('Y-m-d H:i:s');
 $ip = $_SERVER['REMOTE_ADDR'];

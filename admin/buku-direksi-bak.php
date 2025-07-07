@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -381,7 +381,7 @@ else if($inputPost->getUserAction() == UserAction::REJECT)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 
@@ -597,7 +597,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$bukuDireksi->findOne($specs);
 		if($bukuDireksi->issetBukuDireksiId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 		if(!UserAction::isRequireApproval($bukuDireksi->getWaitingFor()))
 		{
@@ -887,7 +887,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 				{
 					// do something here
 				}
-$appEntityLanguage = new AppEntityLanguage(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-detail">
@@ -1151,7 +1151,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 			}
 			else
 			{
-$appEntityLanguage = new AppEntityLanguage(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-detail">
@@ -1309,7 +1309,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
 $mapForDiperiksa = array(
 	"1" => array("value" => "1", "label" => "Sudah", "default" => "false"),
 	"0" => array("value" => "0", "label" => "Belum", "default" => "false")

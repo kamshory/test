@@ -9,6 +9,7 @@ use MagicObject\Exceptions\InvalidAnnotationException;
 use MagicObject\Util\ClassUtil\PicoAnnotationParser;
 use MagicObject\Util\ClassUtil\PicoObjectParser;
 use MagicObject\Util\PicoGenericObject;
+use MagicObject\Util\ValidationUtil;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -379,7 +380,7 @@ class MagicDto extends stdClass // NOSONAR
      * Checks if the given variable is a self-instance.
      *
      * @param mixed $objectTest The object to test against.
-     * @return bool True if it's a self-instance, otherwise false.
+     * @return bool true if it's a self-instance, otherwise false.
      */
     private function isSelfInstance($objectTest)
     {
@@ -390,7 +391,7 @@ class MagicDto extends stdClass // NOSONAR
      * Checks if the given object is an instance of MagicObject or its derivatives.
      *
      * @param mixed $objectTest The object to test.
-     * @return bool True if it is a MagicObject instance, otherwise false.
+     * @return bool true if it is a MagicObject instance, otherwise false.
      */
     private function isMagicObjectInstance($objectTest)
     {
@@ -404,7 +405,7 @@ class MagicDto extends stdClass // NOSONAR
      * Checks if the given object is an instance of DateTime or its derivatives.
      *
      * @param mixed $objectTest The object to test.
-     * @return bool True if it is a MagicObject instance, otherwise false.
+     * @return bool true if it is a MagicObject instance, otherwise false.
      */
     private function isDateTimeInstance($objectTest)
     {
@@ -593,7 +594,7 @@ class MagicDto extends stdClass // NOSONAR
      * This method checks the class parameters to determine if JSON output
      * formatting should be applied to enhance readability.
      *
-     * @return bool True if JSON output is set to be prettified; otherwise, false.
+     * @return bool true if JSON output is set to be prettified; otherwise, false.
      */
     protected function _prettyJson()
     {
@@ -609,7 +610,7 @@ class MagicDto extends stdClass // NOSONAR
      * This method checks the class parameters to determine if XML output
      * formatting should be applied to enhance readability.
      *
-     * @return bool True if XML output is set to be prettified; otherwise, false.
+     * @return bool true if XML output is set to be prettified; otherwise, false.
      */
     protected function _prettyXml()
     {
@@ -907,6 +908,62 @@ class MagicDto extends stdClass // NOSONAR
         }
         
         return false;// No parent class or method is not overridden
+    }
+
+    /**
+     * Validate the current object based on property annotations.
+     *
+     * This method checks the properties of the current object against validation annotations.
+     * If any validation rule fails, an InvalidValueException will be thrown.
+     *
+     * @param string|null      $parentPropertyName        The name of the parent property, if applicable (for nested validation).
+     * @param array|null       $messageTemplate           Optional custom message templates for validation errors.
+     * @param MagicObject|null $reference                 Optional reference object. If provided and is an instance of MagicObject,
+     * validation will use the property annotations from the reference class
+     * (not from the validated object's class), but the data to validate is taken from the current object.
+     * @param bool             $validateIfReferenceEmpty  If true, and a reference object is provided but empty,
+     * validation will proceed using the current object's properties.
+     * If false, validation is skipped if the reference object is empty.
+     * Defaults to true.
+     * @throws InvalidValueException If validation fails.
+     * @return self Returns the current instance for method chaining.
+     */
+    public function validate(
+        $parentPropertyName = null,
+        $messageTemplate = null,
+        $reference = null,
+        $validateIfReferenceEmpty = true
+    ) {
+        $objectToValidate = $this; // Default: validate this object
+        $shouldValidate = true; // Flag to determine if validation should proceed
+
+        // Check if a reference object is provided and is an instance of MagicObject
+        if (isset($reference) && $reference instanceof MagicObject) {
+            // A reference object exists. Now determine if it has properties.
+            if ($reference->hasProperties()) {
+                // The reference has properties, so use annotations from the reference.
+                // The data being validated remains from $this.
+                $objectToValidate = $reference->loadData($this);
+            } else {
+                // The reference has no properties (it's empty).
+                // Determine if validation should still proceed based on $validateIfReferenceEmpty.
+                if (!$validateIfReferenceEmpty) {
+                    $shouldValidate = false; // Skip validation
+                }
+                // If $validateIfReferenceEmpty is true, $objectToValidate remains $this (default)
+                // and $shouldValidate remains true.
+            }
+        }
+        // If no reference ($reference == null), $shouldValidate remains true,
+        // and $objectToValidate remains $this, which is the desired behavior.
+
+
+        if ($shouldValidate) {
+            // Call the main validation utility only once
+            ValidationUtil::getInstance($messageTemplate)->validate($objectToValidate, $parentPropertyName);
+        }
+        
+        return $this;
     }
 
 }

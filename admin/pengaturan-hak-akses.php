@@ -11,7 +11,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -119,7 +119,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		$hakAkses->findOneWithPrimaryKeyValue($inputGet->getHakAksesId(), $subqueryMap);
 		if($hakAkses->hasValueHakAksesId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new HakAkses(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new HakAkses(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -216,7 +216,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Modul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Modul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <script>

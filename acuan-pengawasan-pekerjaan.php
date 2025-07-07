@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -131,7 +131,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -202,9 +202,9 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$acuanPengawasanPekerjaan = new AcuanPengawasanPekerjaan(null, $database);
 	try{
 		$acuanPengawasanPekerjaan->findOneByAcuanPengawasanPekerjaanId($inputGet->getAcuanPengawasanPekerjaanId());
-		if($acuanPengawasanPekerjaan->hasValueAcuanPengawasanPekerjaanId())
+		if($acuanPengawasanPekerjaan->issetAcuanPengawasanPekerjaanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -312,9 +312,9 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$acuanPengawasanPekerjaan->findOneWithPrimaryKeyValue($inputGet->getAcuanPengawasanPekerjaanId(), $subqueryMap);
-		if($acuanPengawasanPekerjaan->hasValueAcuanPengawasanPekerjaanId())
+		if($acuanPengawasanPekerjaan->issetAcuanPengawasanPekerjaanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -335,11 +335,11 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getPekerjaan();?></td>
-						<td><?php echo $acuanPengawasanPekerjaan->hasValuePekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
+						<td><?php echo $acuanPengawasanPekerjaan->issetPekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAcuanPengawasan();?></td>
-						<td><?php echo $acuanPengawasanPekerjaan->hasValueAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
+						<td><?php echo $acuanPengawasanPekerjaan->issetAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
@@ -392,7 +392,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasanPekerjaan(), $appConfig, $currentUser->getLanguageId());
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -579,8 +579,8 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<?php } ?>
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="acuan_pengawasan_pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->getAcuanPengawasanPekerjaanId();?></td>
-								<td data-col-name="pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->hasValuePekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
-								<td data-col-name="acuan_pengawasan_id"><?php echo $acuanPengawasanPekerjaan->hasValueAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
+								<td data-col-name="pekerjaan_id"><?php echo $acuanPengawasanPekerjaan->issetPekerjaan() ? $acuanPengawasanPekerjaan->getPekerjaan()->getKegiatan() : "";?></td>
+								<td data-col-name="acuan_pengawasan_id"><?php echo $acuanPengawasanPekerjaan->issetAcuanPengawasan() ? $acuanPengawasanPekerjaan->getAcuanPengawasan()->getNama() : "";?></td>
 								<td data-col-name="aktif"><?php echo $acuanPengawasanPekerjaan->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 

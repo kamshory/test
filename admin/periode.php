@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -178,7 +178,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Periode(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Periode(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -238,7 +238,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$periode->findOne($specification);
 		if($periode->issetPeriodeId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Periode(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Periode(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -318,7 +318,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$periode->findOne($specification, null, $subqueryMap);
 		if($periode->issetPeriodeId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Periode(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Periode(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -420,7 +420,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Periode(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Periode(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"periodeId" => PicoSpecification::filter("periodeId", "fulltext"),

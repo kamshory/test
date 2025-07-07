@@ -14,12 +14,12 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
-use MagicApp\AppUserPermission;
 use Sipro\AppIncludeImpl;
+use Sipro\AppUserPermissionImpl;
 use Sipro\Entity\Data\AkhirPekan;
 
 
@@ -29,7 +29,7 @@ $inputGet = new InputGet();
 $inputPost = new InputPost();
 
 $currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "akhir-pekan", $appLanguage->getAkhirPekan());
-$userPermission = new AppUserPermission($appConfig, $database, $appUserRole, $currentModule, $currentUser);
+$userPermission = new AppUserPermissionImpl($appConfig, $database, $appUserRole, $currentModule, $currentUser);
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
 if(!$userPermission->allowedAccess($inputGet, $inputPost))
@@ -37,6 +37,7 @@ if(!$userPermission->allowedAccess($inputGet, $inputPost))
 	require_once $appInclude->appForbiddenPage(__DIR__);
 	exit();
 }
+
 
 $dataFilter = null;
 
@@ -208,30 +209,43 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
 	<div class="jambi-wrapper">
+		<?php if($currentModule->hasErrorField())
+		{
+		?>
+		
+		
+		<div class="alert alert-error">
+			<?php echo $currentModule->getErrorMessage(); ?>
+		</div>
+		
+		
+		<?php $currentModule->restoreFormData($currentModule->getFormData(), $currentModule->getErrorField(), '#createform');
+		}
+		?>
 		<form name="createform" id="createform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getNama();?></td>
 						<td>
-							<input type="text" class="form-control" name="nama" id="nama" autocomplete="off" required="required"/>
+							<input type="text" class="form-control" name="nama" id="nama" value="" autocomplete="off" required="required"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getKodeHari();?></td>
 						<td>
-							<input type="text" class="form-control" name="kode_hari" id="kode_hari" autocomplete="off"/>
+							<input type="text" class="form-control" name="kode_hari" id="kode_hari" value="" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSortOrder();?></td>
 						<td>
-							<input type="number" step="1" class="form-control" name="sort_order" id="sort_order" autocomplete="off"/>
+							<input type="number" step="1" class="form-control" name="sort_order" id="sort_order" value="" autocomplete="off"/>
 						</td>
 					</tr>
 					<tr>
@@ -253,8 +267,8 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td></td>
 						<td>
-							<button type="submit" class="btn btn-success" name="user_action" value="create"><?php echo $appLanguage->getButtonSave();?></button>
-							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonCancel();?></button>
+							<button type="submit" class="btn btn-success" name="user_action" id="create_new_data" value="create"><?php echo $appLanguage->getButtonSave();?></button>
+							<button type="button" class="btn btn-primary" id="back_to_list" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonCancel();?></button>
 						</td>
 					</tr>
 				</tbody>
@@ -274,11 +288,24 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$akhirPekan->findOne($specification);
 		if($akhirPekan->issetAkhirPekanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
 	<div class="jambi-wrapper">
+		<?php if($currentModule->hasErrorField())
+		{
+		?>
+		
+		
+		<div class="alert alert-error">
+			<?php echo $currentModule->getErrorMessage(); ?>
+		</div>
+		
+		
+		<?php $currentModule->restoreFormData($currentModule->getFormData(), $currentModule->getErrorField(), '#updateform');
+		}
+		?>
 		<form name="updateform" id="updateform" action="" method="post">
 			<table class="responsive responsive-two-cols" border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tbody>
@@ -319,9 +346,9 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td></td>
 						<td>
-							<button type="submit" class="btn btn-success" name="user_action" value="update"><?php echo $appLanguage->getButtonSave();?></button>
-							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonCancel();?></button>
-							<input type="hidden" name="akhir_pekan_id" value="<?php echo $akhirPekan->getAkhirPekanId();?>"/>
+							<button type="submit" class="btn btn-success" name="user_action" id="update_data" value="update"><?php echo $appLanguage->getButtonSave();?></button>
+							<button type="button" class="btn btn-primary" id="back_to_list" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonCancel();?></button>
+							<input type="hidden" name="akhir_pekan_id" id="primary_key_value" value="<?php echo $akhirPekan->getAkhirPekanId();?>"/>
 						</td>
 					</tr>
 				</tbody>
@@ -356,11 +383,28 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 	$specification->addAnd($dataFilter);
 	$akhirPekan = new AkhirPekan(null, $database);
 	try{
-		$subqueryMap = null;
+		$subqueryMap = array(
+		"adminBuat" => array(
+			"columnName" => "admin_buat",
+			"entityName" => "AdminMin",
+			"tableName" => "admin",
+			"primaryKey" => "admin_id",
+			"objectName" => "pembuat",
+			"propertyName" => "nama"
+		), 
+		"adminUbah" => array(
+			"columnName" => "admin_ubah",
+			"entityName" => "AdminMin",
+			"tableName" => "admin",
+			"primaryKey" => "admin_id",
+			"objectName" => "pengubah",
+			"propertyName" => "nama"
+		)
+		);
 		$akhirPekan->findOne($specification, null, $subqueryMap);
 		if($akhirPekan->issetAkhirPekanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -396,28 +440,28 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<td><?php echo $akhirPekan->optionDefaultData($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 					<tr>
+						<td><?php echo $appEntityLanguage->getAdminBuat();?></td>
+						<td><?php echo $akhirPekan->issetPembuat() ? $akhirPekan->getPembuat()->getNama() : "";?></td>
+					</tr>
+					<tr>
+						<td><?php echo $appEntityLanguage->getAdminUbah();?></td>
+						<td><?php echo $akhirPekan->issetPengubah() ? $akhirPekan->getPengubah()->getNama() : "";?></td>
+					</tr>
+					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuBuat();?></td>
 						<td><?php echo $akhirPekan->dateFormatWaktuBuat('j F Y H:i:s');?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getIpBuat();?></td>
-						<td><?php echo $akhirPekan->getIpBuat();?></td>
-					</tr>
-					<tr>
-						<td><?php echo $appEntityLanguage->getAdminBuat();?></td>
-						<td><?php echo $akhirPekan->getAdminBuat();?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getWaktuUbah();?></td>
 						<td><?php echo $akhirPekan->dateFormatWaktuUbah('j F Y H:i:s');?></td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getIpUbah();?></td>
-						<td><?php echo $akhirPekan->getIpUbah();?></td>
+						<td><?php echo $appEntityLanguage->getIpBuat();?></td>
+						<td><?php echo $akhirPekan->getIpBuat();?></td>
 					</tr>
 					<tr>
-						<td><?php echo $appEntityLanguage->getAdminUbah();?></td>
-						<td><?php echo $akhirPekan->getAdminUbah();?></td>
+						<td><?php echo $appEntityLanguage->getIpUbah();?></td>
+						<td><?php echo $akhirPekan->getIpUbah();?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
@@ -431,11 +475,11 @@ require_once $appInclude->mainAppHeader(__DIR__);
 						<td></td>
 						<td>
 							<?php if($userPermission->isAllowedUpdate()){ ?>
-							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->akhir_pekan_id, $akhirPekan->getAkhirPekanId());?>';"><?php echo $appLanguage->getButtonUpdate();?></button>
+							<button type="button" class="btn btn-primary" id="update_data" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::UPDATE, Field::of()->akhir_pekan_id, $akhirPekan->getAkhirPekanId());?>';"><?php echo $appLanguage->getButtonUpdate();?></button>
 							<?php } ?>
 		
-							<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonBackToList();?></button>
-							<input type="hidden" name="akhir_pekan_id" value="<?php echo $akhirPekan->getAkhirPekanId();?>"/>
+							<button type="button" class="btn btn-primary" id="back_to_list" onclick="window.location='<?php echo $currentModule->getRedirectUrl();?>';"><?php echo $appLanguage->getButtonBackToList();?></button>
+							<input type="hidden" name="akhir_pekan_id" id="primary_key_value" value="<?php echo $akhirPekan->getAkhirPekanId();?>"/>
 						</td>
 					</tr>
 				</tbody>
@@ -466,7 +510,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"nama" => PicoSpecification::filter("nama", "fulltext"),
@@ -498,7 +542,24 @@ $sortable = PicoSortable::fromUserInput($inputGet, $sortOrderMap, array(
 $pageable = new PicoPageable(new PicoPage($inputGet->getPage(), $dataControlConfig->getPageSize()), $sortable);
 $dataLoader = new AkhirPekan(null, $database);
 
-$subqueryMap = null;
+$subqueryMap = array(
+"adminBuat" => array(
+	"columnName" => "admin_buat",
+	"entityName" => "AdminMin",
+	"tableName" => "admin",
+	"primaryKey" => "admin_id",
+	"objectName" => "pembuat",
+	"propertyName" => "nama"
+), 
+"adminUbah" => array(
+	"columnName" => "admin_ubah",
+	"entityName" => "AdminMin",
+	"tableName" => "admin",
+	"primaryKey" => "admin_id",
+	"objectName" => "pengubah",
+	"propertyName" => "nama"
+)
+);
 
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
@@ -511,24 +572,24 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				<span class="filter-group">
 					<span class="filter-label"><?php echo $appEntityLanguage->getNama();?></span>
 					<span class="filter-control">
-						<input type="text" class="form-control" name="nama" value="<?php echo $inputGet->getNama();?>" autocomplete="off"/>
+						<input type="text" class="form-control" name="nama" value="<?php echo $inputGet->getNama(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, false, true);?>" autocomplete="off"/>
 					</span>
 				</span>
 				
 				<span class="filter-group">
 					<span class="filter-label"><?php echo $appEntityLanguage->getKodeHari();?></span>
 					<span class="filter-control">
-						<input type="text" class="form-control" name="kode_hari" value="<?php echo $inputGet->getKodeHari();?>" autocomplete="off"/>
+						<input type="text" class="form-control" name="kode_hari" value="<?php echo $inputGet->getKodeHari(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, false, true);?>" autocomplete="off"/>
 					</span>
 				</span>
 				
 				<span class="filter-group">
-					<button type="submit" class="btn btn-success"><?php echo $appLanguage->getButtonSearch();?></button>
+					<button type="submit" class="btn btn-success" id="show_data"><?php echo $appLanguage->getButtonSearch();?></button>
 				</span>
 				<?php if($userPermission->isAllowedCreate()){ ?>
 		
 				<span class="filter-group">
-					<button type="button" class="btn btn-primary" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::CREATE);?>'"><?php echo $appLanguage->getButtonAdd();?></button>
+					<button type="button" class="btn btn-primary" id="add_data" onclick="window.location='<?php echo $currentModule->getRedirectUrl(UserAction::CREATE);?>'"><?php echo $appLanguage->getButtonAdd();?></button>
 				</span>
 				<?php } ?>
 			</form>
@@ -628,14 +689,14 @@ require_once $appInclude->mainAppHeader(__DIR__);
 				<div class="button-wrapper">
 					<div class="button-area">
 						<?php if($userPermission->isAllowedUpdate()){ ?>
-						<button type="submit" class="btn btn-success" name="user_action" value="activate"><?php echo $appLanguage->getButtonActivate();?></button>
-						<button type="submit" class="btn btn-warning" name="user_action" value="deactivate"><?php echo $appLanguage->getButtonDeactivate();?></button>
+						<button type="submit" class="btn btn-success" name="user_action" id="activate_selected" value="activate"><?php echo $appLanguage->getButtonActivate();?></button>
+						<button type="submit" class="btn btn-warning" name="user_action" id="deactivate_selected" value="deactivate"><?php echo $appLanguage->getButtonDeactivate();?></button>
 						<?php } ?>
 						<?php if($userPermission->isAllowedDelete()){ ?>
-						<button type="submit" class="btn btn-danger" name="user_action" value="delete" data-onclik-message="<?php echo htmlspecialchars($appLanguage->getWarningDeleteConfirmation());?>"><?php echo $appLanguage->getButtonDelete();?></button>
+						<button type="submit" class="btn btn-danger" name="user_action" id="delete_selected" value="delete" data-onclik-message="<?php echo htmlspecialchars($appLanguage->getWarningDeleteConfirmation());?>"><?php echo $appLanguage->getButtonDelete();?></button>
 						<?php } ?>
 						<?php if($userPermission->isAllowedSortOrder()){ ?>
-						<button type="submit" class="btn btn-primary" name="user_action" value="sort_order" disabled="disabled"><?php echo $appLanguage->getButtonSaveCurrentOrder();?></button>
+						<button type="submit" class="btn btn-primary" name="user_action" id="save_current_order" value="sort_order" disabled="disabled"><?php echo $appLanguage->getButtonSaveCurrentOrder();?></button>
 						<?php } ?>
 					</div>
 				</div>

@@ -20,15 +20,19 @@ use Sipro\Entity\App\AppUserRoleImpl;
 use Sipro\Entity\Data\MenuCache;
 use Sipro\Entity\Data\UserLevel;
 
+/**
+ * Utility class for menu-related operations such as caching, retrieval, and update
+ * based on user roles and access levels.
+ */
 class MenuUtil
 {
     /**
-     * Get main menu
+     * Retrieve the main menu for the currently logged-in user.
      *
-     * @param PicoDatabase $database
-     * @param SecretObject $appConfig
-     * @param AppUser $currentUser
-     * @return MainMenu
+     * @param PicoDatabase $database The database connection.
+     * @param SecretObject $appConfig Application configuration object.
+     * @param AppUser $currentUser The currently logged-in user.
+     * @return MainMenu The constructed main menu.
      */
     public static function getMainMenu($database, $appConfig, $currentUser)
     {
@@ -37,16 +41,35 @@ class MenuUtil
         $menus = self::getMenuFromCache($database, $appConfig, $currentUser, $userLevelId);
         return new MainMenu($menus, 'moduleGroupId', 'moduleGroup');
     }
+
+    /**
+     * Clear all cached menu data from the database.
+     *
+     * @param PicoDatabase $database The database connection.
+     * @return void
+     */
+    public static function clearAllCache($database)
+    {
+        $alwaysTrue = PicoSpecification::alwaysTrue();
+        $menuCache = new MenuCache(null, $database);
+        try
+        {
+            $menuCache->where($alwaysTrue)->delete();
+        }
+        catch(Exception $e)
+        {
+            // Do nothing
+        }
+    }
     
     /**
-     * Get menu from cache
+     * Get menu data from cache, or fallback to database query if unavailable.
      *
-     * @param PicoDatabase $database
-     * @param SecretObject $appConfig
-     * @param AppUser $currentUser
-     * @param AppUserRoleImpl $appUserRoleImpl
-     * @param mixed $userLevelId
-     * @return AppModuleImpl[]
+     * @param PicoDatabase $database The database connection.
+     * @param SecretObject $appConfig Application configuration object.
+     * @param AppUser $currentUser The currently logged-in user.
+     * @param mixed $userLevelId The user level ID.
+     * @return AppModuleImpl[] Array of menu items.
      */
     public static function getMenuFromCache($database, $appConfig, $currentUser, $userLevelId)
     {
@@ -75,13 +98,13 @@ class MenuUtil
     }
     
     /**
-     * Update menu on cache for specified user level
+     * Update and retrieve menu data in cache for a specific user level.
      *
-     * @param PicoDatabase $database
-     * @param SecretObject $appConfig
-     * @param mixed $userLevelId
-     * @param boolean $specialAccess
-     * @return AppModuleImpl[]
+     * @param PicoDatabase $database The database connection.
+     * @param SecretObject $appConfig Application configuration object.
+     * @param mixed $userLevelId The user level ID.
+     * @param bool $specialAccess Whether special access modules should be included.
+     * @return AppModuleImpl[] Array of menu items.
      */
     public static function updateMenuByUserLevelId($database, $appConfig, $userLevelId, $specialAccess)
     {
@@ -98,11 +121,11 @@ class MenuUtil
     }
     
     /**
-     * Update menu on cache for all user level
+     * Refresh menu cache for all user levels with active status.
      *
-     * @param PicoDatabase $database
-     * @param SecretObject $appConfig
-     * @return AppModuleImpl[]
+     * @param PicoDatabase $database The database connection.
+     * @param SecretObject $appConfig Application configuration object.
+     * @return void
      */
     public static function updateMenuForAllUserLevelId($database, $appConfig)
     {
@@ -122,13 +145,13 @@ class MenuUtil
     }
     
     /**
-     * Get menu from cache
+     * Generate menu based on user level and access, then optionally cache it.
      *
-     * @param PicoDatabase $database
-     * @param SecretObject $appConfig
-     * @param mixed $userLevelId
-     * @param boolean $specialAccess
-     * @return AppModuleImpl[]
+     * @param PicoDatabase $database The database connection.
+     * @param SecretObject $appConfig Application configuration object.
+     * @param mixed $userLevelId The user level ID to filter by.
+     * @param bool $specialAccess Whether special access modules should be included.
+     * @return AppModuleImpl[] Array of menu items.
      */
     public static function getMenuByUserLevelId($database, $appConfig, $userLevelId, $specialAccess)
     {

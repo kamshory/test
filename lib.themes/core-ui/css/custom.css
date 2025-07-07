@@ -562,4 +562,44 @@ table.table td p {
 }
 table.table td ul {
   margin-bottom: 0.1rem;
+}
+
+/* Simak */
+.table-bordered td {
+  border: 1px solid #ddd;
+  padding: 5px 12px;
+  vertical-align: top;
+}
+
+.table-word {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+}
+
+.table-word th, .table-word td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.table-word th {
+  background-color: #f2f2f2;
+}
+
+.table-word td.data-number {
+  text-align: right;
+  width: 20px;
+}
+
+.table-word thead tr td {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.table-word td.row-number {
+  border-right: 1px solid transparent;
+  text-align: right;
+  width: 20px;
+  padding-right: 0px;
 }/*# sourceMappingURL=custom.css.map */

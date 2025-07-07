@@ -1,6 +1,6 @@
 <?php
 
-namespace Sipro\Supervisor;
+namespace Sipro\Suprvisor;
 
 class AuthSupervisor
 {

@@ -12,6 +12,7 @@ use MagicObject\Util\PicoGenericObject;
 use MagicObject\Util\PicoIniUtil;
 use MagicObject\Util\PicoStringUtil;
 use MagicObject\Util\PicoYamlUtil;
+use MagicObject\Util\ValidationUtil;
 use ReflectionClass;
 use stdClass;
 
@@ -385,7 +386,7 @@ class SecretObject extends stdClass // NOSONAR
      * Check if the given data is an instance of MagicObject or PicoGenericObject.
      *
      * @param mixed $data The data to check.
-     * @return bool True if the data is an instance, otherwise false.
+     * @return bool true if the data is an instance, otherwise false.
      */
     private function typeObject($data)
     {
@@ -400,7 +401,7 @@ class SecretObject extends stdClass // NOSONAR
      * Check if the given data is an instance of self or stdClass.
      *
      * @param mixed $data The data to check.
-     * @return bool True if the data is an instance, otherwise false.
+     * @return bool true if the data is an instance, otherwise false.
      */
     private function typeStdClass($data)
     {
@@ -562,7 +563,7 @@ class SecretObject extends stdClass // NOSONAR
      * Check if a value requires encryption before being stored.
      *
      * @param string $var The variable name.
-     * @return bool True if the value needs to be encrypted, otherwise false.
+     * @return bool true if the value needs to be encrypted, otherwise false.
      */
     private function needInputEncryption($var)
     {
@@ -573,7 +574,7 @@ class SecretObject extends stdClass // NOSONAR
      * Check if a value requires decryption after being read.
      *
      * @param string $var The variable name.
-     * @return bool True if the value needs to be decrypted, otherwise false.
+     * @return bool true if the value needs to be decrypted, otherwise false.
      */
     private function needOutputDecryption($var)
     {
@@ -584,7 +585,7 @@ class SecretObject extends stdClass // NOSONAR
      * Check if a value requires encryption after being read.
      *
      * @param string $var The variable name.
-     * @return bool True if the value needs to be encrypted, otherwise false.
+     * @return bool true if the value needs to be encrypted, otherwise false.
      */
     private function needOutputEncryption($var)
     {
@@ -595,7 +596,7 @@ class SecretObject extends stdClass // NOSONAR
      * Check if a value requires decryption before being stored.
      *
      * @param string $var The variable name.
-     * @return bool True if the value needs to be decrypted, otherwise false.
+     * @return bool true if the value needs to be decrypted, otherwise false.
      */
     private function needInputDecryption($var)
     {
@@ -1038,7 +1039,7 @@ class SecretObject extends stdClass // NOSONAR
     /**
      * Check if JSON naming strategy is snake case.
      *
-     * @return bool True if the naming strategy is snake case, otherwise false.
+     * @return bool true if the naming strategy is snake case, otherwise false.
      */
     protected function _snakeJson()
     {
@@ -1054,7 +1055,7 @@ class SecretObject extends stdClass // NOSONAR
     /**
      * Check if YAML naming strategy is snake case.
      *
-     * @return bool True if the naming strategy is snake case, otherwise false.
+     * @return bool true if the naming strategy is snake case, otherwise false.
      */
     protected function _snakeYaml()
     {
@@ -1070,7 +1071,7 @@ class SecretObject extends stdClass // NOSONAR
     /**
      * Check if JSON naming strategy is upper camel case.
      *
-     * @return bool True if the naming strategy is upper camel case, otherwise false.
+     * @return bool true if the naming strategy is upper camel case, otherwise false.
      */
     protected function isUpperCamel()
     {
@@ -1086,7 +1087,7 @@ class SecretObject extends stdClass // NOSONAR
     /**
      * Check if the JSON output should be prettified
      *
-     * @return bool True if JSON output is set to be prettified; otherwise, false
+     * @return bool true if JSON output is set to be prettified; otherwise, false
      */
     protected function _pretty()
     {
@@ -1099,7 +1100,7 @@ class SecretObject extends stdClass // NOSONAR
     /**
      * Check if JSON naming strategy is camel case.
      *
-     * @return bool True if the naming strategy is camel case, otherwise false.
+     * @return bool true if the naming strategy is camel case, otherwise false.
      */
     protected function _camel()
     {
@@ -1227,6 +1228,62 @@ class SecretObject extends stdClass // NOSONAR
         $snake = $this->_snakeYaml();
         $input = $this->valueArray($snake);
         return PicoYamlUtil::dump($input, $inline, $indent, $flags);
+    }
+
+    /**
+     * Validate the current object based on property annotations.
+     *
+     * This method checks the properties of the current object against validation annotations.
+     * If any validation rule fails, an InvalidValueException will be thrown.
+     *
+     * @param string|null      $parentPropertyName        The name of the parent property, if applicable (for nested validation).
+     * @param array|null       $messageTemplate           Optional custom message templates for validation errors.
+     * @param MagicObject|null $reference                 Optional reference object. If provided and is an instance of MagicObject,
+     * validation will use the property annotations from the reference class
+     * (not from the validated object's class), but the data to validate is taken from the current object.
+     * @param bool             $validateIfReferenceEmpty  If true, and a reference object is provided but empty,
+     * validation will proceed using the current object's properties.
+     * If false, validation is skipped if the reference object is empty.
+     * Defaults to true.
+     * @throws InvalidValueException If validation fails.
+     * @return self Returns the current instance for method chaining.
+     */
+    public function validate(
+        $parentPropertyName = null,
+        $messageTemplate = null,
+        $reference = null,
+        $validateIfReferenceEmpty = true
+    ) {
+        $objectToValidate = $this; // Default: validate this object
+        $shouldValidate = true; // Flag to determine if validation should proceed
+
+        // Check if a reference object is provided and is an instance of MagicObject
+        if (isset($reference) && $reference instanceof MagicObject) {
+            // A reference object exists. Now determine if it has properties.
+            if ($reference->hasProperties()) {
+                // The reference has properties, so use annotations from the reference.
+                // The data being validated remains from $this.
+                $objectToValidate = $reference->loadData($this);
+            } else {
+                // The reference has no properties (it's empty).
+                // Determine if validation should still proceed based on $validateIfReferenceEmpty.
+                if (!$validateIfReferenceEmpty) {
+                    $shouldValidate = false; // Skip validation
+                }
+                // If $validateIfReferenceEmpty is true, $objectToValidate remains $this (default)
+                // and $shouldValidate remains true.
+            }
+        }
+        // If no reference ($reference == null), $shouldValidate remains true,
+        // and $objectToValidate remains $this, which is the desired behavior.
+
+
+        if ($shouldValidate) {
+            // Call the main validation utility only once
+            ValidationUtil::getInstance($messageTemplate)->validate($objectToValidate, $parentPropertyName);
+        }
+        
+        return $this;
     }
 
     /**

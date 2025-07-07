@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicObject\Database\PicoPredicate;
@@ -13,7 +13,7 @@ use Sipro\Entity\Data\Supervisor;
 
 $baseAssetsUrl = $appConfig->getSite()->getBaseUrl();
 
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, 'id');
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, 'id');
 $inputGet = new InputGet();
 
 ?><!DOCTYPE html>

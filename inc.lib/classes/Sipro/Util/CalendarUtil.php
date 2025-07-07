@@ -2,6 +2,16 @@
 
 namespace Sipro\Util;
 
+use Exception;
+use MagicApp\Field;
+use MagicObject\Database\PicoPredicate;
+use MagicObject\Database\PicoSort;
+use MagicObject\Database\PicoSortable;
+use MagicObject\Database\PicoSpecification;
+use Sipro\Entity\Data\AkhirPekan;
+use Sipro\Entity\Data\HariLibur;
+use stdClass;
+
 /**
  * Class CalendarUtil
  *
@@ -231,5 +241,135 @@ class CalendarUtil
     public function getEndDate()
     {
         return $this->endDate;
+    }
+
+    /**
+     * Retrieves working day data, including holidays and weekends, within a specified date range.
+     *
+     * @param mixed $database The database connection or instance used for querying.
+     * @param string $from The start date of the range (format: YYYY-MM-DD).
+     * @param string $to The end date of the range (format: YYYY-MM-DD).
+     * @return stdClass An object containing arrays of holidays and weekends.
+     */
+    public static function getWorkingdayData($database, $from, $to)
+    {
+        $hariLibur = new HariLibur(null, $database);
+        $akhirPekan = new AkhirPekan(null, $database);
+        $arrHariLibur = [];
+        $arrAkhirPekan = [];
+
+        try {
+            // Fetch holiday data within the specified range
+            $specsHariLibur = PicoSpecification::getInstance()
+                ->addAnd(PicoPredicate::getInstance()->between(Field::of()->tanggal, $from, $to))
+                ->addAnd(PicoPredicate::getInstance()->equals(Field::of()->aktif, true));
+
+            $sortsHariLibur = PicoSortable::getInstance()
+                ->addSortable(new PicoSort(Field::of()->tanggal, PicoSort::ORDER_TYPE_ASC));
+
+            $pageData1 = $hariLibur->findAll($specsHariLibur, null, $sortsHariLibur);
+            foreach ($pageData1->getResult() as $row) {
+                $arrHariLibur[] = $row->getTanggal();
+            }
+
+            // Fetch weekend data
+            $specsAkhirPekan = PicoSpecification::getInstance()
+                ->addAnd(PicoPredicate::getInstance()->equals(Field::of()->aktif, true));
+
+            $pageData2 = $akhirPekan->findAll($specsAkhirPekan);
+            foreach ($pageData2->getResult() as $row) {
+                $arrAkhirPekan[] = $row->getKodeHari();
+            }
+        } catch (Exception $e) {
+            // Handle exception silently
+        }
+
+        // Return results as an object
+        $result = new stdClass();
+        $result->holidays = $arrHariLibur;
+        $result->weekends = $arrAkhirPekan;
+
+        return $result;
+    }
+
+
+    /**
+     * Retrieves an array of working days between two dates, excluding weekends and holidays.
+     *
+     * @param PicoDatabase $database The database instance used to fetch working day configuration.
+     * @param string $from The start date (format: YYYY-MM-DD).
+     * @param string $to The end date (format: YYYY-MM-DD).
+     * @return string[] An array of working days within the specified range.
+     */
+    public static function getWorkingDays($database, $from, $to)
+    {
+        if(strtotime($from) > strtotime($to))
+        {
+            $x = $from;
+            $from = $to;
+            $to = $x;
+        }
+        $config = self::getWorkingdayData($database, $from, $to);
+        $weekends = $config->weekends;
+        $holidays = $config->holidays;
+
+        $utFrom = strtotime($from);
+        $utTo = strtotime($to);
+
+        $workingDays = array();
+        for($i = $utFrom; $i <= $utTo; $i += 86400)
+        {
+            $date = date('Y-m-d', $i);
+            if(in_array($date, $weekends) || in_array($date, $holidays))
+            {
+                // Not working days
+            }
+            else
+            {
+                // Working days
+                $workingDays[] = $date;
+            }
+        }
+        return $workingDays;
+    }
+
+    /**
+     * Retrieves an array of non-working days (weekends and holidays) between two dates.
+     *
+     * @param PicoDatabase $database The database instance used to fetch holiday configuration.
+     * @param string $from The start date (format: YYYY-MM-DD).
+     * @param string $to The end date (format: YYYY-MM-DD).
+     * @return string[] An array of non-working days within the specified range.
+     */
+    public static function getHolidays($database, $from, $to)
+    {
+        if(strtotime($from) > strtotime($to))
+        {
+            $x = $from;
+            $from = $to;
+            $to = $x;
+        }
+        $config = self::getWorkingdayData($database, $from, $to);
+        $weekends = $config->weekends;
+        $holidays = $config->holidays;
+
+        $utFrom = strtotime($from);
+        $utTo = strtotime($to);
+
+        $notWorkingDays = array();
+        for($i = $utFrom; $i < $utTo; $i += 86400)
+        {
+            $date = strtotime('Y-m-d', $i);
+            if(in_array($date, $weekends) || in_array($date, $holidays))
+            {
+                // Not working days
+                $notWorkingDays[] = $date;
+            }
+            else
+            {
+                // Working days
+            }
+        }
+        return $notWorkingDays;
     }
 }

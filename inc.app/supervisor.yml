@@ -17,6 +17,9 @@ menu:
       - name: Acc Buku Harian
         url: acc-buku-harian.php
         icon: check  
+      - name: Daftar Simak
+        url: daftar-simak.php
+        icon: check  
       - name: Bill of Quantity Proyek
         url: bill-of-quantity-proyek.php
         icon: 3d  

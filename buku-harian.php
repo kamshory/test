@@ -12,7 +12,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -25,6 +25,7 @@ use Sipro\Entity\Data\BillOfQuantity;
 use Sipro\Entity\Data\BillOfQuantityProyek;
 use Sipro\Entity\Data\BukuHarian;
 use Sipro\Entity\Data\BukuHarianMin;
+use Sipro\Entity\Data\CutiMin;
 use Sipro\Entity\Data\LokasiPekerjaan;
 use Sipro\Entity\Data\LokasiProyek;
 use Sipro\Entity\Data\ManPower;
@@ -781,10 +782,32 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 
-$proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
+$proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true);
+$tanggal = $inputGet->getTanggal(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
+$tanggalCuti = false;
+$cuti = new CutiMin(null, $database);
+$specsCuti = PicoSpecification::getInstance()
+	->addAnd([Field::of()->proyekId, $proyekId])
+	->addAnd(PicoPredicate::getInstance()->like(Field::of()->detilTanggalCuti, "%$tanggal%"))
+	->addAnd([Field::of()->supervisorId, $currentLoggedInSupervisor->getSupervisorId()])
+	->addAnd([Field::of()->aktif, true])
+	->addAnd([Field::of()->statusCuti, 'A']);
+try
+{
+	$cuti->findOne($specsCuti);
+	$tanggalCuti = true;
+}
+catch(Exception $e)
+{
+	// Do nothing
+}
+
+
+if(!$tanggalCuti)
+{
 ?>
 <link rel="stylesheet" href="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/summernote/0.8.20/summernote.css">
 <link rel="stylesheet" href="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>vendors/summernote/0.8.20/summernote-bs4.min.css">
@@ -992,7 +1015,7 @@ var proyekId = <?php echo $proyekId;?>;
 						<td><?php echo $appEntityLanguage->getTanggal();?></td>
 						<td>
 						<?php
-						$tanggal = $inputGet->getTanggal();
+						
 						if(empty($tanggal))
 						{
 							$tanggal = date('Y-m-d');
@@ -1332,6 +1355,15 @@ var proyekId = <?php echo $proyekId;?>;
 </div>
 
 <?php 
+}
+else
+{
+?>
+<div class="alert alert-danger">
+	Anda tidak dapat mengisi buku harian pada tanggal <?php echo date('j F Y', strtotime($tanggal));?>, karena Anda sedang cuti.
+</div>
+<?php
+}
 require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else if($inputGet->getUserAction() == UserAction::UPDATE)
@@ -1365,7 +1397,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		)
 		);
 		$bukuHarian->findOneWithPrimaryKeyValue($inputGet->getBukuHarianId(), $subqueryMap);
-		if($bukuHarian->hasValueBukuHarianId())
+		if($bukuHarian->issetBukuHarianId())
 		{
 			$proyekId = $bukuHarian->getProyekId();
 			$x = array(1=>'cerah', 2=>'berawan', 3=>'hujan', 4=>'hujan-lebat');
@@ -1376,7 +1408,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 				$tv = $bukuHarian->get('c_'.$tt);
 				$data_cuaca[$tt] = isset($x[$tv]) ? $x[$tv] : null;
 			}
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -1529,11 +1561,11 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
-						<td><?php echo $bukuHarian->hasValueSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->issetSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $bukuHarian->hasValueProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->issetProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getTanggal();?></td>
@@ -1590,7 +1622,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 							<?php 
 								$specificationRekomendasiPekerjaan = PicoSpecification::getInstance()
 								->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-								$appEntityLanguagePermasalahan = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+								$appEntityLanguagePermasalahan = new AppEntityLanguageImpl(new RekomendasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 								$dataLoader = new RekomendasiPekerjaan(null, $database);
 								try
 								{
@@ -1688,7 +1720,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 								$parentId = $bukuHarian->getBillOfQuantityId();
 								$specificationBoq = PicoSpecification::getInstance()
 								->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-								$appEntityLanguageBoq = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+								$appEntityLanguageBoq = new AppEntityLanguageImpl(new BillOfQuantity(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 								$dataLoader = new BillOfQuantityProyek(null, $database);
 								try
 								{
@@ -1763,8 +1795,8 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 							//->addAnd([Field::of()->proyekId, $bukuHarian->getProyekId()])
 							->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()])
 							;
-							$appEntityLanguageAcuanPengawasanProyek = new AppEntityLanguage(new AcuanPengawasanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
-							$appEntityLanguageAcuanPengawasan = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+							$appEntityLanguageAcuanPengawasanProyek = new AppEntityLanguageImpl(new AcuanPengawasanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+							$appEntityLanguageAcuanPengawasan = new AppEntityLanguageImpl(new AcuanPengawasan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 							$dataLoader = new AcuanPengawasanProyek(null, $database);
 							try
 							{
@@ -1810,7 +1842,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 						
 						$specificationManPower = PicoSpecification::getInstance()
 							->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-						$appEntityLanguageManPowerProyek = new AppEntityLanguage(new ManPowerProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+						$appEntityLanguageManPowerProyek = new AppEntityLanguageImpl(new ManPowerProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 						$dataLoader = new ManPowerProyek(null, $database);
 						try
 						{
@@ -1889,7 +1921,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 
 							$specificationMaterial = PicoSpecification::getInstance()
 							->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-							$appEntityLanguageMaterialProyek = new AppEntityLanguage(new MaterialProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+							$appEntityLanguageMaterialProyek = new AppEntityLanguageImpl(new MaterialProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 							$dataLoader = new MaterialProyek(null, $database);
 							try
 							{
@@ -2040,7 +2072,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 							<?php 
 							$specificationPeralatan = PicoSpecification::getInstance()
 							->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-							$appEntityLanguagePeralatanProyek = new AppEntityLanguage(new PeralatanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+							$appEntityLanguagePeralatanProyek = new AppEntityLanguageImpl(new PeralatanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 							$dataLoader = new PeralatanProyek(null, $database);
 							try{
 								$peralatanFinder = new Peralatan(null, $database);
@@ -2324,7 +2356,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$bukuHarian->findOneWithPrimaryKeyValue($inputGet->getBukuHarianId(), $subqueryMap);
-		if($bukuHarian->hasValueBukuHarianId())
+		if($bukuHarian->issetBukuHarianId())
 		{
 			$x = array(1=>'cerah', 2=>'berawan', 3=>'hujan', 4=>'hujan-lebat');
 			$data_cuaca = array();
@@ -2334,7 +2366,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 				$tv = $bukuHarian->get('c_'.$tt);
 				$data_cuaca[$tt] = isset($x[$tv]) ? $x[$tv] : null;
 			}
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -2388,11 +2420,11 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
-						<td><?php echo $bukuHarian->hasValueSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->issetSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $bukuHarian->hasValueProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->issetProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getTanggal();?></td>
@@ -2413,7 +2445,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationLokasiPekerjaan = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguageLokasiPekerjaan = new AppEntityLanguage(new LokasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageLokasiPekerjaan = new AppEntityLanguageImpl(new LokasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new LokasiPekerjaan(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationLokasiPekerjaan, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2465,7 +2497,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationRekomendasiPekerjaan = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguagePermasalahan = new AppEntityLanguage(new RekomendasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguagePermasalahan = new AppEntityLanguageImpl(new RekomendasiPekerjaan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new RekomendasiPekerjaan(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationRekomendasiPekerjaan, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2533,7 +2565,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationBoq = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguageBoq = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageBoq = new AppEntityLanguageImpl(new BillOfQuantity(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new BillOfQuantityProyek(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationBoq, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2597,8 +2629,8 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationAcuanPengawasanProyek = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguageAcuanPengawasanProyek = new AppEntityLanguage(new AcuanPengawasanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
-			$appEntityLanguageAcuanPengawasan = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageAcuanPengawasanProyek = new AppEntityLanguageImpl(new AcuanPengawasanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageAcuanPengawasan = new AppEntityLanguageImpl(new AcuanPengawasan(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new AcuanPengawasanProyek(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationAcuanPengawasanProyek, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2652,7 +2684,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationManPower = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguageManPowerProyek = new AppEntityLanguage(new ManPowerProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageManPowerProyek = new AppEntityLanguageImpl(new ManPowerProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new ManPowerProyek(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationManPower, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2702,7 +2734,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationMaterial = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguageMaterialProyek = new AppEntityLanguage(new MaterialProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguageMaterialProyek = new AppEntityLanguageImpl(new MaterialProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new MaterialProyek(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationMaterial, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2752,7 +2784,7 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 			<?php 
 			$specificationPeralatan = PicoSpecification::getInstance()
 			->addAnd([Field::of()->bukuHarianId, $bukuHarian->getBukuHarianId()]);
-			$appEntityLanguagePeralatanProyek = new AppEntityLanguage(new PeralatanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+			$appEntityLanguagePeralatanProyek = new AppEntityLanguageImpl(new PeralatanProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 			$dataLoader = new PeralatanProyek(null, $database);
 			try{
 			$pageData = $dataLoader->findAll($specificationPeralatan, null, null, true, null, MagicObject::FIND_OPTION_NO_FETCH_DATA);
@@ -2844,7 +2876,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 $proyekId = $inputGet->getProyekId();
 $specMap = array(
 	"supervisorId" => PicoSpecification::filter("supervisorId", "number"),
@@ -2952,6 +2984,10 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				}
 			</script>
 			<?php
+
+			
+
+
 			$supervisorId = $currentLoggedInSupervisor->getSupervisorId();
 
 			$inputGet = new InputGet();
@@ -3007,6 +3043,33 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 					->setClass($class)
 					;
 			}
+			$tanggalCuti = array();
+			$cuti = new CutiMin(null, $database);
+			$specsCuti = PicoSpecification::getInstance()
+				->addAnd([Field::of()->proyekId, $proyekId])
+				->addAnd(PicoPredicate::getInstance()->like(Field::of()->detilTanggalCuti, "%$periode%"))
+				->addAnd([Field::of()->supervisorId, $currentLoggedInSupervisor->getSupervisorId()])
+				->addAnd([Field::of()->aktif, true])
+				->addAnd([Field::of()->statusCuti, 'A']);
+			try
+			{
+				$cutiData = $cuti->findAll($specsCuti);
+				foreach($cutiData->getResult() as $cuti)
+				{
+					$detilTanggalCuti = $cuti->getDetilTanggalCuti();
+					$detilTanggalCutiArr = explode(',', $detilTanggalCuti);
+					foreach($detilTanggalCutiArr as $tanggal)
+					{
+						$tanggalCuti[] = trim($tanggal);
+					}
+				}
+			}
+			catch(Exception $e)
+			{
+				// do nothing
+			}
+
+
 			try
 			{
 				$pageData = $bukuHarianFinder->findAll($specs);
@@ -3099,6 +3162,10 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 					background-color: red;
 					color: #FFFFFF;
 				}
+				button.leave{
+					background-color: #fb5d39;
+					color: #FFFFFF;
+				}
 
 			</style>
 			<div class="calendar">
@@ -3186,10 +3253,11 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 										$class = $col['class'];
 										$tanggal = $col['date'];
 										$class2 = isset($buhar[$tanggal]) ? $buhar[$tanggal]->getClass() : "";
+										$class3 = in_array($tanggal, $tanggalCuti) ? 'leave' : '';
 										$bukuHarianId = isset($buhar[$tanggal]) ? $buhar[$tanggal]->getBukuHarianId() : "";
 										$dataKoordinator = isset($buhar[$tanggal]) ? $buhar[$tanggal]->getDataKoordinator() : "";
 										$dataKtsk = isset($buhar[$tanggal]) ? $buhar[$tanggal]->getDataKtsk() : "";
-										$class = $class.' '.$class2;
+										$class = trim(preg_replace('/\s\s+/', ' ', $class.' '.$class2. ' '.$class3));
 									?>
 									<button 
 									data-proyek-id="<?php echo $proyekId;?>" 
@@ -3198,6 +3266,9 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 									data-koordinator="<?php echo $dataKoordinator;?>"
 									data-ktsk="<?php echo $dataKtsk;?>"
 									class="calendar-button buku-harian-button <?php echo $class;?>"
+									<?php if($class3 == 'leave'){?>
+										disabled="disabled"
+									<?php } ?>
 									><?php echo $col['day'];?></button>
 									<?php
 									}

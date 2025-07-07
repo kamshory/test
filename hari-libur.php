@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -134,7 +134,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -206,9 +206,9 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$hariLibur = new HariLibur(null, $database);
 	try{
 		$hariLibur->findOneByHariLiburId($inputGet->getHariLiburId());
-		if($hariLibur->hasValueHariLiburId())
+		if($hariLibur->issetHariLiburId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -309,9 +309,9 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$hariLibur->findOneWithPrimaryKeyValue($inputGet->getHariLiburId(), $subqueryMap);
-		if($hariLibur->hasValueHariLiburId())
+		if($hariLibur->issetHariLiburId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -340,7 +340,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getJenisHariLibur();?></td>
-						<td><?php echo $hariLibur->hasValueJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
+						<td><?php echo $hariLibur->issetJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getBuka();?></td>
@@ -397,7 +397,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
 require_once $appInclude->mainAppHeader(__DIR__);
@@ -581,7 +581,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="tanggal"><?php echo $hariLibur->getTanggal();?></td>
 								<td data-col-name="nama"><?php echo $hariLibur->getNama();?></td>
-								<td data-col-name="jenis_hari_libur_id"><?php echo $hariLibur->hasValueJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
+								<td data-col-name="jenis_hari_libur_id"><?php echo $hariLibur->issetJenisHariLibur() ? $hariLibur->getJenisHariLibur()->getNama() : "";?></td>
 								<td data-col-name="buka"><?php echo $hariLibur->optionBuka($appLanguage->getYes(), $appLanguage->getNo());?></td>
 								<td data-col-name="aktif"><?php echo $hariLibur->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>

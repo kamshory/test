@@ -1,13 +1,13 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\PicoFilterConstant;
 use Sipro\Entity\Data\Material;
 use Sipro\Util\CommonUtil;
 
 require_once dirname(__DIR__) . "/inc.app/auth-supervisor-no-form.php";
-$appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Material(), $appConfig, $currentUser->getLanguageId());
 
 $inputGet = new InputGet();
 

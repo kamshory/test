@@ -4,7 +4,8 @@ namespace MagicObject\Database;
 use DateTime;
 use Exception;
 use MagicObject\Exceptions\ClassNotFoundException;
-use MagicObject\Exceptions\EmptyResultException;
+use MagicObject\Exceptions\DataRetrievalException;
+use MagicObject\Exceptions\NoRecordFoundException;
 use MagicObject\Exceptions\EntityException;
 use MagicObject\Exceptions\InvalidAnnotationException;
 use MagicObject\Exceptions\InvalidFilterException;
@@ -281,7 +282,7 @@ class PicoDatabasePersistence // NOSONAR
      * Check if a given string is null or empty.
      *
      * @param string $string The string to check
-     * @return bool True if the string is null or empty, false otherwise
+     * @return bool true if the string is null or empty, false otherwise
      */
     public static function nullOrEmpty($string)
     {
@@ -292,7 +293,7 @@ class PicoDatabasePersistence // NOSONAR
      * Check if a given string is not null and not empty.
      *
      * @param string $string The string to check
-     * @return bool True if the string is not null and not empty, false otherwise
+     * @return bool true if the string is not null and not empty, false otherwise
      */
     public static function notNullAndNotEmpty($string)
     {
@@ -651,7 +652,7 @@ class PicoDatabasePersistence // NOSONAR
      *
      * @param PDOStatement $stmt PDO statement to check.
      * @param string|null $databaseType Optional database type, for specific behavior (e.g., SQLite).
-     * @return bool True if rows match, false otherwise.
+     * @return bool true if rows match, false otherwise.
      */
     public function matchRow($stmt, $databaseType = null)
     {
@@ -863,24 +864,20 @@ class PicoDatabasePersistence // NOSONAR
     private function getSet($info, $queryBuilder)
     {
         $sets = array();
-        $primaryKeys = $this->getPrimaryKeys($info);
         $nullCols = $this->getNullCols($info);
         $nonUpdatableCols = $this->getNonUpdatableCols($info);
         foreach($info->getColumns() as $property=>$column)
         {
             $columnName = $column[self::KEY_NAME];
-            if(!$this->isPrimaryKeys($columnName, $primaryKeys))
+            $value = $this->object->get($property);
+            $value = $this->fixInput($value, $column);
+            if(($this->flagIncludeNull || $value !== null) 
+                && !in_array($columnName, $nullCols) 
+                && !in_array($columnName, $nonUpdatableCols)
+                )
             {
-                $value = $this->object->get($property);
-                $value = $this->fixInput($value, $column);
-                if(($this->flagIncludeNull || $value !== null) 
-                    && !in_array($columnName, $nullCols) 
-                    && !in_array($columnName, $nonUpdatableCols)
-                    )
-                {
-                    $value = $queryBuilder->escapeValue($value);
-                    $sets[] = $columnName . " = " . $value;
-                }
+                $value = $queryBuilder->escapeValue($value);
+                $sets[] = $columnName . " = " . $value;
             }
         }
         foreach($nullCols as $columnName)
@@ -998,7 +995,7 @@ class PicoDatabasePersistence // NOSONAR
      *
      * @param string $columnName The name of the column to check.
      * @param array $primaryKeys An array of primary key column names.
-     * @return bool True if the column is a primary key, false otherwise.
+     * @return bool true if the column is a primary key, false otherwise.
      */
     public function isPrimaryKeys($columnName, $primaryKeys)
     {
@@ -1229,7 +1226,7 @@ class PicoDatabasePersistence // NOSONAR
      *
      * @param string $strategy The generation strategy for the property.
      * @param string $propertyName The name of the property to check.
-     * @return bool True if a generated value is required, false otherwise.
+     * @return bool true if a generated value is required, false otherwise.
      */
     private function isRequireGenerateValue($strategy, $propertyName)
     {
@@ -1957,7 +1954,7 @@ class PicoDatabasePersistence // NOSONAR
      *
      * @param string[] $primaryKeys Array of primary key names
      * @param array $propertyValues Property values to check
-     * @return bool True if primary keys are valid, false otherwise
+     * @return bool true if primary keys are valid, false otherwise
      */
     private function isValidPrimaryKeyValues($primaryKeys, $propertyValues)
     {
@@ -2007,7 +2004,7 @@ class PicoDatabasePersistence // NOSONAR
      * @return object The found record, or null if not found.
      * @throws EntityException If there is an issue with the entity.
      * @throws InvalidFilterException If the provided filter criteria are invalid.
-     * @throws EmptyResultException If no record is found or no primary key is set.
+     * @throws NoRecordFoundException If no record is found or no primary key is set.
      */
     public function find($propertyValues)
     {
@@ -2048,17 +2045,17 @@ class PicoDatabasePersistence // NOSONAR
                 }
                 else
                 {
-                    throw new EmptyResultException(self::MESSAGE_NO_RECORD_FOUND);
+                    throw new NoRecordFoundException(self::MESSAGE_NO_RECORD_FOUND);
                 }
             }
             catch(Exception $e)
             {
-                throw new EmptyResultException($e->getMessage());
+                throw new NoRecordFoundException($e->getMessage());
             }
         }
         else
         {
-            throw new EmptyResultException("No primary key set");
+            throw new NoRecordFoundException("No primary key set");
         }
     }
     
@@ -2271,7 +2268,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoPageable|null $pageable Pageable object (optional)
      * @param PicoSortable|string|null $sortable Sortable object or field name (optional)
      * @param PicoTableInfo $info Table information
-     * @return bool True if JOIN is required, otherwise false
+     * @return bool true if JOIN is required, otherwise false
      */
     protected function isRequireJoin($specification, $pageable, $sortable, $info)
     {
@@ -2292,7 +2289,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoPageable|null $pageable Pageable object (optional)
      * @param PicoSortable|string|null $sortable Sortable object or field name (optional)
      * @param PicoTableInfo $info Table information
-     * @return bool True if JOIN is required, otherwise false
+     * @return bool true if JOIN is required, otherwise false
      */
     private function isRequireJoinFromPageableAndSortable($pageable, $sortable, $info)
     {
@@ -2323,7 +2320,7 @@ class PicoDatabasePersistence // NOSONAR
      * Determine if JOIN is required based on specification
      *
      * @param PicoSpecification $specification Specification object
-     * @return bool True if JOIN is required, otherwise false
+     * @return bool true if JOIN is required, otherwise false
      */
     private function isRequireJoinFromSpecification($specification)
     {
@@ -2426,7 +2423,9 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoSortable|string|null $sortable       Sort order for the results
      * @param array|null $subqueryMap                Optional subquery mappings
      * @return array|null                              The retrieved record or null if not found
-     * @throws EntityException|EmptyResultException    If no results are found
+     * @throws EntityException If there is an issue with the entity
+     * @throws NoRecordFoundException If no record is found
+     * @throws DataRetrievalException If there is an error in data retrieval
      */
     public function findOne($specification, $sortable = null, $subqueryMap = null)
     {
@@ -2450,7 +2449,8 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoSortable|string|null $sortable     Sort order for the results
      * @param array|null $subqueryMap               Optional subquery mappings
      * @return array|null                             The list of records or null if not found
-     * @throws EntityException|EmptyResultException   If no results are found
+     * @throws EntityException If there is an issue with the entity
+     * @throws DataRetrievalException If there is an error in data retrieval
      */
     public function findAll($specification, $pageable = null, $sortable = null, $subqueryMap = null)
     {
@@ -2471,7 +2471,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param mixed $primaryKeyVal    The value of the primary key
      * @param array $subqueryMap      Optional subquery mappings
      * @return array|null             The retrieved record or null if not found
-     * @throws EmptyResultException    If no record is found
+     * @throws NoRecordFoundException If no record is found
      */
     public function findOneWithPrimaryKeyValue($primaryKeyVal, $subqueryMap)
     {
@@ -2519,12 +2519,12 @@ class PicoDatabasePersistence // NOSONAR
             }
             else
             {
-                throw new EmptyResultException(self::MESSAGE_NO_RECORD_FOUND);
+                throw new NoRecordFoundException(self::MESSAGE_NO_RECORD_FOUND);
             }
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new NoRecordFoundException($e->getMessage());
         }
         return $data;
     }
@@ -2538,7 +2538,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoSortable|string|null $sortable   Sort order for the results
      * @param array|null $subqueryMap               Optional subquery mappings
      * @return array|null             The list of records or null if not found
-     * @throws EntityException|EmptyResultException If no results are found
+     * @throws DataRetrievalException If there is an error in data retrieval
      */
     public function findSpecificWithSubquery($selected, $specification, $pageable = null, $sortable = null, $subqueryMap = null)
     {
@@ -2570,14 +2570,10 @@ class PicoDatabasePersistence // NOSONAR
                     $result[] = $data;
                 }
             }
-            else
-            {
-                throw new EmptyResultException(self::MESSAGE_NO_RECORD_FOUND);
-            }
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
         return $result;
     }
@@ -2647,7 +2643,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoPageable|null $pageable         Pageable information for pagination
      * @param PicoSortable|string|null $sortable   Sort order for the results
      * @return array|null             The list of records or null if not found
-     * @throws EntityException|EmptyResultException If no results are found
+     * @throws DataRetrievalException If there is an error in data retrieval
      */
     public function findSpecific($selected, $specification, $pageable = null, $sortable = null)
     {
@@ -2668,14 +2664,10 @@ class PicoDatabasePersistence // NOSONAR
                     $result[] = $data;
                 }
             }
-            else
-            {
-                throw new EmptyResultException(self::MESSAGE_NO_RECORD_FOUND);
-            }
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
         return $result;
     }
@@ -2786,7 +2778,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param PicoPageable|null $pageable            Pageable information for pagination
      * @param PicoSortable|null $sortable             Sort order for the results
      * @return int                                   The count of records
-     * @throws EntityException|EmptyResultException   If an error occurs
+     * @throws DataRetrievalException If there is an error in data retrieval
      */
     public function countAll($specification = null, $pageable = null, $sortable = null)
     {
@@ -2827,7 +2819,7 @@ class PicoDatabasePersistence // NOSONAR
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
     }
     
@@ -2837,7 +2829,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param string $propertyName   The property name to filter by.
      * @param mixed $propertyValue   The value of the property to filter by.
      * @return int                   The count of matched records.
-     * @throws EntityException|InvalidFilterException|PDOException|EmptyResultException If an error occurs.
+     * @throws EntityException|InvalidFilterException|PDOException|DataRetrievalException If an error occurs.
      */
     public function countBy($propertyName, $propertyValue)
     {
@@ -2854,23 +2846,36 @@ class PicoDatabasePersistence // NOSONAR
         $queryBuilder = new PicoDatabaseQueryBuilder($this->database);
         $sqlQuery = $queryBuilder
             ->newQuery()
-            ->select($this->database->getDatabaseType() == PicoDatabaseType::DATABASE_TYPE_SQLITE ? "count(*)" : $agg)
+            ->select($this->database->getDatabaseType() == PicoDatabaseType::DATABASE_TYPE_SQLITE ? $agg : "COUNT(*) as total")
             ->from($info->getTableName())
             ->where($where);
-
+        $count = 0;
         try {
             $stmt = $this->database->executeQuery($sqlQuery);
             if ($stmt) {
-                return $this->database->getDatabaseType() == PicoDatabaseType::DATABASE_TYPE_SQLITE 
-                    ? $stmt->fetchColumn() 
-                    : $stmt->rowCount();
+                if($this->database->getDatabaseType() == PicoDatabaseType::DATABASE_TYPE_SQLITE)
+                {
+                    $data = $stmt->fetchColumn();
+                    if($data === false)
+                    {
+                        // SQLite database
+                        $count = 0;
+                    }
+                    else
+                    {
+                        $count = 1;
+                    }
+                } 
+                else
+                {
+                    $count = $stmt->fetchColumn();
+                }
             }
-            throw new PDOException("Unknown error");
+            return $count;
         } catch (Exception $e) {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
     }
-
     
     /**
      * Delete records based on specified criteria without reading them first
@@ -2878,7 +2883,7 @@ class PicoDatabasePersistence // NOSONAR
      * @param string $propertyName   The property name to filter by
      * @param mixed $propertyValue   The value of the property to filter by
      * @return int                   The number of deleted records
-     * @throws EntityException|InvalidFilterException|PDOException|EmptyResultException If an error occurs
+     * @throws EntityException|InvalidFilterException|PDOException|DataRetrievalException If an error occurs
      */
     public function deleteBy($propertyName, $propertyValue)
     {
@@ -2909,7 +2914,7 @@ class PicoDatabasePersistence // NOSONAR
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
     }
     
@@ -2925,7 +2930,7 @@ class PicoDatabasePersistence // NOSONAR
      * @return array|null Returns the matching record as an associative array, or null if no record is found.
      * @throws EntityException If there is an issue with the entity operations.
      * @throws InvalidFilterException If the constructed filter is invalid.
-     * @throws EmptyResultException If the query results in an empty set.
+     * @throws DataRetrievalException If there is an error during data retrieval.
      */
     public function findOneBy($propertyName, $propertyValue, $sortable = null)
     {
@@ -2968,7 +2973,7 @@ class PicoDatabasePersistence // NOSONAR
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
         return $data;   
     }
@@ -3246,7 +3251,7 @@ class PicoDatabasePersistence // NOSONAR
      * This method checks if the provided filter is not null, not empty, and not a whitespace string.
      *
      * @param string $filter The filter string to validate.
-     * @return bool True if the filter is valid; otherwise, false.
+     * @return bool true if the filter is valid; otherwise, false.
      */
     private function isValidFilter($filter)
     {
@@ -3260,7 +3265,7 @@ class PicoDatabasePersistence // NOSONAR
      * a valid, non-empty string.
      *
      * @param string $value The value to check.
-     * @return bool True if the value is valid; otherwise, false.
+     * @return bool true if the value is valid; otherwise, false.
      */
     private function notNullAndNotEmptyAndNotSpace($value)
     {
@@ -3368,7 +3373,7 @@ class PicoDatabasePersistence // NOSONAR
      * if it should return `true`; otherwise, it returns `false`.
      *
      * @param mixed $value The input value to convert.
-     * @return bool True if the value is equivalent to `1`; otherwise, false.
+     * @return bool true if the value is equivalent to `1`; otherwise, false.
      */
     private function boolval($value)
     {
@@ -3483,7 +3488,7 @@ class PicoDatabasePersistence // NOSONAR
      * This method checks specific string representations of null or default datetime values.
      *
      * @param string $value The value to check.
-     * @return bool True if the value represents a null datetime; otherwise, false.
+     * @return bool true if the value represents a null datetime; otherwise, false.
      */
     private function isDateTimeNull($value)
     {
@@ -3549,7 +3554,7 @@ class PicoDatabasePersistence // NOSONAR
      * This method constructs and executes a query to retrieve all records from the 
      * specified table in the database.
      *
-     * @return mixed The result set containing all records.
+     * @return array The result set containing all records.
      * @throws EntityException If an error occurs during the selection process.
      */
     public function selectAll()
@@ -3592,7 +3597,7 @@ class PicoDatabasePersistence // NOSONAR
      * @return mixed The matching record or null if not found.
      * @throws EntityException If an error occurs during the selection process.
      * @throws InvalidFilterException If the provided filter is invalid.
-     * @throws EmptyResultException If no result is found.
+     * @throws DataRetrievalException If there is an error during data retrieval.
      */
     private function _select($info = null, $queryBuilder = null, $where = null, $specification = null, $pageable = null, $sortable = null)
     {
@@ -3648,7 +3653,7 @@ class PicoDatabasePersistence // NOSONAR
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
         return $data;
     }
@@ -3668,7 +3673,7 @@ class PicoDatabasePersistence // NOSONAR
      * @return array An array of matching records.
      * @throws EntityException If an error occurs during the selection process.
      * @throws InvalidFilterException If the provided filter is invalid.
-     * @throws EmptyResultException If no results are found.
+     * @throws DataRetrievalException If there is an error during data retrieval.
      */
     private function _selectAll($info = null, $queryBuilder = null, $where = null, $specification = null, $pageable = null, $sortable = null)
     {
@@ -3719,7 +3724,7 @@ class PicoDatabasePersistence // NOSONAR
         }
         catch(Exception $e)
         {
-            throw new EmptyResultException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
         return $result;
     }
@@ -3987,7 +3992,7 @@ class PicoDatabasePersistence // NOSONAR
      * This method verifies whether the provided value is set and is an array.
      *
      * @param mixed $value The value to be checked.
-     * @return bool True if the value is an array, false otherwise.
+     * @return bool true if the value is an array, false otherwise.
      */
     public static function isArray($value)
     {
@@ -4001,7 +4006,7 @@ class PicoDatabasePersistence // NOSONAR
      * returning true if it contains a non-empty value, and false otherwise.
      *
      * @param mixed $input The input value to check.
-     * @return bool True if the input is not empty, false otherwise.
+     * @return bool true if the input is not empty, false otherwise.
      */
     public static function isNotEmpty($input)
     {

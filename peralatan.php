@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -155,7 +155,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -238,7 +238,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$peralatan->findOneByPeralatanId($inputGet->getPeralatanId());
 		if($peralatan->hasValuePeralatanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -350,7 +350,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$peralatan->findOneWithPrimaryKeyValue($inputGet->getPeralatanId(), $subqueryMap);
 		if($peralatan->hasValuePeralatanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -440,7 +440,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
 require_once $appInclude->mainAppHeader(__DIR__);

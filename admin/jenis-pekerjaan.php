@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -220,7 +220,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -310,7 +310,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$jenisPekerjaan->findOne($specification);
 		if($jenisPekerjaan->issetJenisPekerjaanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -420,7 +420,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$jenisPekerjaan->findOne($specification, null, $subqueryMap);
 		if($jenisPekerjaan->issetJenisPekerjaanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -542,7 +542,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new JenisPekerjaan(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"jenisPekerjaanId" => PicoSpecification::filter("jenisPekerjaanId", "fulltext"),

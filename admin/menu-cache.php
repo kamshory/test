@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -146,7 +146,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new MenuCache(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new MenuCache(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -209,7 +209,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$menuCache->findOneByMenuCacheId($inputGet->getMenuCacheId());
 		if($menuCache->issetMenuCacheId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new MenuCache(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new MenuCache(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -291,7 +291,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$menuCache->findOneByMenuCacheId($inputGet->getMenuCacheId());
 		if($menuCache->issetMenuCacheId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new MenuCache(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new MenuCache(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -365,7 +365,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new MenuCache(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new MenuCache(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"userLevelId" => PicoSpecification::filter("userLevelId", "number")

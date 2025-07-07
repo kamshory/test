@@ -193,7 +193,7 @@ savePNGButton.addEventListener("click", function (event) {
                     body: formData
                 })
                 .then(response => {
-                    
+                    showSavedMessage();
                 })
                 .catch(error => {
                     console.error('Error uploading signature:', error);
@@ -201,3 +201,12 @@ savePNGButton.addEventListener("click", function (event) {
             });
     }
 });
+
+
+function showSavedMessage()
+{
+    document.querySelector('.description').innerHTML = 'Tanda Tangan Tersimpan';
+    setTimeout(function(){
+        document.querySelector('.description').innerHTML = 'Tanda Tangan Di Atas';
+    }, 2000);
+}

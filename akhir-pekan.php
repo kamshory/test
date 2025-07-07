@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -151,7 +151,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -213,9 +213,9 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$akhirPekan = new AkhirPekan(null, $database);
 	try{
 		$akhirPekan->findOneByAkhirPekanId($inputGet->getAkhirPekanId());
-		if($akhirPekan->hasValueAkhirPekanId())
+		if($akhirPekan->issetAkhirPekanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -297,9 +297,9 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 	try{
 		$subqueryMap = null;
 		$akhirPekan->findOneWithPrimaryKeyValue($inputGet->getAkhirPekanId(), $subqueryMap);
-		if($akhirPekan->hasValueAkhirPekanId())
+		if($akhirPekan->issetAkhirPekanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -385,7 +385,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AkhirPekan(), $appConfig, $currentUser->getLanguageId());
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
 require_once $appInclude->mainAppHeader(__DIR__);

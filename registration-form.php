@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicObject\Database\PicoPredicate;
@@ -19,7 +19,7 @@ if(basename($_SERVER['PHP_SELF']) == basename(__FILE__))
 
 $baseAssetsUrl = $appConfig->getSite()->getBaseUrl();
 
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, 'id');
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, 'id');
 $inputGet = new InputGet();
 
 ?><!DOCTYPE html>

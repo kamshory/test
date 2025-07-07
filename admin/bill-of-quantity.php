@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -311,7 +311,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <script>
@@ -456,7 +456,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$billOfQuantity->findOneByBillOfQuantityId($inputGet->getBillOfQuantityId());
 		if($billOfQuantity->issetBillOfQuantityId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <script>
@@ -671,7 +671,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$billOfQuantity->findOneWithPrimaryKeyValue($inputGet->getBillOfQuantityId(), $subqueryMap);
 		if($billOfQuantity->issetBillOfQuantityId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -826,7 +826,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantity(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"proyekId" => PicoSpecification::filter("proyekId", "number"),

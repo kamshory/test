@@ -9,6 +9,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Util\File\FileUtil;
+use Sipro\Entity\Data\Admin;
 use Sipro\Entity\Data\AkhirPekan;
 use Sipro\Entity\Data\BukuHarian;
 use Sipro\Entity\Data\Cuti;
@@ -17,14 +18,11 @@ use Sipro\Entity\Data\HariLibur;
 use Sipro\Entity\Data\PerjalananDinas;
 use Sipro\Entity\Data\Proyek;
 use Sipro\Entity\Data\Supervisor;
-use Sipro\Supervisor\Attendance;
 use Sipro\Util\CommonUtil;
 use Sipro\Util\DateUtil;
 use Sipro\Util\TimeSheetUtil;
 
 require_once dirname(__DIR__) . "/inc.app/auth.php";
-
-
 
 if (!isset($inputGet)) {
 	$inputGet = new InputGet();
@@ -33,16 +31,15 @@ if (!isset($inputGet)) {
 $supervisorId = $inputGet->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true);
 $periodeId = $inputGet->getPeriodeId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
 
-$util = new Attendance(null, $database);
-$attendances = $util->getAttendance($supervisorId, $periodeId);
+$dataFilter = $dataFilter = PicoSpecification::getInstance();
 
-$dataFilter = null;
-
+if($currentUser->getUmkId() != 0)
+{
+	$dataFilter->addAnd(['umkId', $currentUser->getUmkId()]);
+}
 if($currentUser->getTskId() != 0)
 {
-	$dataFilter = PicoSpecification::getInstance()
-		->addAnd(['tskId', $currentUser->getTskId()])
-		;
+	$dataFilter->addAnd(['tskId', $currentUser->getTskId()]);
 }
 
 if ($supervisorId != 0 && !empty($periodeId)) {
@@ -58,8 +55,17 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 	} catch (Exception $e) {
 		// do nothing
 	}
+	$adminSupervisor = new Admin(null, $database);
+	$ttd = 0;
+	try {
+		$adminSupervisor->findOneBySupervisorId($supervisorId);
+		$ttd = $adminSupervisor->getAdminId();
+	} catch (Exception $e) {
+		// do nothing
+	}
 
 	$nip = $supervisor->getNip();
+	
 
 	$tahun = substr($periodeId, 0, 4);
 	$bulan = substr($periodeId, 4, 2);
@@ -71,6 +77,8 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 	$arrayProyek = array();
 	$arrayBukuHarian = array();
 	$totalTanggal = array();
+
+	$daftarKehadiran = $timeSheetUtil->getKehadiran($database, $supervisorId, $periodeId);
 
 	$akhirPekanList = new AkhirPekan(null, $database);
 	try {
@@ -143,7 +151,8 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 		->addAnd(PicoPredicate::getInstance()->greaterThanOrEquals(Field::of()->cutiDari, $tanggalAwal))
 		->addAnd(PicoPredicate::getInstance()->lessThanOrEquals(Field::of()->cutiDari, $tanggalAkhir))
 		->addAnd(PicoPredicate::getInstance()->equals(Field::of()->aktif, true))
-		->addAnd(PicoPredicate::getInstance()->equals(Field::of()->status, 'A'));
+		->addAnd(PicoPredicate::getInstance()->equals(Field::of()->status_cuti, 'A'))
+		;
 	$cutiList = new Cuti(null, $database);
 
 	$cuti_note = array();
@@ -209,7 +218,9 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 
 	$specsBukuHarian = PicoSpecification::getInstance()
 		->addAnd(PicoPredicate::getInstance()->equals(Field::of()->supervisorId, $supervisorId))
-		->addAnd(PicoPredicate::getInstance()->like(Field::of()->tanggal, PicoPredicate::generateLikeStarts($tahun_bulan)));
+		->addAnd(PicoPredicate::getInstance()->like(Field::of()->tanggal, PicoPredicate::generateLikeStarts($tahun_bulan)))
+
+		;
 	$bukuHarianList = new BukuHarian(null, $database);
 
 	$adminKtskArray = array();
@@ -250,7 +261,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 			if (!isset($arrayBukuHarian[$tanggal])) {
 				$arrayBukuHarian[$tanggal] = 0;
 			}
-			if (!in_array($tanggal . "-" . $proyekId, $buff)) {
+			if (!in_array($tanggal . "-" . $proyekId, $buff) && $bukuHarian->getStatusAccKtsk() == 'APPROVED') {
 				$buff[] = $tanggal . "-" . $proyekId;
 				$arrayBukuHarian[$tanggal]++;
 			}
@@ -272,38 +283,51 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 			->addAnd(PicoPredicate::getInstance()->equals(Field::of()->supervisorId, $supervisorId))
 			->addAnd(PicoPredicate::getInstance()->like(Field::of()->tanggal, PicoPredicate::generateLikeStarts($tahun_bulan)))
 			->addAnd(PicoPredicate::getInstance()->notEquals('cuti.proyekId', null))
-			->addAnd(PicoPredicate::getInstance()->notEquals('cuti.proyekId', 0));
+			->addAnd(PicoPredicate::getInstance()->notEquals('cuti.proyekId', 0))
+			->addAnd(PicoPredicate::getInstance()->equals('cuti.status_cuti', 'A'))
+			;
 
 		if (count($projects)) {
 			$specsCutiSuper->addAnd(PicoPredicate::getInstance()->notIn('cuti.proyekId', $projects));
 		}
 
-		try {
-			$sortable = PicoSortable::getInstance()
-				->add(new PicoSort('cuti.proyekId', PicoSort::ORDER_TYPE_ASC));
-			$cutiSupervisorPageData = $cutiSupervisorList->findAll($specsCutiSuper, null, $sortable);
-			foreach ($cutiSupervisorPageData->getResult() as $cutiSupervisor) {
 
-				if ($cutiSupervisor->hasValueCuti()) {
-					$proyekId = $cutiSupervisor->getCuti()->getProyekId();
-					if (!isset($arrayProyek[$proyekId])) {
-						$proyek = $cutiSupervisor->getCuti()->hasValueProyek() ? $cutiSupervisor->getCuti()->getProyek() : new Proyek(null, $database);
-						$supervisor = $cutiSupervisor->hasValueSupervisor() ? $cutiSupervisor->getSupervisor() : new Supervisor(null, $database);
-						$namaProyek = $proyek->getNama();
-						$kodeLokasi = $proyek->getKodeLokasi();
-						$jabatan = $supervisor->hasValueJabatan() ? $supervisor->getJabatan()->getNama() : "";
-						$ktskId = $proyek->getKtskId();
-						$arrayProyek[$proyekId] = array(
-							"nama" => $namaProyek,
-							"kode_lokasi" => $kodeLokasi,
-							"jabatan" => $jabatan,
-							"ktsk_id" => $ktskId
-						);
+		try {
+
+			try
+			{
+				$sortable = PicoSortable::getInstance()
+					->add(new PicoSort('cuti.proyekId', PicoSort::ORDER_TYPE_ASC));
+				$cutiSupervisorPageData = $cutiSupervisorList->findAll($specsCutiSuper, null, $sortable);
+				
+				foreach ($cutiSupervisorPageData->getResult() as $cutiSupervisor) {
+
+					if ($cutiSupervisor->hasValueCuti()) {
+						$proyekId = $cutiSupervisor->getCuti()->getProyekId();
+						if (!isset($arrayProyek[$proyekId])) {
+							$proyek = $cutiSupervisor->getCuti()->hasValueProyek() ? $cutiSupervisor->getCuti()->getProyek() : new Proyek(null, $database);
+							$supervisor = $cutiSupervisor->hasValueSupervisor() ? $cutiSupervisor->getSupervisor() : new Supervisor(null, $database);
+							$namaProyek = $proyek->getNama();
+							$kodeLokasi = $proyek->getKodeLokasi();
+							$jabatan = $supervisor->hasValueJabatan() ? $supervisor->getJabatan()->getNama() : "";
+							$ktskId = $proyek->getKtskId();
+							$arrayProyek[$proyekId] = array(
+								"nama" => $namaProyek,
+								"kode_lokasi" => $kodeLokasi,
+								"jabatan" => $jabatan,
+								"ktsk_id" => $ktskId
+							);
+						}
 					}
 				}
 			}
+			catch(Exception $e)
+			{
+				// Do nothing
+			}
 
 			// proyek lain dalam PST yang sama
+			
 
 			$specsOtherProyects = PicoSpecification::getInstance()
 			->addAnd(PicoPredicate::getInstance()->notIn(Field::of()->proyekId, $projects))
@@ -311,6 +335,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 			->addAnd(['aktif', true])
 			->addAnd(['draft', false])
 			;
+
 
 			$otherProjectFinder = new Proyek(null, $database);
 
@@ -331,8 +356,30 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 			// do nothing
 		}
 
-		
-?>
+		/**
+		 * Get nilai hari
+		 *
+		 * @param array $arrayBukuHarian
+		 * @param array $arrayHari
+		 * @param string $indeksArrayHari
+		 * @param int $indeksArrayProyek
+		 * @param array $daftarKehadiran
+		 * @return int
+		 */
+		function getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek, $daftarKehadiran)
+		{
+			$mm = 0;
+			$kehadiran = isset($daftarKehadiran[$indeksArrayHari]) ? 1 : 0;
+			if (isset($arrayBukuHarian[$indeksArrayHari])) {
+				if ($arrayBukuHarian[$indeksArrayHari] > 0) {
+					$mm = 1 * $arrayBukuHarian[$indeksArrayHari] * $kehadiran;
+				}
+			} else if ($arrayHari[$indeksArrayHari]['cuti_dibayar'] == 1 && $arrayHari[$indeksArrayHari]['proyek_id'] == $indeksArrayProyek) {
+				$mm = 1;
+			}
+			return $mm;
+		}
+	?>
 	
 	<style type="text/css">
 		.supervisor-sign-text {
@@ -362,10 +409,6 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 
 		.dayoff {
 			background-color: #B9B9B9;
-		}
-
-		.travel {
-			background-color: transparent;
 		}
 
 		tfoot .leave {
@@ -472,66 +515,121 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 				</tr>
 			</thead>
 			<tbody>
-				<?php
+				<?php 
+
+				$resultArray = [];
 				$no = 0;
+				$pembagi = 1; // asumsi awal, pastikan nilai ini di-set sebelumnya jika diperlukan
+
 				foreach ($arrayProyek as $indeksArrayProyek => $val2) {
 					$no++;
-				?>
-					<tr>
-						<td align="right"><?php echo $no; ?></td>
-						<td><?php echo $val2['nama']; ?></td>
-						<td><?php echo $val2['kode_lokasi']; ?></td>
-						<?php
-						$totalBaris = 0;
-						foreach ($arrayHari as $indeksArrayHari => $val) {
-							$infoTanggal = $arrayHari[$indeksArrayHari];
-							$class = CommonUtil::getCalendarClass($infoTanggal);
-							if (!isset($totalTanggal[$indeksArrayHari])) {
-								$totalTanggal[$indeksArrayHari] = 0;
-							}
-						?>
-							<td class="<?php echo trim($class); ?> day"><?php
-							if (isset($arrayTanggal[$indeksArrayHari][$indeksArrayProyek]) || CommonUtil::isTrue($arrayHari[$indeksArrayHari]['cuti_dibayar'])) // && !@$arrayHari[$indeksArrayHari]['akhir_pekan'] && !@$arrayHari[$indeksArrayHari]['tanggal_merah'])
-							{
-								$mm = $util->getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek) * $util->getNilaiKehadiran($attendances, $indeksArrayHari);
-								
-								echo number_format($mm, 2, ".", ",");
-								$totalBaris += $mm;
-								$totalTanggal[$indeksArrayHari] += $mm;
-							} else {
-								echo "0";
-							}
-							?></td>
-						<?php
+					$row = [];
+					$row['no'] = $no;
+					$row['nama'] = $val2['nama'];
+					$row['kode_lokasi'] = $val2['kode_lokasi'];
+
+					$totalBaris = 0;
+					foreach ($arrayHari as $indeksArrayHari => $val) {
+						$infoTanggal = $arrayHari[$indeksArrayHari];
+
+						if (!isset($totalTanggal[$indeksArrayHari])) {
+							$totalTanggal[$indeksArrayHari] = 0;
 						}
-						if ($totalBaris > $pembagi) {
-							$pembagi = $totalBaris;
+
+						if (isset($arrayTanggal[$indeksArrayHari][$indeksArrayProyek]) || CommonUtil::isTrue($arrayHari[$indeksArrayHari]['cuti_dibayar'])) {
+							$mm = getNominal($arrayBukuHarian, $arrayHari, $indeksArrayHari, $indeksArrayProyek, $daftarKehadiran);
+							$row['hari'][$indeksArrayHari] = $mm;
+							$totalBaris += $mm;
+							$totalTanggal[$indeksArrayHari] += $mm;
+						} else {
+							$row['hari'][$indeksArrayHari] = 0;
 						}
-						
-						?>
-						<td align="center"><?php echo number_format($totalBaris, 2); ?></td>
-						<td align="center"><?php echo number_format($totalBaris / $pembagi, 2); ?></td>
-						<td align="center">
-						<div style="height:80px; overflow:visible" class="signature-container">
-						<?php
-						if(isset($val2['acc_ktsk']))
-						{
-							$signaturePath1 = dirname(dirname(__FILE__)) . "/lib.signature/" . $val2['acc_ktsk'] . "/signature.png";
-							$signaturePath1 = FileUtil::fixFilePath($signaturePath1);
-							if(file_exists($signaturePath1))
-							{
+					}
+
+					if ($totalBaris > $pembagi) {
+						$pembagi = $totalBaris;
+					}
+
+
+					$row['total'] = $totalBaris;
+					$row['persentase'] = $pembagi ? $totalBaris / $pembagi : 0;
+
+					// Signature handling (optional, hanya jika perlu menyimpan status tanda tangan)
+					if ($timeSheetAccKtsk) {
+						$signaturePath1 = dirname(dirname(__FILE__)) . "/lib.signature/" . $ttdKtskId . "/signature.png";
+						$signaturePath1 = FileUtil::fixFilePath($signaturePath1);
+						if (file_exists($signaturePath1)) {
 							$filetime = filemtime($signaturePath1);
-							?>
-							<img class="signature-image" src="../lib.signature/<?php echo $val2['acc_ktsk']; ?>/signature.png?_=<?php echo $filetime; ?>" width="80" height="80" />
-							<?php
-							}
+							$row['signature'] = "../lib.signature/{$ttdKtskId}/signature.png?_={$filetime}";
+						} else {
+							$row['signature'] = null;
 						}
-						?>
-						</div>
-					</td>
-					</tr>
-				<?php
+					}
+
+					$resultArray[] = $row;
 				}
+				$totalTanggal = array();
+				foreach($resultArray as $row)
+				{
+					foreach($row['hari'] as $tanggal => $val)
+					{
+						if(!isset($totalTanggal[$tanggal]))
+						{
+							$totalTanggal[$tanggal] = 0;
+						}
+						$totalTanggal[$tanggal] += $val;
+					}
+				}
+				$jumlahTotal = 0;
+				$jumlahProporsional = 0;
+				foreach($resultArray as $idx=>$row)
+				{
+					$total = 0;
+					foreach($row['hari'] as $tanggal => $val)
+					{
+						if ($val > 0)
+						{
+							$resultArray[$idx]['hari'][$tanggal] = $totalTanggal[$tanggal] != 0 ? $val / $totalTanggal[$tanggal] : 0;
+							$total += $resultArray[$idx]['hari'][$tanggal];
+						}
+					}
+					$resultArray[$idx]['total'] = $total;
+					$resultArray[$idx]['persentase'] = $hari_kerja ? $total / $hari_kerja : 0;
+					$jumlahTotal += $total;
+					$jumlahProporsional += $resultArray[$idx]['persentase'];
+				}
+				
+				foreach ($resultArray as $row)
+				{
+				?>
+            <tr>
+                <td align="right"><?php echo $row['no']; ?></td>
+                <td><?php echo htmlspecialchars($row['nama']); ?></td>
+                <td><?php echo htmlspecialchars($row['kode_lokasi']); ?></td>
+                
+                <?php foreach ($arrayHari as $indeksArrayHari => $hari) { 
+					$infoTanggal = $arrayHari[$indeksArrayHari];
+					$class = CommonUtil::getCalendarClass($infoTanggal);
+					?>
+                    <td class="<?php echo trim($class); ?> day"><?php echo number_format($row['hari'][$indeksArrayHari], 2, ".", ","); ?></td>
+                <?php } ?>
+
+                <td align="center"><?php echo number_format($row['total'], 2); ?></td>
+                <td align="center"><?php echo number_format($row['persentase'], 2); ?></td>
+                <td align="center">
+                    <div style="height:80px; overflow:visible" class="signature-container">
+                        <?php if (!empty($row['signature'])){ ?>
+                            <img class="signature-image" src="<?php echo $row['signature']; ?>" width="80" height="80" />
+                        <?php } else { ?>
+                            <em></em>
+                        <?php } ?>
+                    </div>
+                </td>
+            </tr>
+        	<?php 
+			}
+			
+
 
 				foreach($anoterProjects as $indeksArrayProyek => $val2)
 				{
@@ -615,7 +713,7 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 						<td class="<?php echo trim($class); ?> day"><?php
 						if (isset($arrayBukuHarian[$indeksArrayHari]) || CommonUtil::isTrue($arrayHari[$indeksArrayHari]['cuti_dibayar'])) // && !@$arrayHari[$indeksArrayHari]['akhir_pekan'] && !@$arrayHari[$indeksArrayHari]['tanggal_merah'])
 						{
-							echo isset($totalTanggal[$indeksArrayHari])?$totalTanggal[$indeksArrayHari]:"";
+							echo isset($totalTanggal[$indeksArrayHari]) && $totalTanggal[$indeksArrayHari] > 0 ? 1 : "";
 							$totalBaris += $totalTanggal[$indeksArrayHari];
 						} else {
 							echo "0";
@@ -623,12 +721,12 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 						?></td>
 					<?php
 					}
-					if ($totalBaris > $pembagi) {
-						$pembagi = $totalBaris;
+					if ($jumlahTotal > $pembagi) {
+						$pembagi = $jumlahTotal;
 					}
 					?>
-					<td align="center"><?php echo number_format($totalBaris, 2); ?></td>
-					<td align="center"><?php echo number_format($totalBaris / $pembagi, 2); ?></td>
+					<td align="center"><?php echo number_format($jumlahTotal, 2); ?></td>
+					<td align="center"><?php echo number_format($jumlahProporsional, 2); ?></td>
 					<td align="center"></td>
 				</tr>
 			</tfoot>
@@ -647,12 +745,12 @@ if ($supervisorId != 0 && !empty($periodeId)) {
 				<td width="200" align="center">
 					<div style="height: 80px; overflow:visible" class="signature-container">
 					<?php
-					$signaturePath2 = dirname(dirname(__FILE__)) . "/lib.signature/supervisor/$supervisorId/signature.png";
+					$signaturePath2 = dirname(dirname(__FILE__)) . "/lib.signature/$ttd/signature.png";
 					$signaturePath2 = FileUtil::fixFilePath($signaturePath2);
 					if(file_exists($signaturePath2))
 					{
 						$filetime = filemtime($signaturePath2);
-						?><img class="signature-image" src="../lib.signature/supervisor/<?php echo $supervisorId; ?>/signature.png?_=<?php echo $filetime; ?>" width="80" height="80" /><?php
+						?><img class="signature-image" src="../lib.signature/<?php echo $ttd; ?>/signature.png?_=<?php echo $filetime; ?>" width="80" height="80" /><?php
 					}
 					?>
 					</div>

@@ -9,6 +9,7 @@ use MagicObject\SetterGetter;
 use MagicObject\Util\File\FileUtil;
 use MagicObject\Util\PicoIniUtil;
 use MagicObject\Util\PicoStringUtil;
+use Sipro\AppLanguageImpl;
 use Sipro\Entity\Data\Admin;
 
 require_once __DIR__."/app.php";
@@ -36,7 +37,7 @@ if(isset($sessions->adminUsername) && isset($sessions->adminPassword))
 
     $currentLoggedInSupervisor->setAdminId($currentLoggedInSupervisor->getAdminId());
 
-    $appLanguage = new AppLanguage(
+    $appLanguage = new AppLanguageImpl(
         $appConfig,
         $currentLoggedInSupervisor->getLangId(),
         function($var, $value)

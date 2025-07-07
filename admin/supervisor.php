@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -550,7 +550,7 @@ else if($inputPost->getUserAction() == UserAction::REJECT)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -748,7 +748,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$supervisor->findOne($specification);
 		if($supervisor->issetSupervisorId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 		if(!UserAction::isRequireApproval($supervisor->getWaitingFor()))
 		{
@@ -1037,7 +1037,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 				{
 					// do something here
 				}
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-detail">
@@ -1400,7 +1400,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 			}
 			else
 			{
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-detail">
@@ -1602,7 +1602,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, $currentUser->getLanguageId());
 $mapForJenisKelamin = array(
 	"L" => array("value" => "L", "label" => "Laki-Laki", "group" => "AAA", "selected" => true, "varA" => "1", "varB" => "2"),
 	"P" => array("value" => "P", "label" => "Perempuan", "group" => "CCC", "selected" => false, "varA" => "3", "varB" => "4")

@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\InputGet;
@@ -14,7 +14,7 @@ $inputPost = new InputPost();
 $proyekId = $inputGet->getProyekId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
 $bukuHarianId = $inputGet->getBukuHarianId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
 $billOfQuantityId = $inputGet->getBillOfQuantityId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
-$appEntityLanguage = new AppEntityLanguage(new GaleriProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new GaleriProyek(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 $specs4 = PicoSpecification::getInstance()
     ->add(['proyekId', $proyekId])
     ->add(['bukuHarianId', $bukuHarianId])

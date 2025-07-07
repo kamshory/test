@@ -33,7 +33,7 @@ class AppUserRoleImpl extends AppUserRole
      * @Label(content="User Level ID")
      * @var string
      */
-    protected $userLevelId;
+    protected $adminLevelId;
 
     /**
      * User Level
@@ -43,7 +43,7 @@ class AppUserRoleImpl extends AppUserRole
      * @Label(content="User Level")
      * @var AppUserLevelImpl
      */
-    protected $userLevel;
+    protected $adminLevel;
 
     /**
      * Module ID
@@ -72,6 +72,15 @@ class AppUserRoleImpl extends AppUserRole
      * @var AppModuleImpl
      */
     protected $module;
+
+    /**
+     * Module Code
+     * 
+     * @Column(name="kode_modul", type="varchar(40)", length=40, defaultValue="NULL", nullable=true)
+     * @Label(content="Module Code")
+     * @var string
+     */
+    protected $moduleCode;
 
     /**
      * Allowed show list

@@ -12,7 +12,7 @@ use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -87,7 +87,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		$billOfQuantityHistory->findOneWithPrimaryKeyValue($inputGet->getBillOfQuantityHistoryId(), $subqueryMap);
 		if($billOfQuantityHistory->issetBillOfQuantityHistoryId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantityHistory(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantityHistory(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// define map here
 			
@@ -225,7 +225,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantityHistory(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantityHistory(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"billOfQuantityId" => PicoSpecification::filter("billOfQuantityId", "number"),

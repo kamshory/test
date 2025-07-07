@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicObject\Database\PicoSort;
 use MagicObject\Database\PicoSortable;
@@ -67,7 +67,7 @@ if($inputPost->getPermasalahan() != null
     }
 }
 
-$appEntityLanguage = new AppEntityLanguage(new Permasalahan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Permasalahan(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"proyekId" => PicoSpecification::filter("proyekId", "number"),

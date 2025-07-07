@@ -1,4 +1,3 @@
-
 # MagicObject Version 2
 
 ## What's New
@@ -383,3 +382,792 @@ echo $object->maskEmail(-10, 6, '*')."\r\n"; // Output: john.******ample.com
     ```
 
 With the addition of this formatting function, users can easily format object properties according to their needs.
+
+# MagicObject version 3.9
+
+## What's New
+
+- **Add Magic Methods**
+
+    -  **trim**: A function to retrieves the property value and trims any leading and trailing whitespace.  
+       
+       **Example Usage:**  
+        ```php
+        $object = new MagicObject();
+        $name = $object->trimName();
+        ```
+    -  **upper**: A function to retrieves the property value and transform it to uppercase.  
+       
+       **Example Usage:**  
+       
+        ```php
+        $object = new MagicObject();
+        $code = $object->upperCode();
+        ```
+    -  **lower**: A function to retrieves the property value and transform it to lowercase.  
+       
+       **Example Usage:**  
+        ```php
+        $object = new MagicObject();
+        $username = $object->lowerUsername();
+        ```
+    -  **dms**: A function to retrieves the property value and convert it to DMS (Degrees, Minutes, Seconds) format.  
+       
+       **Example Usage:**  
+        ```php
+        $object = new MagicObject();
+        $dms = $object->dmsDuration(true, ":", 2, true, 2, true);
+        ```
+        
+        **move**: A function to move uploaded file via callback function.
+        
+        **Example Usage**
+        ```php
+        $inputFiles = new PicoUploadFile();
+        $inputFiles->moveMyVideo(function($file){
+            foreach($file->getAll() as $fileItem)
+            {
+                $fileItem->moveTo("upload/".$fileItem->getName());
+            }
+        });
+        ```
+- **Add PicoFileRenderer Class**
+  MagicObject add utility class to render various file types (images, audio, video, files, links, text) into corresponding HTML elements from plain strings or JSON-encoded arrays.
+  
+- **Update documentation**
+  The documentation has been updated to reflect the new magic methods added in this version, ensuring clarity on how to use them in your code.
+  
+This version introduces essential new functions for better handling of data transformations such as trimming, converting to uppercase or lowercase, and formatting data into DMS (Degrees, Minutes, Seconds). These enhancements streamline property value manipulation and provide additional flexibility when interacting with data.
+
+# MagicObject version 3.10
+
+## What's New
+
+### **New Feature: `retrieve()` Method**
+
+We’re excited to introduce the **`retrieve()`** method in MagicObject 3.10, designed to make it easier to access deeply nested properties within your objects. This new feature allows you to pass multiple keys as arguments, making it incredibly efficient to traverse complex nested structures.
+
+#### **How it Works:**
+
+-   The `retrieve()` method takes one or more keys (in camelCase format) as parameters.
+-   It will traverse through the object, fetching values based on the provided keys.
+-   If a key is missing at any level, the method will return `null`.
+-   This is especially useful when dealing with objects that contain deep nested data.
+
+#### **Example:**
+
+```php
+$object = new  MagicObject();
+$yaml = '
+  prop1:
+    prop2:
+      prop3: Test
+';
+$object->loadYamlString($yaml, false, true, true);
+echo  $object->retrieve('prop1', 'prop2', 'prop3');
+```
+
+In this example:
+-   The method will first check `prop1`, then move to `prop2`, and finally `prop3`.
+-   If any of these keys do not exist, it will return `null`.    
+
+### **New Feature: `mergeWith()` Method**
+
+We’ve also added a powerful new method called **`mergeWith()`**, which allows you to merge two `MagicObject` instances with ease.
+
+#### What it Does:
+
+-   Combines properties from another object into the current one.
+-   If a property doesn’t exist in the current object, it will be added.
+-   If the property already exists:
+    -   If both values are `MagicObject` instances, they will be **merged recursively**.
+    -   Otherwise, the value will be **overwritten**.
+
+#### Example:
+
+```php
+$obj1 = new  MagicObject();
+$obj1->loadYamlString('
+user:
+  name: ALice
+client:
+  address: Jakarta
+', false, true, true);
+
+$obj2 = new  MagicObject();
+$obj2->loadYamlString('
+user:
+  email: alice@example.com
+client:
+  name: Ana
+', false, true, true);
+$obj1->mergeWith($obj2);
+
+echo  $obj1;
+
+// {"user":{"name":"ALice","email":"alice@example.com"},"client":{"address":"Jakarta","name":"Ana"}}
+```
+
+This method simplifies combining nested objects and ensures consistency in structured data merging.
+
+### **Bug Fixes & Performance Improvements**
+
+-   Various small bug fixes related to edge cases.
+-   Optimizations made to improve performance when accessing deeply nested data within MagicObject.
+    
+
+### **Other Changes**
+
+-   Internal code refactoring for improved readability and maintainability.
+-   Enhanced flexibility in property name handling, especially for camelCase formatting.
+
+
+# MagicObject version 3.11
+
+## What's New
+
+### Added: Matrix Calculation Class
+A new `MatrixCalculator` class has been introduced to perform basic matrix operations such as addition, subtraction, multiplication, and element-wise division.  
+This class is useful for numerical or scientific processing involving 2D arrays of real numbers.
+
+### Added: `toFixed` Magic Method in MagicObject
+A new `toFixed` magic method has been added to the core `MagicObject` class.  
+This allows any numeric property to be formatted as a string with a fixed number of decimal places using dynamic method access.
+
+**Example usage:**
+
+```php
+$object = new MagicObject();
+$object->setData(100.123456);
+echo $object->toFixedData(2)."\r\n"; // Outputs 100.12
+echo $object->toFixedData(4)."\r\n"; // Outputs 100.1235
+```
+
+### Bug Fixes
+
+-  Fixed an issue where countBy() returned 1 even when no records matched the condition.
+   The method now correctly uses fetchColumn() to retrieve the result from SELECT COUNT(*).
+
+### **Other Changes**
+
+-   Internal code refactoring for improved readability and maintainability.
+-   Enhanced flexibility in property name handling, especially for camelCase formatting.
+
+
+# MagicObject version 3.12
+
+## What's New
+
+- **Removed Exception Throwing for Empty Results in Multi-Record Finders**  
+  In this version, `EmptyResultException` and `NoRecordFoundException` are no longer thrown when methods for finding multiple records return an empty result. Instead, these methods will simply return an empty array or collection. This change improves developer experience by making it easier to handle cases where no records are found, without the need for additional exception handling.
+
+
+# MagicObject version 3.13
+
+## What's New
+
+### Added: `alwaysTrue()`  Specification Method
+
+A new static method `PicoSpecification::alwaysTrue()` has been added.  
+This method returns a specification that always evaluates to `TRUE` (`WHERE 1 = 1`  in SQL). It is especially useful for scenarios where developers need to update, delete, or retrieve **all records**  from a table without any filtering.
+
+**Example usage:**
+
+```php
+$specs = PicoSpecification::alwaysTrue();
+
+$userFinder = new UserMin(null, $database);
+try {
+    $pageData = $userFinder->findAll($specs);
+    foreach($pageData->getResult() as $user)
+    {
+      echo $user."\r\n";
+    }
+} catch (Exception $e) {
+    // Optional: handle or ignore
+}
+```
+
+
+# MagicObject Version 3.14
+
+## What's New
+
+### Table Structure Conversion Support
+
+MagicObject 3.14 introduces a robust SQL dialect conversion utility, powered by the `PicoDatabaseConverter` class, for seamless translation of table structures between **MySQL**, **PostgreSQL**, and **SQLite**.
+
+**Key features of the conversion utility:**
+- Converts `CREATE TABLE` statements between MySQL, PostgreSQL, and SQLite, including:
+    - Data type mapping and normalization
+    - Identifier quoting and syntax adaptation
+    - Handling of constraints, keys, and auto-increment fields
+    - Keyword and function normalization
+- Supports round-trip conversion (e.g., MySQL → PostgreSQL → MySQL)
+- Can parse and split SQL column/constraint definitions, respecting nested parentheses
+- Provides type translation utilities for mapping field types between dialects
+- Offers value quoting, escaping, and PHP type conversion helpers for SQL literals
+- Enables migration and data-dump scenarios between different RDBMS platforms
+
+This class is typically used for database migration, schema portability, and interoperability between different database engines, without requiring entity definitions.
+
+Developers can now easily transform `CREATE TABLE` statements from one dialect to another with proper handling of:
+
+-   Data type conversion
+-   Identifier quoting
+-   Keyword and syntax normalization
+
+Table structure conversion can be performed without the need to create entities beforehand. In addition to converting table structures, MagicObject version 3.14 also provides tools to dump data from one database to another DBMS.
+
+#### Example Use Case
+
+```php
+<?php
+
+use MagicObject\Database\PicoDatabaseType;
+use MagicObject\Util\Database\PicoDatabaseConverter;
+
+require_once dirname(__DIR__) . "/vendor/autoload.php";
+
+$converter = new PicoDatabaseConverter();
+
+$mySql = <<<SQL
+CREATE TABLE IF NOT EXISTS `admin` (
+  `admin_id` varchar(40) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `username` varchar(100) DEFAULT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `admin_level_id` varchar(40) DEFAULT NULL,
+  `gender` varchar(1) DEFAULT NULL,
+  `birth_day` date DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(100) DEFAULT NULL,
+  `language_id` varchar(40) DEFAULT NULL,
+  `validation_code` text,
+  `last_reset_password` timestamp NULL DEFAULT NULL,
+  `blocked` tinyint(1) DEFAULT '0',
+  `time_create` timestamp NULL DEFAULT NULL,
+  `time_edit` timestamp NULL DEFAULT NULL,
+  `admin_create` varchar(40) DEFAULT NULL,
+  `admin_edit` varchar(40) DEFAULT NULL,
+  `ip_create` varchar(50) DEFAULT NULL,
+  `ip_edit` varchar(40) DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+SQL;
+
+
+$postgreSql = $converter->translateCreateTable($mySql, PicoDatabaseType::DATABASE_TYPE_MARIADB, PicoDatabaseType::DATABASE_TYPE_POSTGRESQL);
+$sqlite = $converter->translateCreateTable($mySql, PicoDatabaseType::DATABASE_TYPE_MARIADB, PicoDatabaseType::DATABASE_TYPE_SQLITE);
+
+echo "MySQL:\n";
+echo $mySql . "\n\n";
+
+echo "PostgreSQL:\n";
+echo $postgreSql . "\n\n";
+
+echo "SQLite:\n";
+echo $sqlite . "\n\n";
+
+echo "Now, let's convert the PostgreSQL back to MySQL:\n";
+$mySqlConverted = $converter->translateCreateTable($postgreSql, PicoDatabaseType::DATABASE_TYPE_POSTGRESQL, PicoDatabaseType::DATABASE_TYPE_MARIADB);
+echo $mySqlConverted . "\n\n";
+
+echo "Now, let convert PostgreSQL to SQLite:\n";
+$sqliteConverted = $converter->translateCreateTable($postgreSql, PicoDatabaseType::DATABASE_TYPE_POSTGRESQL, PicoDatabaseType::DATABASE_TYPE_SQLITE);   
+echo $sqliteConverted . "\n\n";
+
+echo "Now, let convert SQLite to MySQL:\n";
+$mysqlConverted2 = $converter->translateCreateTable($sqliteConverted, PicoDatabaseType::DATABASE_TYPE_SQLITE, PicoDatabaseType::DATABASE_TYPE_MYSQL);   
+echo $mysqlConverted2 . "\n\n";
+
+echo "Now, let convert SQLite to PostgreSQL:\n";
+$postgresqlConverted2 = $converter->translateCreateTable($sqliteConverted, PicoDatabaseType::DATABASE_TYPE_SQLITE, PicoDatabaseType::DATABASE_TYPE_POSTGRESQL);   
+echo $postgresqlConverted2 . "\n\n";
+```
+
+### Enhanced Property Validation
+
+The `ValidationUtil` class has been significantly enhanced to provide a robust and flexible object property validation mechanism. Inspired by Jakarta Bean Validation (JSR 380), developers can now apply a comprehensive set of annotations directly in property docblocks to enforce data integrity.
+
+The following validation annotations are now supported, grouped by their function:
+
+#### Presence & Nullability
+-   **`@Required(message="...")`**: Ensures the property value is not `null`.
+-   **`@NotEmpty(message="...")`**: Checks if a string is not empty (`""`) or an array is not empty.
+-   **`@NotBlank(message="...")`**: Validates that a string is not empty and not just whitespace characters.
+
+#### Value Range & Size
+-   **`@Min(value=X, message="...")`**: Asserts that a numeric property's value is greater than or equal to a minimum value.
+-   **`@Max(value=X, message="...")`**: Asserts that a numeric property's value is less than or equal to a maximum value.
+-   **`@DecimalMin(value="...", message="...")`**: Validates that a numeric property (can be float/string) is greater than or equal to a specified decimal value.
+-   **`@DecimalMax(value="...", message="...")`**: Validates that a numeric property (can be float/string) is less than or equal to a specified decimal value.
+-   **`@Range(min=X, max=Y, message="...")`**: Validates that a numeric property's value falls within an inclusive range.
+-   **`@Size(min=X, max=Y, message="...")`**: Verifies that the length of a string or the count of an array is within a specified range.
+-   **`@Length(min=X, max=Y, message="...")`**: Similar to `@Size`, specifically for string lengths within a range.
+-   **`@Digits(integer=X, fraction=Y, message="...")`**: Checks that a numeric property has at most `X` integer digits and `Y` fractional digits.
+
+#### Numeric Sign
+-   **`@Positive(message="...")`**: Ensures a numeric value is positive (> 0).
+-   **`@PositiveOrZero(message="...")`**: Ensures a numeric value is positive or zero (>= 0).
+-   **`@Negative(message="...")`**: Ensures a numeric value is negative (< 0).
+-   **`@NegativeOrZero(message="...")`**: Ensures a numeric value is negative or zero (<= 0).
+
+#### Pattern & Format
+-   **`@Pattern(regexp="...", message="...")`**: Validates a string property against a specified regular expression.
+-   **`@Email(message="...")`**: Checks if a string property is a well-formed email address.
+-   **`@Url(message="...")`**: Ensures a string is a valid URL.
+-   **`@Ip(message="...")`**: Ensures a string is a valid IP address.
+-   **`@DateFormat(format="...", message="...")`**: Ensures a string matches a specific date format.
+-   **`@Phone(message="...")`**: Ensures a string is a valid phone number.
+-   **`@NoHtml(message="...")`**: Checks if a string property contains any HTML tags.
+
+#### Date & Time
+-   **`@Past(message="...")`**: Ensures a `DateTimeInterface` property represents a date/time in the past.
+-   **`@Future(message="...")`**: Ensures a `DateTimeInterface` property represents a date/time in the future.
+-   **`@PastOrPresent(message="...")`**: Ensures a date/time is in the past or present.
+-   **`@FutureOrPresent(message="...")`**: Ensures a `DateTimeInterface` property represents a date/time in the future or the present.
+-   **`@BeforeDate(date="...", message="...")`**: Ensures a date is before a specified date.
+-   **`@AfterDate(date="...", message="...")`**: Ensures a date is after a specified date.
+
+#### Boolean
+-   **`@AssertTrue(message="...")`**: Asserts that a boolean property's value is strictly `true`.
+
+#### Enum & Allowed Values
+-   **`@Enum(message="...", allowedValues={...}, caseSensitive=true|false)`**: Ensures a string property's value is one of a predefined set of allowed values, with an option for case-sensitive or case-insensitive comparison.
+
+#### String Content & Structure
+-   **`@Alpha(message="...")`**: Ensures a string contains only alphabetic characters.
+-   **`@AlphaNumeric(message="...")`**: Ensures a string contains only alphanumeric characters.
+-   **`@StartsWith(prefix="...", caseSensitive=true|false, message="...")`**: Ensures a string starts with a specified prefix, with optional case sensitivity.
+-   **`@EndsWith(suffix="...", caseSensitive=true|false, message="...")`**: Ensures a string ends with a specified suffix, with optional case sensitivity.
+-   **`@Contains(substring="...", caseSensitive=true|false, message="...")`**: Ensures a string contains a specified substring, with optional case sensitivity.
+
+#### Nested Validation
+-   **`@Valid`**: Recursively validates nested `MagicObject` and `MagicDto` instances.
+
+**Class `UserProfile`**
+
+```php
+// Define an example entity class demonstrating various validations
+class UserProfile extends MagicObject
+{
+    /**
+     * @Required(message="Username cannot be null")
+     * @NotBlank(message="Username cannot be blank")
+     * @Length(min=4, max=20, message="Username must be 4-20 characters long")
+     * @Pattern(regexp="^[a-zA-Z0-9_]+$", message="Username can only contain letters, numbers, and underscores")
+     * @var string
+     */
+    protected $username;
+
+    /**
+     * @Email(message="Invalid email address format")
+     * @Required(message="Email cannot be null")
+     * @var string
+     */
+    protected $email;
+
+    /**
+     * @Min(value=18, message="Age must be at least 18")
+     * @Max(value=99, message="Age cannot exceed 99")
+     * @var int
+     */
+    protected $age;
+
+    /**
+     * @NoHtml(message="About Me field contains unsupported HTML tags")
+     * @Size(max=500, message="About Me cannot exceed 500 characters")
+     * @var string
+     */
+    protected $aboutMe;
+
+    /**
+     * @Past(message="Birth date must be in the past")
+     * @var DateTime
+     */
+    protected $birthDate;
+
+    /**
+     * @Enum(message="Gender must be 'Male' or 'Female'", allowedValues={"Male", "Female"})
+     * @var string
+     */
+    protected $gender;
+
+    /**
+     * @Enum(message="Status must be 'active', 'inactive', or 'pending'", allowedValues={"active", "inactive", "pending"}, caseSensitive=false)
+     * @var string
+     */
+    protected $status;
+
+    // A nested object to demonstrate @Valid
+    /**
+     * @Valid
+     * @var Address
+     */
+    protected $address;
+```
+
+**Class `Address`**
+
+```php
+class Address extends MagicObject
+{
+    /**
+     * @Required(message="Street cannot be null")
+     * @NotBlank(message="Street cannot be blank")
+     * @var string
+     */
+    protected $street;
+
+    /**
+     * @Required(message="City cannot be null")
+     * @NotBlank(message="City cannot be blank")
+     * @var string
+     */
+    protected $city;
+}
+```
+
+**Validation**
+
+```php
+// Test 1: Valid user profile
+try {
+    $user = new UserProfile();
+    $user->setUsername("john_doe");
+    $user->setEmail("john.doe@example.com");
+    $user->setAge(30);
+    $user->setAboutMe("Hello, I am John Doe. I like programming.");
+    $user->setBirthDate(new DateTime('1995-01-15'));
+    $user->setGender("Male");
+    $user->setStatus("active");
+
+    $address = new Address();
+    $address->setStreet("123 Main St");
+    $address->setCity("Anytown");
+    $user->setAddress($address);
+
+    ValidationUtil::getInstance()->validate($user);
+    echo "Test 1: Valid User Profile - PASSED.\n";
+} catch (InvalidValueException $e) {
+    echo "Test 1: FAILED (Unexpected) - " . $e->getPropertyName() . ": " . $e->getValidationMessage() . "\n";
+}
+
+// Test 2: Invalid username (too short)
+try {
+    $user = new UserProfile();
+    $user->setUsername("joh"); // Too short
+    $user->setEmail("john.doe@example.com");
+    $user->setAge(30);
+    $user->setAboutMe("Hello, I am John Doe.");
+    $user->setBirthDate(new DateTime('1995-01-15'));
+    $user->setGender("Male");
+    $user->setStatus("active");
+    
+    $address = new Address();
+    $address->setStreet("123 Main St");
+    $address->setCity("Anytown");
+    $user->setAddress($address);
+
+    ValidationUtil::getInstance()->validate($user);
+    echo "Test 2: Valid User Profile (should have failed) - PASSED.\n";
+} catch (InvalidValueException $e) {
+    echo "Test 2: FAILED (Expected) - " . $e->getPropertyName() . ": " . $e->getValidationMessage() . "\n";
+}
+
+// Test 3: Invalid email format
+try {
+    $user = new UserProfile();
+    $user->setUsername("jane_doe");
+    $user->setEmail("invalid-email"); // Invalid format
+    $user->setAge(25);
+    $user->setAboutMe("Hello, I am Jane Doe.");
+    $user->setBirthDate(new DateTime('1999-03-20'));
+    $user->setGender("Female");
+    $user->setStatus("inactive");
+
+    $address = new Address();
+    $address->setStreet("123 Main St");
+    $address->setCity("Anytown");
+    $user->setAddress($address);
+
+    ValidationUtil::getInstance()->validate($user);
+    echo "Test 3: Valid User Profile (should have failed) - PASSED.\n";
+} catch (InvalidValueException $e) {
+    echo "Test 3: FAILED (Expected) - " . $e->getPropertyName() . ": " . $e->getValidationMessage() . "\n";
+}
+
+// Test 4: Invalid Enum value (case-sensitive)
+try {
+    $user = new UserProfile();
+    $user->setUsername("test_user");
+    $user->setEmail("test@example.com");
+    $user->setAge(40);
+    $user->setAboutMe("Some text.");
+    $user->setBirthDate(new DateTime('1980-05-01'));
+    $user->setGender("male"); // Should fail due to case-sensitivity (expected "Male")
+    $user->setStatus("pending");
+
+    $address = new Address();
+    $address->setStreet("123 Main St");
+    $address->setCity("Anytown");
+    $user->setAddress($address);
+
+    ValidationUtil::getInstance()->validate($user);
+    echo "Test 4: Valid User Profile (should have failed) - PASSED.\n";
+} catch (InvalidValueException $e) {
+    echo "Test 4: FAILED (Expected) - " . $e->getPropertyName() . ": " . $e->getValidationMessage() . "\n";
+}
+
+// Test 5: Nested validation failure
+try {
+    $user = new UserProfile();
+    $user->setUsername("test_nest");
+    $user->setEmail("nest@example.com");
+    $user->setAge(22);
+    $user->setAboutMe("Testing nested validation.");
+    $user->setBirthDate(new DateTime('2000-01-01'));
+    $user->setGender("Female");
+    $user->setStatus("active");
+
+    $address = new Address();
+    $address->setStreet(""); // Blank street, should fail @NotBlank
+    $address->setCity("Anytown");
+    $user->setAddress($address);
+
+    ValidationUtil::getInstance()->validate($user);
+    echo "Test 5: Valid User Profile (should have failed due to nested object) - PASSED.\n";
+} catch (InvalidValueException $e) {
+    echo "Test 5: FAILED (Expected due to nested object) - " . $e->getPropertyName() . ": " . $e->getValidationMessage() . "\n";
+}
+```
+
+Users can perform validation on objects that extend from the following base classes:
+- **MagicObject**
+- **MagicDto**
+- **InputPost**
+- **InputGet**
+
+This means that property validation is supported not only for entities derived from `MagicObject`, but also for data transfer objects (`MagicDto`) and HTTP input wrappers (`InputPost`, `InputGet`).  
+You can annotate properties in any of these classes with validation annotations, and the validation mechanism will recursively check all nested properties, ensuring robust data integrity across your application's data models and input layers.
+
+
+### Fluent Setter Chaining
+
+MagicObject 3.14 introduces a new **`with()`** method within `PicoDatabasePersistenceExtended`, designed to enhance the readability and flow of setting multiple properties through method chaining. This simple yet powerful addition allows developers to initiate a setter chain with improved clarity, especially when configuring objects before persistence operations.
+
+**Key feature:**
+
+-   **`with()` Method**: Provides a convenient entry point for fluent setter chaining, returning the current object instance to allow for sequential method calls.
+
+# MagicObject Version 3.14.1
+
+## What's Changed
+
+### Enhanced Validation Flexibility
+
+MagicObject 3.14.1 introduces an additional parameter to the `validate()` method across `MagicObject` and related input classes (`InputPost`, `InputGet`, `MagicDto`, `SetterGetter`, `SecretObject`, and `PicoDatabasePersistenceExtended`). This enhancement provides more granular control over validation behavior, particularly when utilizing a **reference object** for validation annotations.
+
+The `validate()` method now accepts a new boolean parameter:
+
+-   **`$validateIfReferenceEmpty`**:
+    -   **`true`** (default): If a `$reference` object is provided but it contains no properties (is considered "empty" in terms of its defined attributes), the validation will still proceed. In this scenario, the validation annotations from the current object (`$this`) will be used to validate the current object's data.
+    -   **`false`**: If a `$reference` object is provided and it has no properties, the validation process will be **skipped entirely**. This is useful when you want validation to occur _only_ if the reference model actually defines validation rules.
+
+This new parameter provides developers with more precise control over when and how validation occurs, especially in dynamic scenarios where reference models might not always contain defined properties.
+
+
+### New `@MaxLength` Validation Annotation
+
+MagicObject now supports a dedicated **`@MaxLength`** annotation for string properties. This new annotation allows you to quickly and clearly enforce a maximum length constraint without needing to specify a minimum length.
+
+-   **`@MaxLength(value=X, message="...")`**: Ensures that a string property's value does not exceed `X` characters.
+
+This simplifies common validation scenarios where only an upper bound on string length is required.
+
+# MagicObject Version 3.14.2
+
+## What's Changed
+
+### Validator Generator Enhancement with `tableName` Support
+
+In version 3.14.2, the **validator class generator** has been enhanced to support an optional `tableName` parameter. This addition provides improved integration with annotation-based ORMs or systems that benefit from structural metadata within validator classes.
+
+#### New Behavior:
+
+When the `tableName` parameter is provided to the `PicoEntityGenerator::generateValidatorClass()` method:
+
+-   The generated validator class will include the following additional class-level annotations:
+    
+    -   `@Validator`
+        
+    -   `@Table(name="your_table_name")`
+        
+
+#### Benefits:
+
+-   Enables clearer association between the validator class and the underlying database table.
+    
+-   Improves compatibility with tools or frameworks that rely on metadata annotations for mapping or validation contexts.
+    
+-   Provides a better foundation for auto-documentation or introspection tools.
+    
+
+#### Example Output:
+
+```php
+/**
+ * Represents a validator class for the `user` module.
+ *
+ * @Validator
+ * @Table(name="user_account")
+ */
+class UserValidator extends MagicObject
+{
+    ...
+}
+
+```
+
+This enhancement makes the validator generator more expressive and future-proof, especially when building layered architectures or generating documentation automatically.
+
+
+# MagicObject Version 3.14.4
+
+## What's Fixed
+
+### Bug Fix: `numberFormat*` Methods Accept Single Parameter
+
+In version 3.14.4, a bug has been fixed in the internal magic method handling for `numberFormat*` methods (such as `numberFormatPercent`, `numberFormatTotal`, etc.).
+
+#### Previous Behavior (Before 3.14.4)
+
+Calling a `numberFormat*` method with **only one argument** would trigger warnings:
+
+```php
+$data = new MagicObject();
+$data->setPercent(2.123456);
+echo $data->numberFormatPercent(2);
+```
+
+**Result:**
+
+```txt
+Warning: Undefined index 1
+Warning: Undefined index 2
+```
+
+This occurred because the internal handler expected three parameters and did not check for their existence properly.
+
+#### New Behavior (Since 3.14.4)
+
+These methods now safely accept **a single argument**, defaulting the missing parameters to reasonable values internally. The example above now works as expected and outputs:
+
+```txt
+2.12
+```
+
+#### Benefits:
+
+-   Improved developer experience when formatting numbers.
+    
+-   No need to always pass three parameters for simple formatting.
+    
+-   Prevents PHP warnings in production environments.
+
+This bug fix enhances robustness and backward compatibility for developers using dynamic number formatting features in MagicObject.
+
+
+# MagicObject Version 3.14.5
+
+## What's Changed
+
+### New Feature: URL-Based Database Credential Parsing
+
+MagicObject now supports importing database credentials from a **datasource URL** string using the new method `PicoDatabaseCredentials::importFromUrl()`.
+
+This enhancement simplifies configuration and integration with environment-based or externalized connection settings (e.g., `DATABASE_URL`).
+
+#### Supported URL Format
+
+driver://username:password@host:port/database?schema=public&charset=utf8&timezone=Asia/Jakarta
+
+
+#### Example
+
+```php
+$credentials = new PicoDatabaseCredentials();
+$credentials->importFromUrl(
+    'mysql://user:secret@localhost:3306/myapp?schema=public&charset=utf8mb4&timezone=Asia/Jakarta'
+);
+```
+
+#### Optional Override
+
+Username and password can be passed directly to override the values in the URL:
+
+```php
+$credentials->importFromUrl($url, 'realuser', 'realpass');
+```
+
+This is useful when credentials are stored separately from the connection string.
+
+#### Special Handling for SQLite
+
+When using sqlite:///path/to/database.db, the file path is automatically mapped to databaseFilePath instead of host/port.
+
+```php
+$url = 'sqlite:///path/to/database.db';
+$credentials->importFromUrl($url);
+```
+
+### Why It Matters
+
+-   Makes deployment and configuration more flexible in containerized or cloud environments.
+
+-   Simplifies integration with .env files, environment variables, or external secrets managers.
+
+-   Supports both traditional and SQLite-based databases.
+
+### Backward Compatibility
+
+This update is fully backward-compatible and does not change any existing behavior unless the new method is used explicitly.
+
+
+### Bug Fix: Class-Typed Default Parameters Now Compatible with PHP 5
+
+Fixed a **fatal error** caused by the use of default parameters with a class type hint (`MagicObject`, `SecretObject`, `SetterGetter`, `MagicDto`) and non-null default values in the `validate()` method.
+
+#### Before (Problematic in PHP 5):
+
+```php
+public function validate(
+    $parentPropertyName = null,
+    $messageTemplate = null,
+    MagicObject $reference = null,
+    bool $validateIfReferenceEmpty = true // ❌ Causes error in PHP 5
+)
+```
+
+After (PHP 5 Compatible):
+
+```php
+public function validate(
+    $parentPropertyName = null,
+    $messageTemplate = null,
+    MagicObject $reference = null,
+    $validateIfReferenceEmpty = true // ✅ Compatible with PHP 5
+)
+```
+
+> This change ensures full compatibility with legacy environments running PHP 5, while maintaining functionality in modern PHP versions.
+
+### Backward Compatibility
+
+-   This version is **fully backward-compatible**.
+    
+-   No breaking changes were introduced.
+    
+-   Existing codebases will continue to function as-is unless the new functionality is explicitly invoked.

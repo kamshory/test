@@ -3,12 +3,13 @@
 namespace MagicObject\Request;
 
 use MagicObject\Exceptions\InvalidAnnotationException;
+use MagicObject\Exceptions\ObjectParsingError;
 use MagicObject\MagicObject;
 use MagicObject\Util\ClassUtil\PicoAnnotationParser;
 use MagicObject\Util\PicoStringUtil;
+use MagicObject\Util\ValidationUtil;
 use ReflectionClass;
 use stdClass;
-
 
 /**
  * Base class for handling HTTP requests, including input sanitization, data manipulation, 
@@ -51,6 +52,17 @@ class PicoRequestBase extends stdClass // NOSONAR
      * @var bool
      */
     protected $_recursive = false; // NOSONAR
+
+    /**
+     * Array to keep track of fields that have been retrieved.
+     * 
+     * This property is used to avoid redundant data retrieval and processing.
+     * The property name starts with an underscore to prevent child classes 
+     * from overriding its value.
+     *
+     * @var array
+     */
+    protected $_fieldsRetrieved = array(); // NOSONAR
 
     /**
      * Constructor to initialize the request handler and process class annotations.
@@ -119,6 +131,7 @@ class PicoRequestBase extends stdClass // NOSONAR
     {
         $var = PicoStringUtil::camelize($propertyName);
         $value = isset($this->{$var}) ? $this->{$var} : null;
+        $this->_fieldsRetrieved[] = $var; // Keep track of retrieved fields
         if(isset($params) && !empty($params))
         {
             $filter = $params[0];
@@ -134,12 +147,29 @@ class PicoRequestBase extends stdClass // NOSONAR
             {
                 $params[3] = false;
             }
-            return $this->filterValue($value, $filter, $params[1], $params[2], $params[3]);
+            $val = $this->filterValue($value, $filter, $params[1], $params[2], $params[3]);
+            if($this->hasProperty($var))
+            {
+                $this->{$var} = $val;
+            }
+            return $val;
         }
         else
         {
             return $value;
         }
+    }
+
+    /**
+     * Check if a property exists in the object.
+     *
+     * This method checks if a property with the given name is defined in the object.
+     *
+     * @param string $propertyName The name of the property to check.
+     * @return boolean Returns true if the property exists, false otherwise.
+     */
+    public function hasProperty($propertyName) {
+        return property_exists($this, $propertyName);
     }
 
     /**
@@ -504,7 +534,7 @@ class PicoRequestBase extends stdClass // NOSONAR
     /**
      * Check if the request is a GET request.
      *
-     * @return bool True if the request method is GET, false otherwise.
+     * @return bool true if the request method is GET, false otherwise.
      */
     public function isGet()
     {
@@ -514,7 +544,7 @@ class PicoRequestBase extends stdClass // NOSONAR
     /**
      * Check if the request is a POST request.
      *
-     * @return bool True if the request method is POST, false otherwise.
+     * @return bool true if the request method is POST, false otherwise.
      */
     public function isPost()
     {
@@ -524,7 +554,7 @@ class PicoRequestBase extends stdClass // NOSONAR
     /**
      * Check if the request is an AJAX request.
      *
-     * @return bool True if the request is an AJAX request, false otherwise.
+     * @return bool true if the request is an AJAX request, false otherwise.
      */
     public function isAjax()
     {
@@ -745,7 +775,7 @@ class PicoRequestBase extends stdClass // NOSONAR
     /**
      * Check if the JSON naming strategy is snake case.
      *
-     * @return bool True if the naming strategy is snake case, false otherwise.
+     * @return bool true if the naming strategy is snake case, false otherwise.
      */
     private function isSnake()
     {
@@ -766,7 +796,7 @@ class PicoRequestBase extends stdClass // NOSONAR
      * This method returns true if the JSON naming strategy is not snake case,
      * indicating that camel case is used instead.
      *
-     * @return bool True if the naming strategy is camel case, false otherwise.
+     * @return bool true if the naming strategy is camel case, false otherwise.
      */
     protected function isCamel()
     {
@@ -779,7 +809,7 @@ class PicoRequestBase extends stdClass // NOSONAR
      * This method determines if the prettification option is enabled in the JSON configuration,
      * indicating whether the output should be formatted for readability.
      *
-     * @return bool True if the prettify option is enabled, false otherwise.
+     * @return bool true if the prettify option is enabled, false otherwise.
      */
     private function isPretty()
     {
@@ -795,7 +825,7 @@ class PicoRequestBase extends stdClass // NOSONAR
      * This method checks whether the current request has no values set,
      * indicating that it is considered empty.
      *
-     * @return bool True if the request is empty, false otherwise.
+     * @return bool true if the request is empty, false otherwise.
      */
     public function isEmpty()
     {
@@ -908,6 +938,101 @@ class PicoRequestBase extends stdClass // NOSONAR
                 }
             }
         }
+    }
+
+    /**
+     * Validate the current object based on property annotations.
+     *
+     * This method checks the properties of the current object against validation annotations.
+     * If any validation rule fails, an InvalidValueException will be thrown.
+     *
+     * @param string|null      $parentPropertyName        The name of the parent property, if applicable (for nested validation).
+     * @param array|null       $messageTemplate           Optional custom message templates for validation errors.
+     * @param MagicObject|null $reference                 Optional reference object. If provided and is an instance of MagicObject,
+     * validation will use the property annotations from the reference class
+     * (not from the validated object's class), but the data to validate is taken from the current object.
+     * @param bool             $validateIfReferenceEmpty  If true, and a reference object is provided but empty,
+     * validation will proceed using the current object's properties.
+     * If false, validation is skipped if the reference object is empty.
+     * Defaults to true.
+     * @throws InvalidValueException If validation fails due to a validation rule.
+     * @throws ObjectParsingError If the object cannot be converted to a valid JSON string for validation.
+     * @return self Returns the current instance for method chaining.
+     */
+    public function validate($parentPropertyName = null, $messageTemplate = null, $reference = null, $validateIfReferenceEmpty = null) // NOSONAR
+    {
+        $objectToValidate = $this->object; // Default: validate the internal object of this persistence class
+        $shouldValidate = true; // Flag to determine if validation should proceed
+
+        // Check if a reference object is provided and is an instance of MagicObject
+        if (isset($reference) && $reference instanceof MagicObject) {
+            // A reference object exists. Now determine if it has properties.
+            if ($reference->hasProperties()) {
+                // The reference has properties, so use annotations from the reference.
+                // The data being validated remains from $this->object.
+
+                // Attempt to convert the internal object to JSON string and then decode it
+                // for loadData, assuming $this->object has a __toString() or similar that returns JSON.
+                $jsonString = (string) $this->object; // Ensure this returns a valid JSON string for $this->object
+
+                // Error handling for JSON decoding
+                $objectToLoad = json_decode($jsonString);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new ObjectParsingError(
+                        "Failed to decode object to JSON for validation reference: " . json_last_error_msg()
+                    );
+                }
+                
+                // If the decoded object is not an object or array, it might indicate an issue
+                // depending on what loadData expects. A simple check is added.
+                if (!is_object($objectToLoad) && !is_array($objectToLoad)) {
+                     throw new ObjectParsingError(
+                        "Decoded JSON is not a valid object or array for validation reference. Decoded type: " . gettype($objectToLoad)
+                    );
+                }
+
+
+                $objectToValidate = $reference->loadData($objectToLoad);
+            } else {
+                // The reference has no properties (it's empty).
+                // Determine if validation should still proceed based on $validateIfReferenceEmpty.
+                if (!$validateIfReferenceEmpty) {
+                    $shouldValidate = false; // Skip validation
+                }
+                // If $validateIfReferenceEmpty is true, $objectToValidate remains $this->object (default)
+                // and $shouldValidate remains true.
+            }
+        }
+        // If no reference ($reference == null), $shouldValidate remains true,
+        // and $objectToValidate remains $this->object, which is the desired behavior.
+
+
+        if ($shouldValidate) {
+            // Call the main validation utility only once
+            ValidationUtil::getInstance($messageTemplate)->validate($objectToValidate, $parentPropertyName);
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Retrieve form data as an associative array.
+     *
+     * This method collects the values of all fields that have been retrieved from the object
+     * and returns them as an associative array. The keys are the field names, and the values
+     * are the corresponding values from the object.
+     *
+     * @return array An associative array containing field names and their values.
+     */
+    public function formData()
+    {
+        $data = array();
+        foreach($this->_fieldsRetrieved as $field)
+        {
+            $data[$field] = $this->get($field);
+        }
+        return $data;
     }
 
 }

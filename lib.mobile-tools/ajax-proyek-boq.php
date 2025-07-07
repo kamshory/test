@@ -1,6 +1,5 @@
 <?php
 
-use MagicApp\AppLanguage;
 use MagicApp\Field;
 use MagicObject\Database\PicoPredicate;
 use MagicObject\Database\PicoSort;
@@ -11,13 +10,14 @@ use MagicObject\Request\InputGet;
 use MagicObject\Util\File\FileUtil;
 use MagicObject\Util\PicoIniUtil;
 use MagicObject\Util\PicoStringUtil;
+use Sipro\AppLanguageImpl;
 use Sipro\Entity\Data\BillOfQuantityProyek;
 use Sipro\Entity\Data\Proyek;
 use Sipro\Util\DateUtil;
 
 require_once dirname(__DIR__) . "/inc.app/app.php";
 
-$appLanguage = new AppLanguage(
+$appLanguage = new AppLanguageImpl(
   $appConfig,
   'id',
   function($var, $value)

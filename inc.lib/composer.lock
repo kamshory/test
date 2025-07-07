@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8bea535aec1160c2297a11ad838d2919",
+    "content-hash": "58166b1b6dc08734707745b00c40fd0d",
     "packages": [
         {
             "name": "phpmailer/phpmailer",
-            "version": "v6.9.3",
+            "version": "v6.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e"
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/2f5c94fe7493efc213f643c23b1b1c249d40f47e",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
                 "shasum": ""
             },
             "require": {
@@ -77,7 +77,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.9.3"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.10.0"
             },
             "funding": [
                 {
@@ -85,25 +85,25 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-24T18:04:13+00:00"
+            "time": "2025-04-24T15:19:31+00:00"
         },
         {
             "name": "planetbiru/magic-app",
-            "version": "3.8.4",
+            "version": "3.14.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Planetbiru/MagicApp.git",
-                "reference": "bc962d535582d2c0e219b11608dcf21a7ce62880"
+                "reference": "a483fae2cf1f3a8b4255cdd40aae33c160f71d31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Planetbiru/MagicApp/zipball/bc962d535582d2c0e219b11608dcf21a7ce62880",
-                "reference": "bc962d535582d2c0e219b11608dcf21a7ce62880",
+                "url": "https://api.github.com/repos/Planetbiru/MagicApp/zipball/a483fae2cf1f3a8b4255cdd40aae33c160f71d31",
+                "reference": "a483fae2cf1f3a8b4255cdd40aae33c160f71d31",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4",
-                "planetbiru/magic-object": "^3.8"
+                "planetbiru/magic-object": "^3.14"
             },
             "type": "library",
             "autoload": {
@@ -123,22 +123,22 @@
             "description": "MagicApp",
             "support": {
                 "issues": "https://github.com/Planetbiru/MagicApp/issues",
-                "source": "https://github.com/Planetbiru/MagicApp/tree/3.8.4"
+                "source": "https://github.com/Planetbiru/MagicApp/tree/3.14.5"
             },
-            "time": "2025-03-30T08:44:35+00:00"
+            "time": "2025-07-05T11:18:20+00:00"
         },
         {
             "name": "planetbiru/magic-object",
-            "version": "3.8.2",
+            "version": "3.14.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Planetbiru/MagicObject.git",
-                "reference": "ac19ad0164ff6d6f635fce073b29b8ffc8979b1c"
+                "reference": "6ae38f1e5c649a57563355376e700aadaa6027e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Planetbiru/MagicObject/zipball/ac19ad0164ff6d6f635fce073b29b8ffc8979b1c",
-                "reference": "ac19ad0164ff6d6f635fce073b29b8ffc8979b1c",
+                "url": "https://api.github.com/repos/Planetbiru/MagicObject/zipball/6ae38f1e5c649a57563355376e700aadaa6027e8",
+                "reference": "6ae38f1e5c649a57563355376e700aadaa6027e8",
                 "shasum": ""
             },
             "require": {
@@ -162,9 +162,9 @@
             "description": "MagicObject",
             "support": {
                 "issues": "https://github.com/Planetbiru/MagicObject/issues",
-                "source": "https://github.com/Planetbiru/MagicObject/tree/3.8.2"
+                "source": "https://github.com/Planetbiru/MagicObject/tree/3.14.5"
             },
-            "time": "2025-03-30T08:40:15+00:00"
+            "time": "2025-07-05T11:15:26+00:00"
         }
     ],
     "packages-dev": [],
@@ -177,5 +177,5 @@
         "php": ">=5.3.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.6.0"
 }

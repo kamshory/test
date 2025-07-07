@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -289,7 +289,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Cuti(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Cuti(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <link rel="stylesheet" href="<?php echo $baseAssetsUrl;?><?php echo $themePath;?>css/calendar.css">
@@ -513,7 +513,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$cuti->findOne($specification, null, $subqueryMap);
 		if($cuti->issetCutiId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Cuti(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Cuti(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// Define map here
 			$mapForStatusCuti = array(
@@ -668,7 +668,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Cuti(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Cuti(), $appConfig, $currentUser->getLanguageId());
 $mapForStatusCuti = array(
 	"P" => array("value" => "P", "label" => "Menunggu Persetujuan", "group" => "", "selected" => false),
 	"A" => array("value" => "A", "label" => "Disetujui", "group" => "", "selected" => false),

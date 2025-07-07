@@ -1,6 +1,6 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\UserAction;
 use MagicObject\Request\InputGet;
 use Sipro\Entity\Data\BukuDireksi;
@@ -49,7 +49,7 @@ function convertMinutesToTime($minutes) {
 if($inputGet->getUserAction() == UserAction::DETAIL)
 {
 	$bukuDireksi = new BukuDireksi(null, $database);
-    $appEntityLanguage = new AppEntityLanguage(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
+    $appEntityLanguage = new AppEntityLanguageImpl(new BukuDireksi(), $appConfig, $currentUser->getLanguageId());
 
     // Define map here
     $mapForDiperiksa = array(

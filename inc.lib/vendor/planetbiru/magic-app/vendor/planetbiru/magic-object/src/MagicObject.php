@@ -2,7 +2,6 @@
 
 namespace MagicObject;
 
-use DateTime;
 use Exception;
 use PDOException;
 use PDOStatement;
@@ -19,6 +18,7 @@ use MagicObject\Database\PicoSort;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\Database\PicoTableInfo;
+use MagicObject\Exceptions\DataRetrievalException;
 use MagicObject\Exceptions\FileNotFoundException;
 use MagicObject\Exceptions\FindOptionException;
 use MagicObject\Exceptions\InvalidAnnotationException;
@@ -31,6 +31,7 @@ use MagicObject\Util\ClassUtil\PicoObjectParser;
 use MagicObject\Util\Database\NativeQueryUtil;
 use MagicObject\Util\Database\PicoDatabaseUtil;
 use MagicObject\Util\PicoArrayUtil;
+use MagicObject\Util\PicoDataFormat;
 use MagicObject\Util\PicoEnvironmentVariable;
 use MagicObject\Util\PicoIniUtil;
 use MagicObject\Util\PicoStringUtil;
@@ -668,7 +669,6 @@ class MagicObject extends stdClass // NOSONAR
      *                          If FALSE, only non-null values will be saved.
      * @return PDOStatement Returns a PDOStatement object for further database interaction.
      * @throws NoDatabaseConnectionException If there is no active database connection.
-     * @throws NoRecordFoundException If no corresponding record is found.
      * @throws PDOException If a database error occurs.
      */
     public function save($includeNull = false)
@@ -695,7 +695,6 @@ class MagicObject extends stdClass // NOSONAR
      *                          If FALSE, only non-null values will be included in the query.
      * @return PicoDatabaseQueryBuilder Returns a PicoDatabaseQueryBuilder object for query construction.
      * @throws NoDatabaseConnectionException If there is no active database connection.
-     * @throws NoRecordFoundException If no corresponding record is found.
      */
     public function saveQuery($includeNull = false)
     {
@@ -713,13 +712,14 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Select data from the database.
      *
-     * This method retrieves data from the database. If no data is found, a `NoRecordFoundException` will be thrown. 
+     * This method retrieves data from the database. 
      * The retrieved data is then loaded into the current instance for further use.
      *
      * @return self Returns the current instance for method chaining.
      * @throws NoDatabaseConnectionException If there is no active database connection.
-     * @throws NoRecordFoundException If no records are found in the database.
      * @throws PDOException If a database error occurs.
+     * @throws DataRetrievalException If no data is found in the database.
+     * 
      */
     public function select()
     {
@@ -727,11 +727,11 @@ class MagicObject extends stdClass // NOSONAR
         {
             $persist = new PicoDatabasePersistence($this->_database, $this);
             $data = $persist->select();
-            if($data == null)
+            if(isset($data) && !empty($data))
             {
-                throw new NoRecordFoundException(self::MESSAGE_NO_RECORD_FOUND);
+                $this->loadData($data);
             }
-            $this->loadData($data);
+            
             return $this;
         }
         else
@@ -743,12 +743,11 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Select all data from the database.
      *
-     * This method retrieves all data from the database. If no data is found, a `NoRecordFoundException` will be thrown. 
+     * This method retrieves all data from the database.
      * The retrieved data is then loaded into the current instance for further use.
      *
      * @return self Returns the current instance for method chaining.
      * @throws NoDatabaseConnectionException If there is no active database connection.
-     * @throws NoRecordFoundException If no records are found in the database.
      * @throws PDOException If a database error occurs.
      */
     public function selectAll()
@@ -757,11 +756,10 @@ class MagicObject extends stdClass // NOSONAR
         {
             $persist = new PicoDatabasePersistence($this->_database, $this);
             $data = $persist->selectAll();
-            if($data == null)
+            if(isset($data) && !empty($data))
             {
-                throw new NoRecordFoundException(self::MESSAGE_NO_RECORD_FOUND);
+                $this->loadData($data);
             }
-            $this->loadData($data);
             return $this;
         }
         else
@@ -1273,7 +1271,7 @@ class MagicObject extends stdClass // NOSONAR
      * This method checks if the specified property is set (exists and has a value). It returns true if the property exists and has a value, and false otherwise.
      *
      * @param string $propertyName The name of the property to check.
-     * @return bool True if the property is set, false otherwise.
+     * @return bool true if the property is set, false otherwise.
      */
     public function hasValue($propertyName)
     {
@@ -1294,6 +1292,47 @@ class MagicObject extends stdClass // NOSONAR
     {
         $var = PicoStringUtil::camelize($propertyName);
         return isset($this->{$var}) ? $this->{$var} : $defaultValue;
+    }
+    
+    /**
+     * Retrieves a value from a nested object based on the provided keys.
+     * This function allows you to access nested properties of an object by passing the keys
+     * in a dot-notation-like fashion, where each key corresponds to a level in the object hierarchy.
+     * 
+     * The method will return the value at the deepest level if all the keys exist. If any key does not
+     * exist or the value at any level is not set, the function will return `null`.
+     * 
+     * @param string ...$keys The keys used to retrieve the value at various levels of the object.
+     * Each key corresponds to a property in the object, and the keys are automatically camelized.
+     * 
+     * @return mixed|null The value found at the specified keys in the object, or `null` if any key is not found.
+     */
+    public function retrieve(...$keys)
+    {
+        // Start from the current object
+        $currentData = $this;
+        
+        // Loop through all provided keys
+        foreach ($keys as $key) {
+            // Convert key to camelCase format for consistency
+            if($key === null)
+            {
+                break;
+            }
+            $key = PicoStringUtil::camelize($key);
+
+            // Check if the current data object has the given key and the value is not null
+            if (isset($currentData) && $currentData instanceof self && $currentData->hasValue($key)) {
+                // If the key exists, get the value at this level
+                $currentData = $currentData->get($key);
+            } else {
+                // If any key is not found, return null
+                return null;
+            }
+        }
+
+        // Return the final value at the deepest level
+        return $currentData;
     }
 
     /**
@@ -1333,7 +1372,7 @@ class MagicObject extends stdClass // NOSONAR
      * using `isset()`. It checks if the property exists and is set (even if its value is null).
      *
      * @param string $propertyName The name of the property to check.
-     * @return bool True if the property is set (including null), false otherwise.
+     * @return bool true if the property is set (including null), false otherwise.
      */
     public function __isset($propertyName)
     {
@@ -1392,6 +1431,60 @@ class MagicObject extends stdClass // NOSONAR
                 $this->set($property, $value);
             }
         }
+        return $this;
+    }
+    
+    /**
+     * Merges the current object with another MagicObject.
+     *
+     * This method allows you to combine the properties of another object into the current one.
+     * It is particularly useful for updating or extending an object with new values while preserving
+     * existing nested structures.
+     *
+     * Behavior:
+     * - If a property from the incoming object does not exist in the current object, it will be added.
+     * - If a property exists:
+     *   - If both values are instances of MagicObject, a recursive merge is performed.
+     *   - Otherwise, the existing value will be overwritten with the incoming one.
+     *
+     * All property names will be automatically camelized before processing.
+     *
+     * @param self $other The MagicObject instance to merge with the current object.
+     * @return self Returns the current object instance for method chaining.
+     */
+    public function mergeWith($other)
+    {
+        // Ensure $other is a MagicObject and not empty
+        if (isset($other) || $other instanceof self && !$other->empty()) {
+            // Get an array of values from the other object
+            $values = $other->valueArray();
+            $keys = array_keys($values);
+            
+            // Loop through each key-value pair
+            foreach ($keys as $key) {
+                // Normalize the key to camelCase
+                $value1 = $this->get($key);
+                $value2 = $other->get($key);
+
+                // If the property does not exist, simply add it
+                if (!$this->hasValue($key)) {
+                    $this->set($key, $value2);
+                } else {
+                    // If it exists, get the current value
+
+                    // If both current and new values are MagicObject, merge recursively
+                    if ($value1 instanceof self && $value2 instanceof self) {
+                        $value1->mergeWith($value2);
+                        $this->set($key, $value1);
+                    } else {
+                        // Otherwise, override the value
+                        $this->set($key, $value2);
+                    }
+                }
+            }
+        }
+
+        // Return the current object for chaining
         return $this;
     }
 
@@ -1560,7 +1653,7 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Check if the JSON naming strategy is snake case
      *
-     * @return bool True if the naming strategy is snake case; otherwise, false
+     * @return bool true if the naming strategy is snake case; otherwise, false
      */
     protected function _snakeJson()
     {
@@ -1576,7 +1669,7 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Check if the YAML naming strategy is snake case
      *
-     * @return bool True if the naming strategy is snake case; otherwise, false
+     * @return bool true if the naming strategy is snake case; otherwise, false
      */
     protected function _snakeYaml()
     {
@@ -1592,7 +1685,7 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Check if the JSON naming strategy is upper camel case
      *
-     * @return bool True if the naming strategy is upper camel case; otherwise, false
+     * @return bool true if the naming strategy is upper camel case; otherwise, false
      */
     protected function _upperCamel()
     {
@@ -1608,7 +1701,7 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Check if the JSON naming strategy is camel case
      *
-     * @return bool True if the naming strategy is camel case; otherwise, false
+     * @return bool true if the naming strategy is camel case; otherwise, false
      */
     protected function _camel()
     {
@@ -1618,7 +1711,7 @@ class MagicObject extends stdClass // NOSONAR
     /**
      * Check if the JSON output should be prettified
      *
-     * @return bool True if JSON output is set to be prettified; otherwise, false
+     * @return bool true if JSON output is set to be prettified; otherwise, false
      */
     protected function _pretty()
     {
@@ -1646,7 +1739,7 @@ class MagicObject extends stdClass // NOSONAR
      * Check if a value is not null and not empty
      *
      * @param mixed $value The value to check
-     * @return bool True if the value is not null and not empty; otherwise, false
+     * @return bool true if the value is not null and not empty; otherwise, false
      */
     private function _isNotNullAndNotEmpty($value)
     {
@@ -1700,7 +1793,7 @@ class MagicObject extends stdClass // NOSONAR
      * @param bool $passive Flag indicating whether the object is passive
      * @param array|null $subqueryMap An optional map of subqueries
      * @return PicoPageData The paginated data
-     * @throws NoRecordFoundException if no records are found
+     * @throws DataRetrievalException if there is an error retrieving data
      * @throws NoDatabaseConnectionException if no database connection is established
      */
     public function listAll($specification = null, $pageable = null, $sortable = null, $passive = false, $subqueryMap = null)
@@ -1796,8 +1889,11 @@ class MagicObject extends stdClass // NOSONAR
      * @param array|null $subqueryMap An optional map of subqueries
      * @param int $findOption The find option
      * @return PicoPageData The paginated data
-     * @throws NoRecordFoundException if no records are found
      * @throws NoDatabaseConnectionException if no database connection is established
+     * @throws FindOptionException if an invalid find option is provided
+     * @throws PDOException if there is an error with the database connection or query execution
+     * @throws DataRetrievalException if there is an error retrieving data
+     * @throws Exception for any other exceptions that may occur
      */
     public function findAll($specification = null, $pageable = null, $sortable = null, $passive = false, $subqueryMap = null, $findOption = self::FIND_OPTION_DEFAULT)
     {
@@ -1839,10 +1935,6 @@ class MagicObject extends stdClass // NOSONAR
         {
             throw new FindOptionException($e->getMessage());
         }
-        catch(NoRecordFoundException $e)
-        {
-            throw new NoRecordFoundException($e->getMessage());
-        }
         catch(Exception $e)
         {
             throw new PDOException($e->getMessage(), intval($e->getCode()));
@@ -1853,6 +1945,7 @@ class MagicObject extends stdClass // NOSONAR
      * Find all records without filters, sorted by primary key in ascending order
      *
      * @return PicoPageData The paginated data
+     * @throws DataRetrievalException if there is an error retrieving data
      */
     public function findAllAsc()
     {
@@ -1866,6 +1959,7 @@ class MagicObject extends stdClass // NOSONAR
      * Find all records without filters, sorted by primary key in descending order
      *
      * @return PicoPageData The paginated data
+     * @throws DataRetrievalException if there is an error retrieving data
      */
     public function findAllDesc()
     {
@@ -1886,7 +1980,7 @@ class MagicObject extends stdClass // NOSONAR
      * @param array|null $subqueryMap An optional map of subqueries
      * @param int $findOption The find option
      * @return PicoPageData The paginated data
-     * @throws NoRecordFoundException if no records are found
+     * @throws DataRetrievalException if there is an error retrieving data
      * @throws NoDatabaseConnectionException if no database connection is established
      */
     public function findSpecific($selected, $specification = null, $pageable = null, $sortable = null, $passive = false, $subqueryMap = null, $findOption = self::FIND_OPTION_DEFAULT)
@@ -1929,9 +2023,9 @@ class MagicObject extends stdClass // NOSONAR
         {
             throw new FindOptionException($e->getMessage());
         }
-        catch(NoRecordFoundException $e)
+        catch(DataRetrievalException $e)
         {
-            throw new NoRecordFoundException($e->getMessage());
+            throw new DataRetrievalException($e->getMessage());
         }
         catch(Exception $e)
         {
@@ -2008,7 +2102,7 @@ class MagicObject extends stdClass // NOSONAR
      * @param PicoPageable|null $pageable The pagination information
      * @param PicoSortable|null $sortable The sorting criteria
      * @return int|false The count of records or false on error
-     * @throws NoRecordFoundException if no records are found
+     * @throws DataRetrievalException if there is an error retrieving data
      * @throws NoDatabaseConnectionException if no database connection is established
      */
     public function countAll($specification = null, $pageable = null, $sortable = null)
@@ -2047,7 +2141,7 @@ class MagicObject extends stdClass // NOSONAR
      * @param PicoPageable|string|null $pageable The pagination information
      * @param PicoSortable|string|null $sortable The sorting criteria
      * @return PicoDatabaseQueryBuilder The query builder
-     * @throws NoRecordFoundException if no record is found
+     * @throws DataRetrievalException if there is an error retrieving data
      * @throws NoDatabaseConnectionException if no database connection is established
      */
     public function findAllQuery($specification = null, $pageable = null, $sortable = null)
@@ -2138,7 +2232,6 @@ class MagicObject extends stdClass // NOSONAR
      * @param bool $passive Flag indicating whether the object is passive
      * @param array|null $subqueryMap An optional map of subqueries
      * @return PicoPageData The paginated data
-     * @throws NoRecordFoundException if no records are found
      * @throws NoDatabaseConnectionException if no database connection is established
      */
     private function findBy($method, $params, $pageable = null, $sortable = null, $passive = false, $subqueryMap = null)
@@ -2252,7 +2345,7 @@ class MagicObject extends stdClass // NOSONAR
      * @param string $method The method used for finding.
      * @param mixed $params The parameters to use for the search.
      * @param PicoSortable|string|null $sortable Optional sorting criteria.
-     * @return object The found instance.
+     * @return self The found instance.
      * @throws NoRecordFoundException If no record is found.
      * @throws NoDatabaseConnectionException If there is no database connection.
      */
@@ -2284,7 +2377,7 @@ class MagicObject extends stdClass // NOSONAR
      * @param string $method The method used for finding.
      * @param mixed $params The parameters to use for the search.
      * @param PicoSortable|string|null $sortable Optional sorting criteria.
-     * @return object The found instance or the current instance if not found.
+     * @return self The found instance or the current instance if not found.
      * @throws NoDatabaseConnectionException If there is no database connection.
      */
     private function findOneIfExistsBy($method, $params, $sortable = null)
@@ -2312,7 +2405,7 @@ class MagicObject extends stdClass // NOSONAR
      *
      * @param string $method The method used for finding.
      * @param mixed $params The parameters to use for the deletion.
-     * @return bool True on success; otherwise, false.
+     * @return bool true on success; otherwise, false.
      * @throws NoDatabaseConnectionException If there is no database connection.
      */
     private function deleteOneBy($method, $params)
@@ -2341,7 +2434,7 @@ class MagicObject extends stdClass // NOSONAR
      *
      * @param string $method The method used for finding.
      * @param mixed $params The parameters to use for the search.
-     * @return bool True if the record exists; otherwise, false.
+     * @return bool true if the record exists; otherwise, false.
      * @throws NoDatabaseConnectionException If there is no database connection.
      */
     private function existsBy($method, $params)
@@ -2457,6 +2550,15 @@ class MagicObject extends stdClass // NOSONAR
      * - **get**: Retrieves the property value.
      *   - Example: `$value = $object->getPropertyName();`
      *
+     * - **trim**: Retrieves the property value and trims any leading and trailing whitespace.
+     *   - Example: `$value = $object->trimPropertyName();`
+     *
+     * - **upper**: Retrieves the property value and transform it to uppercase.
+     *   - Example: `$value = $object->upperPropertyName();`
+     *
+     * - **lower**: Retrieves the property value and transform it to lowercase.
+     *   - Example: `$value = $object->lowerPropertyName();`
+     *
      * - **set**: Sets the property value.
      *   - Example: `$object->setPropertyName($value);`
      *
@@ -2482,46 +2584,47 @@ class MagicObject extends stdClass // NOSONAR
      *   - Example: `$removedElement = $object->shiftPropertyName();`
      *
      * - **findOneBy**: Searches for data in the database and returns one record.
-     *   - Example: `$record = $object->findOneByPropertyName($value);`
+     *   - Example: `$record = $object->findOneByPropertyName($columnName);`
      *   - *Requires a database connection.*
      *
      * - **findOneIfExistsBy**: Searches for data in the database by any column values and returns one record.
-     *   - Example: `$record = $object->findOneIfExistsByPropertyName($value, $sortable);`
+     *   - Example: `$record = $object->findOneIfExistsByPropertyName($columnName, $sortable);`
      *   - *Requires a database connection.*
      *
      * - **deleteOneBy**: Deletes data from the database by any column values and returns one record.
-     *   - Example: `$deletedRecord = $object->deleteOneByPropertyName($value, $sortable);`
+     *   - Example: `$deletedRecord = $object->deleteOneByPropertyName($columnName, $sortable);`
      *   - *Requires a database connection.*
      *
      * - **findFirstBy**: Searches for data in the database by any column values and returns the first record.
-     *   - Example: `$firstRecord = $object->findFirstByColumnName($value);`
+     *   - Example: `$firstRecord = $object->findFirstByColumnName($columnName);`
      *   - *Requires a database connection.*
      *
      * - **findFirstIfExistsBy**: Similar to `findFirstBy`, but returns the first record if it exists.
-     *   - Example: `$firstRecord = $object->findFirstIfExistsByPropertyName($value, $sortable);`
+     *   - Example: `$firstRecord = $object->findFirstIfExistsByPropertyName($columnName, $sortable);`
      *   - *Requires a database connection.*
      *
      * - **findLastBy**: Searches for data in the database by any column values and returns the last record.
-     *   - Example: `$lastRecord = $object->findLastByColumnName($value);`
+     *   - Example: `$lastRecord = $object->findLastByColumnName($columnName);`
      *   - *Requires a database connection.*
      *
      * - **findLastIfExistsBy**: Similar to `findLastBy`, but returns the last record if it exists.
-     *   - Example: `$lastRecord = $object->findLastIfExistsByPropertyName($value, $sortable);`
+     *   - Example: `$lastRecord = $object->findLastIfExistsByPropertyName($columnName, $sortable);`
      *   - *Requires a database connection.*
      *
      * - **findBy**: Searches for multiple records in the database by any column values.
-     *   - Example: `$records = $object->findByColumnName($value);`
+     *   - Example: `$records = $object->findByColumnName($columnName);`
      *   - *Requires a database connection.*
      *
      * - **countBy**: Counts data from the database.
      *   - Example: `$count = $object->countByColumnName();`
+     *   - *Requires a database connection.*
      *
      * - **existsBy**: Checks for data in the database.
      *   - Example: `$exists = $object->existsByColumn($column);`
      *   - *Requires a database connection.*
      *
      * - **deleteBy**: Deletes data from the database without reading it first.
-     *   - Example: `$object->deleteByPropertyName($value);`
+     *   - Example: `$object->deleteByPropertyName($columnName);`
      *   - *Requires a database connection.*
      *
      * - **booleanToTextBy**: Converts a boolean value to "yes/no" or "true/false" based on given parameters.
@@ -2567,14 +2670,26 @@ class MagicObject extends stdClass // NOSONAR
      * - **numberFormat**: Format a number with grouped thousands
      *   - Example: `$numberFormat = $object->numberFormatData(6, ".", ",");`
      *
+     * - **toFixed**: Formats the number as a string using fixed-point notation with the specified number of decimal places.
+     *   - Example: `$numberFormat = $object->toFixedData(6);`
+     *
      * - **format**: Format a date value into a specified format.
      *   - Example: `$formattedData = $object->formatData("%7.3f");`
+     *
+     * - **dms**: Convert decimal to DMS format.
+     *   - **Parameters**:
+     *     - `$inSeconds` (bool): Whether to convert in seconds (default is false)
+     *     - `$decimal` (string): Separator (default is ":")
+     *     - `$decimalPlaces` (int): Number of decimal places (default is 0)
+     *     - `$withSign` (bool): Whether to include sign (default is false)
+     *     - `$zeroPadding` (int): Number of zero padding (default is 0)
+     *     - `$trimDegreeMinute` (bool): Whether to trim degree and minute if they are 0 (default is false)
+     *   - Example: `$formattedData = $object->dmsData(";");`
      *
      * @param string $method Method name
      * @param mixed $params Parameters for the method
      * @return mixed|null The result of the called method, or null if not applicable
      */
-
     public function __call($method, $params) // NOSONAR
     {
         if (strncasecmp($method, "hasValue", 8) === 0) {
@@ -2595,6 +2710,15 @@ class MagicObject extends stdClass // NOSONAR
         }
         else if (strncasecmp($method, "get", 3) === 0) {
             return $this->get(substr($method, 3));
+        }
+        else if (strncasecmp($method, "trim", 4) === 0) {
+            return trim($this->get(substr($method, 4)));
+        }
+        else if (strncasecmp($method, "upper", 5) === 0) {
+            return strtoupper($this->get(substr($method, 5)));
+        }
+        else if (strncasecmp($method, "lower", 5) === 0) {
+            return strtolower($this->get(substr($method, 5)));
         }
         else if (strncasecmp($method, "set", 3) === 0 && $this->_isArray($params) && !empty($params) && !$this->_readonly) {
             $var = substr($method, 3);
@@ -2849,7 +2973,7 @@ class MagicObject extends stdClass // NOSONAR
         {
             if(isset($params[0]))
             {
-                return $this->_dateFormat($params[0], $this->get(substr($method, 10)));
+                return PicoDataFormat::dateFormat($params[0], $this->get(substr($method, 10)));
             }
             else
             {
@@ -2870,70 +2994,38 @@ class MagicObject extends stdClass // NOSONAR
                 return $this->get(substr($method, 12));
             }
         }
+        else if(strncasecmp($method, "toFixed", 7) === 0)
+        {
+            if(isset($params[0]))
+            {
+                $param0 = $params[0];
+                return number_format($this->get(substr($method, 7)), $param0);
+            }
+            else
+            {
+                return number_format($this->get(substr($method, 7)), 0);
+            }
+        }
         else if(strncasecmp($method, "format", 6) === 0)
         {
             if(isset($params[0]))
             {
-                return $this->_format($params[0], $this->get(substr($method, 6)));
+                return PicoDataFormat::format($params[0], $this->get(substr($method, 6)));
             }
             else
             {
                 return $this->get(substr($method, 6));
             }
         }
-    }
-
-    /**
-     * Format a given date value into a specified format.
-     *
-     * This method accepts various types of date input, including:
-     * - `DateTime` object: Directly formatted using its `format` method.
-     * - `int` (timestamp): Formatted using `date()`.
-     * - `float` (timestamp with microseconds): Cast to `int` and formatted using `date()`.
-     * - `string` (date representation): Parsed with `strtotime()` and formatted if valid.
-     *
-     * If the provided string value is `null`, empty, or an invalid date 
-     * (such as '0000-00-00' or '0000-00-00 00:00:00'), the function returns `null`.
-     *
-     * @param string $format The desired date format (e.g., 'Y-m-d H:i:s').
-     * @param DateTime|string|int|float $value The date value to format.
-     * @return string|null Formatted date string or `null` if the value is invalid.
-     */
-    private function _dateFormat($format, $value) // NOSONAR
-    {
-        if ($value instanceof DateTime) {
-            return $value->format($format);
-        } elseif (is_int($value)) {
-            return date($format, $value);
-        } elseif (is_float($value)) {
-            return date($format, (int) $value);
-        } elseif (is_string($value)) {
-            if($value != null && $value != '' && $value != '0000-00-00' && $value != '0000-00-00 00:00:00')
-            {
-                $dateTime = strtotime($value);
-                if ($dateTime !== false) {
-                    return date($format, $dateTime);
-                }
-            }
+        else if(strncasecmp($method, "dms", 3) === 0)
+        {
+            // Convert real number to DMS (Degrees, Minutes, Seconds) format
+            $decimal = floatval($this->get(substr($method, 3)));
+            
+            
+            // Call function to convert decimal to DMS format
+            return PicoDataFormat::convertDecimalToDMS($decimal, $params);
         }
-        return null;
-    }
-
-    /**
-     * Formats a string using a specified format pattern.
-     *
-     * The format string consists of ordinary characters (except `%`, which 
-     * introduces a conversion specification). Each conversion specification 
-     * fetches and formats a corresponding parameter. This behavior applies 
-     * to both `sprintf` and `printf`.
-     *
-     * @param string $format The format string containing conversion specifications.
-     * @param mixed $value The value to be formatted.
-     * @return string The formatted string.
-     */
-    private function _format($format, $value)
-    {
-        return sprintf($format, $value);
     }
 
     /**

@@ -6,7 +6,7 @@
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
 use MagicApp\PicoModule;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicObject\Database\PicoPredicate;
 use MagicObject\Database\PicoSort;
@@ -18,11 +18,10 @@ use Sipro\Entity\Data\Proyek;
 use Sipro\Util\DateUtil;
 use Sipro\Util\ProyekUtil;
 
-
 require_once dirname(__DIR__) . "/inc.app/auth.php";
+
 $inputGet = new InputGet();
 $inputPost = new InputPost();
-
 
 $currentModule = new PicoModule($appConfig, $database, $appModule, "/admin", "depan", $appLanguage->getDepan());
 $inputGet = new InputGet();
@@ -30,8 +29,10 @@ $inputPost = new InputPost();
 
 $appInclude = new AppIncludeImpl($appConfig, $currentModule);
 
+
 require_once $appInclude->mainAppHeader(__DIR__);
-$appEntityLanguage = new AppEntityLanguage(new Proyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Proyek(), $appConfig, $currentUser->getLanguageId());
+
 $baseAssetsUrl = $appConfig->getSite()->getBaseUrl();
 ?>
 <?php

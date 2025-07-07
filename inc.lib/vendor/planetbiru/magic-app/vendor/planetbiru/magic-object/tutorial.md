@@ -426,7 +426,528 @@ echo $someObject."\r\n\r\n";
 echo $someObject->popData()."\r\n";
 echo "After Pop\r\n";
 echo $someObject."\r\n\r\n";
-``
+```
+
+The following are the magic methods of the MagicObject class.
+
+### 1. **hasValue**
+
+-   **Description**: Checks if a property has a value.
+    
+-   **Example**:
+
+```php
+$object->hasValuePropertyName();
+```
+
+### 2. **isset**
+
+-   **Description**: Checks if a property is set.
+    
+-   **Example**:
+
+```php
+$object->issetPropertyName();
+```
+
+### 3. **is**
+
+-   **Description**: Retrieves the property value as a boolean.
+    
+-   **Example**:
+
+```php
+$isActive = $object->isActive();
+```
+
+### 4. **equals**
+
+-   **Description**: Checks if the property value equals the given value.
+    
+-   **Example**:
+
+```php
+$isEqual = $object->equalsPropertyName($value);
+```
+
+### 5. **get**
+
+-   **Description**: Retrieves the property value.
+    
+-   **Example**:
+
+```php
+$value = $object->getPropertyName();
+```
+
+### 6. **trim**
+
+-   **Description**: Retrieves the property value and trims any leading and trailing whitespace.
+    
+-   **Example**:
+
+```php
+$value = $object->trimPropertyName();
+```
+
+### 7. **upper**
+
+-   **Description**: Retrieves the property value and transforms it to uppercase.
+    
+-   **Example**:
+
+```php
+$value = $object->upperPropertyName();
+```
+
+### 8. **lower**
+
+-   **Description**: Retrieves the property value and transforms it to lowercase.
+    
+-   **Example**:
+
+```php
+$value = $object->lowerPropertyName();
+```
+
+### 9. **set**
+
+-   **Description**: Sets the property value.
+    
+-   **Example**:
+
+```php
+$object->setPropertyName($value);
+```
+
+### 10. **unset**
+
+-   **Description**: Unsets the property value.
+    
+-   **Example**:
+
+```php
+$object->unsetPropertyName();
+```
+
+### 11. **push**
+
+-   **Description**: Adds array elements to a property at the end.
+    
+-   **Example**:
+
+```php
+$object->pushPropertyName($newElement);
+```
+
+### 12. **append**
+
+-   **Description**: Appends array elements to a property at the end.
+    
+-   **Example**:
+
+```php
+$object->appendPropertyName($newElement);
+```
+
+### 13. **unshift**
+
+-   **Description**: Adds array elements to a property at the beginning.
+    
+-   **Example**:
+
+```php
+$object->unshiftPropertyName($newElement);
+```
+
+### 14. **prepend**
+
+-   **Description**: Prepends array elements to a property at the beginning.
+    
+-   **Example**:
+
+```php
+$object->prependPropertyName($newElement);
+```
+
+### 15. **pop**
+
+-   **Description**: Removes the last element from the property.
+    
+-   **Example**:
+
+```php
+$removedElement = $object->popPropertyName();
+```
+
+### 16. **shift**
+
+-   **Description**: Removes the first element from the property.
+    
+-   **Example**:
+
+```php
+$removedElement = $object->shiftPropertyName();
+```
+
+### 17. **findOneBy**
+
+-   **Description**: Searches for data in the database and returns one record.
+    
+-   **Example**:
+
+```php
+$record = $object->findOneByPropertyName($columnName);
+```
+**Note**: Requires a database connection.
+
+### 18. **findOneIfExistsBy**
+
+-   **Description**: Searches for data in the database by any column values and returns one record if it exists.
+    
+-   **Example**:
+
+```php
+$record = $object->findOneIfExistsByPropertyName($columnName, $sortable);
+```
+
+**Note**: Requires a database connection.
+
+### 19. **deleteOneBy**
+
+-   **Description**: Deletes data from the database by any column values and returns one record.
+    
+-   **Example**:
+
+```php
+$deletedRecord = $object->deleteOneByPropertyName($columnName, $sortable);
+```
+
+**Note**: Requires a database connection.
+
+### 20. **findFirstBy**
+
+-   **Description**: Searches for data in the database by any column values and returns the first record.
+    
+-   **Example**:
+
+```php
+$firstRecord = $object->findFirstByColumnName($columnName);
+```
+
+**Note**: Requires a database connection.
+
+### 21. **findFirstIfExistsBy**
+
+-   **Description**: Similar to `findFirstBy`, but returns the first record if it exists.
+    
+-   **Example**:
+
+```php
+$firstRecord = $object->findFirstIfExistsByPropertyName($columnName, $sortable);
+```
+
+**Note**: Requires a database connection.
+
+### 22. **findLastBy**
+
+-   **Description**: Searches for data in the database by any column values and returns the last record.
+    
+-   **Example**:
+
+```php
+$lastRecord = $object->findLastByColumnName($columnName);
+```
+
+**Note**: Requires a database connection.
+
+### 23. **findLastIfExistsBy**
+
+-   **Description**: Similar to `findLastBy`, but returns the last record if it exists.
+    
+-   **Example**:
+
+```php
+$lastRecord = $object->findLastIfExistsByPropertyName($columnName, $sortable);
+```
+
+**Note**: Requires a database connection.
+
+### 24. **findBy**
+
+-   **Description**: Searches for multiple records in the database by any column values.
+    
+-   **Example**:
+
+```php
+$records = $object->findByColumnName($columnName);
+```
+
+**Note**: Requires a database connection.
+
+### 25. **countBy**
+
+-   **Description**: Counts the data from the database.
+    
+-   **Example**:
+
+```php
+`$count = $object->countByColumnName();`
+```
+
+**Note**: Requires a database connection.
+
+### 26. **existsBy**
+
+-   **Description**: Checks for data in the database.
+    
+-   **Example**:
+
+```php
+`$exists = $object->existsByColumn($column);`
+```
+
+**Note**: Requires a database connection.
+
+### 27. **deleteBy**
+
+-   **Description**: Deletes data from the database without reading it first.
+    
+-   **Example**:
+
+```php
+$object->deleteByPropertyName($columnName);
+```
+
+**Note**: Requires a database connection.
+
+### 28. **booleanToTextBy**
+
+-   **Description**: Converts a boolean value to "yes/no" or "true/false" based on the given parameters.
+    
+-   **Example**:
+
+```php
+$result = $object->booleanToTextByActive("Yes", "No");
+```
+
+**Note**: If `$obj->active` is `true`, `$result` will be "Yes", otherwise "No".
+
+### 29. **startsWith**
+
+-   **Description**: Checks if the value starts with a given string.
+    
+-   **Example**:
+
+```php
+$startsWith = $object->startsWithPropertyName("prefix");
+```
+
+### 30. **endsWith**
+
+-   **Description**: Checks if the value ends with a given string.
+    
+-   **Example**:
+
+```php
+$endsWith = $object->endsWithPropertyName("suffix");
+```
+
+### 31. **label**
+
+-   **Description**: Retrieves the label associated with the given property. If the label is not set, it attempts to fetch it from annotations.
+    
+-   **Example**:
+
+```php
+$label = $object->labelPropertyName();
+```
+
+### 32. **option**
+
+-   **Description**: Returns the first parameter if the property is set to `true` or equals `1`; otherwise, returns the second parameter.
+    
+-   **Example**:
+
+```php
+$option = $object->optionPropertyName("Yes", "No");
+```
+
+### 33. **notNull**
+
+-   **Description**: Checks if the specified property is set (not null).
+    
+-   **Example**:
+
+```php
+$isNotNull = $object->notNullPropertyName();
+```
+
+### 34. **notEmpty**
+
+-   **Description**: Checks if the specified property is set and not empty.
+    
+-   **Example**:
+
+```php
+$isNotEmpty = $object->notEmptyPropertyName();
+```
+
+### 35. **notZero**
+
+-   **Description**: Checks if the specified property is set and not equal to zero.
+    
+-   **Example**:
+
+```php
+$isNotZero = $object->notZeroPropertyName();
+```
+
+### 36. **notEquals**
+
+-   **Description**: Checks if the specified property is set and does not equal the given value.
+    
+-   **Example**:
+
+```php
+$isNotEqual = $object->notEqualsPropertyName($value);
+```
+
+### 37. **mask**
+
+-   **Description**: Masks the value of the property by replacing certain characters with a masking character.
+    
+-   **Parameters**:
+    
+    -   `$position` (int): Starting position for the mask (default is 1).
+        
+    -   `$maskLength` (int): Number of characters to mask (default is 3).
+        
+    -   `$maskChar` (string): Character used for masking (default is `*`).
+        
+-   **Example**:
+
+```php
+$object->maskPropertyName(1, 3, '*');
+```
+
+**Description**: If `maskPropertyName(1, 3, '*')` is called, it masks the first 3 characters of the property value starting from position 1 with `*`.
+
+### 38. **dateFormat**
+
+-   **Description**: Format a date value into a specified format.
+    
+-   **Example**:
+
+```php
+$formattedDate = $object->dateFormatDate("j F Y H:i:s");
+```
+
+### 39. **numberFormat**
+
+-   **Description**: Format a number with grouped thousands.
+    
+-   **Example**:
+
+```php
+$numberFormat = $object->numberFormatData(6, ".", ",");
+```
+
+### 40. **format**
+
+-   **Description**: Format a date value into a specified format.
+    
+-   **Example**:
+
+```php
+$formattedData = $object->formatData("%7.3f");
+```
+
+### 41. **dms**
+
+-   **Description**: Convert decimal to DMS (Degree, Minute, Second) format.
+    
+-   **Parameters**:
+    
+    -   `$inSeconds` (bool): Whether to convert in seconds (default is false).
+        
+    -   `$decimal` (string): Separator (default is ":").
+        
+    -   `$decimalPlaces` (int): Number of decimal places (default is 0).
+        
+    -   `$withSign` (bool): Whether to include the sign (default is false).
+        
+    -   `$zeroPadding` (int): Number of zero padding (default is 0).
+        
+    -   `$trimDegreeMinute` (bool): Whether to trim degree and minute if they are 0 (default is false).
+        
+-   **Example**:
+
+```php
+$formattedData = $object->dmsData(";");
+```
+
+### 42. **retrieve**
+
+-   **Description**: Enables access to deeply nested properties within objects. This feature accepts multiple keys as arguments, allowing efficient traversal of complex nested structures.
+
+-   **Example**:
+
+
+```php
+$object = new  MagicObject();
+$yaml = '
+  prop1:
+    prop2:
+      prop3: Test
+';
+$object->loadYamlString($yaml, false, true, true);
+echo  $object->retrieve('prop1', 'prop2', 'prop3');
+```
+
+In this example:
+-   The method will first check `prop1`, then move to `prop2`, and finally `prop3`.
+-   If any of these keys do not exist, it will return `null`.    
+
+### 43. **mergeWith**
+
+-   **Description**: Merges properties from another `MagicObject` instance into the current one. If a property does not exist, it will be added. If it does:
+    
+    -   When both values are `MagicObject` instances, they will be merged recursively.
+        
+    -   Otherwise, the existing value will be overwritten.
+        
+-   **Example**:
+
+```php
+$obj1 = new MagicObject();
+$obj1->loadYamlString('
+user:
+  name: ALice
+client:
+  address: Jakarta
+', false, true, true);
+
+$obj2 = new MagicObject();
+$obj2->loadYamlString('
+user:
+  email: alice@example.com
+client:
+  name: Ana
+', false, true, true);
+
+$obj1->mergeWith($obj2);
+
+echo $obj1;
+// {"user":{"name":"ALice","email":"alice@example.com"},"client":{"address":"Jakarta","name":"Ana"}}
+```
+
+
+In this example:
+-   Properties in `$obj2` are merged into `$obj1`.
+-   Nested `MagicObject` instances are merged recursively.    
+-   Non-object values with the same key are replaced.
+
 ## Extends MagicObject
 
 User can extend `MagicObject` to many classes.
@@ -2853,7 +3374,7 @@ In **MagicObject 2.7**, when you pass a **PDO** connection object to the constru
 
 Version 2.7 of **MagicObject** introduces an important enhancement by allowing PDO connections to be used alongside **PicoDatabase**. This update provides greater flexibility for developers, allowing them to work with traditional PDO connections if they choose, while still benefiting from the advanced features of **MagicObject** for database interactions. This change aligns with the goal of making **MagicObject** more accessible to a wider range of developers, whether they are just starting with **MagicObject** or are looking to transition from an existing PDO-based application.
 
-## Object-Relational Mapping (ORM)
+## ORM
 
 ORM (Object-Relational Mapping) is a class used to access the database. ORM is derived from MagicObject. Some annotations are required to activate all ORM features.
 
@@ -2985,7 +3506,7 @@ class Album extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -2994,7 +3515,7 @@ class Album extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -3326,7 +3847,6 @@ try
     $album1->save();
   
     // update
-    // NoRecordFoundException if ID not found
     $album1->update();
   
     // convert to JSON
@@ -4701,7 +5221,7 @@ class EntitySong extends MagicObject
 	/**
 	 * File Upload Time
 	 * 
-	 * @Column(name="file_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="file_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="File Upload Time")
 	 * @var string
 	 */
@@ -4710,7 +5230,7 @@ class EntitySong extends MagicObject
 	/**
 	 * First Upload Time
 	 * 
-	 * @Column(name="first_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="first_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="First Upload Time")
 	 * @var string
 	 */
@@ -4719,7 +5239,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time
 	 * 
-	 * @Column(name="last_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time")
 	 * @var string
 	 */
@@ -4737,7 +5257,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Midi
 	 * 
-	 * @Column(name="last_upload_time_midi", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_midi", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Midi")
 	 * @var string
 	 */
@@ -4755,7 +5275,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Xml
 	 * 
-	 * @Column(name="last_upload_time_xml", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_xml", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Xml")
 	 * @var string
 	 */
@@ -4773,7 +5293,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Pdf
 	 * 
-	 * @Column(name="last_upload_time_pdf", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_pdf", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Pdf")
 	 * @var string
 	 */
@@ -4924,7 +5444,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Image
 	 * 
-	 * @Column(name="last_upload_time_image", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_image", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Image")
 	 * @var string
 	 */
@@ -4933,7 +5453,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -4942,7 +5462,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -5107,7 +5627,7 @@ class Album extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -5116,7 +5636,7 @@ class Album extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -5326,7 +5846,7 @@ class Producer extends MagicObject
 	/**
 	 * Image Update
 	 * 
-	 * @Column(name="image_update", type="timestamp", length=19, nullable=true)
+	 * @Column(name="image_update", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Image Update")
 	 * @var string
 	 */
@@ -5335,7 +5855,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -5344,7 +5864,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -5554,7 +6074,7 @@ class Artist extends MagicObject
 	/**
 	 * Image Update
 	 * 
-	 * @Column(name="image_update", type="timestamp", length=19, nullable=true)
+	 * @Column(name="image_update", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Image Update")
 	 * @var string
 	 */
@@ -5563,7 +6083,7 @@ class Artist extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -5572,7 +6092,7 @@ class Artist extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -5675,7 +6195,7 @@ class Genre extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -5684,7 +6204,7 @@ class Genre extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -5928,7 +6448,7 @@ class EntityAlbum extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -5937,7 +6457,7 @@ class EntityAlbum extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -6138,7 +6658,7 @@ class Producer extends MagicObject
 	/**
 	 * Image Update
 	 * 
-	 * @Column(name="image_update", type="timestamp", length=19, nullable=true)
+	 * @Column(name="image_update", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Image Update")
 	 * @var string
 	 */
@@ -6147,7 +6667,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -6156,7 +6676,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -6615,7 +7135,7 @@ class EntityAlbum extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -6624,7 +7144,7 @@ class EntityAlbum extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -6825,7 +7345,7 @@ class Producer extends MagicObject
 	/**
 	 * Image Update
 	 * 
-	 * @Column(name="image_update", type="timestamp", length=19, nullable=true)
+	 * @Column(name="image_update", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Image Update")
 	 * @var string
 	 */
@@ -6834,7 +7354,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -6843,7 +7363,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -8037,6 +8557,34 @@ catch(Exception $e)
 }
 ```
 
+**Always TRUE Specification**
+
+In certain scenarios, developers may need to update or delete all records in a database table. To achieve this, it is common to use a native SQL query with the condition `WHERE 1 = 1`, which effectively applies no filtering and includes all rows. This approach can also be used when retrieving all records from a table.
+
+To simplify this pattern and make it reusable in a more structured way, MagicObject provides a built-in utility method:
+
+`PicoSpecification::alwaysTrue()`
+
+This method returns a specification that translates to a SQL condition that is always true. It is particularly useful as a default or fallback filter when no specific criteria are applied.
+
+**Use Case Example:**
+
+```php
+$specs = PicoSpecification::alwaysTrue();
+
+$user = new UserMin(null, $database);
+try
+{
+$pageData = $user->findAll($specs);
+}
+catch(Exception $e)
+{
+    // Do nothing
+}
+```
+
+In this example, the `findAll()` method retrieves all user records from the database without applying any filtering conditions, thanks to the `alwaysTrue()` specification.
+
 **String-Based Specification**
 
 Since version **3.6**, **MagicObject** has supported specifications in the form of strings, which are used as part of the `WHERE` clause. The introduction of string-based specifications aims to address limitations that cannot be handled using predicates alone. This feature provides users with greater flexibility, allowing them to write `WHERE` clauses directly, tailored to the syntax and capabilities of their specific DBMS.
@@ -8695,7 +9243,7 @@ class EntityAlbum extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -8704,7 +9252,7 @@ class EntityAlbum extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -8905,7 +9453,7 @@ class Producer extends MagicObject
 	/**
 	 * Image Update
 	 * 
-	 * @Column(name="image_update", type="timestamp", length=19, nullable=true)
+	 * @Column(name="image_update", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Image Update")
 	 * @var string
 	 */
@@ -8914,7 +9462,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -8923,7 +9471,7 @@ class Producer extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -9215,7 +9763,7 @@ class EntitySong extends MagicObject
 	/**
 	 * File Upload Time
 	 * 
-	 * @Column(name="file_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="file_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="File Upload Time")
 	 * @var string
 	 */
@@ -9224,7 +9772,7 @@ class EntitySong extends MagicObject
 	/**
 	 * First Upload Time
 	 * 
-	 * @Column(name="first_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="first_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="First Upload Time")
 	 * @var string
 	 */
@@ -9233,7 +9781,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time
 	 * 
-	 * @Column(name="last_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time")
 	 * @var string
 	 */
@@ -9251,7 +9799,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Midi
 	 * 
-	 * @Column(name="last_upload_time_midi", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_midi", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Midi")
 	 * @var string
 	 */
@@ -9269,7 +9817,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Xml
 	 * 
-	 * @Column(name="last_upload_time_xml", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_xml", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Xml")
 	 * @var string
 	 */
@@ -9287,7 +9835,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Pdf
 	 * 
-	 * @Column(name="last_upload_time_pdf", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_pdf", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Pdf")
 	 * @var string
 	 */
@@ -9438,7 +9986,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Last Upload Time Image
 	 * 
-	 * @Column(name="last_upload_time_image", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_image", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Image")
 	 * @var string
 	 */
@@ -9447,7 +9995,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -9456,7 +10004,7 @@ class EntitySong extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -11214,7 +11762,7 @@ class Song extends MagicObject
 	/**
 	 * File Upload Time
 	 * 
-	 * @Column(name="file_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="file_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="File Upload Time")
 	 * @var string
 	 */
@@ -11223,7 +11771,7 @@ class Song extends MagicObject
 	/**
 	 * First Upload Time
 	 * 
-	 * @Column(name="first_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="first_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="First Upload Time")
 	 * @var string
 	 */
@@ -11232,7 +11780,7 @@ class Song extends MagicObject
 	/**
 	 * Last Upload Time
 	 * 
-	 * @Column(name="last_upload_time", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time")
 	 * @var string
 	 */
@@ -11250,7 +11798,7 @@ class Song extends MagicObject
 	/**
 	 * Last Upload Time Midi
 	 * 
-	 * @Column(name="last_upload_time_midi", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_midi", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Midi")
 	 * @var string
 	 */
@@ -11268,7 +11816,7 @@ class Song extends MagicObject
 	/**
 	 * Last Upload Time Xml
 	 * 
-	 * @Column(name="last_upload_time_xml", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_xml", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Xml")
 	 * @var string
 	 */
@@ -11286,7 +11834,7 @@ class Song extends MagicObject
 	/**
 	 * Last Upload Time Pdf
 	 * 
-	 * @Column(name="last_upload_time_pdf", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_pdf", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Pdf")
 	 * @var string
 	 */
@@ -11430,7 +11978,7 @@ class Song extends MagicObject
 	/**
 	 * Last Upload Time Image
 	 * 
-	 * @Column(name="last_upload_time_image", type="timestamp", length=19, nullable=true)
+	 * @Column(name="last_upload_time_image", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Last Upload Time Image")
 	 * @var string
 	 */
@@ -11439,7 +11987,7 @@ class Song extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -11448,7 +11996,7 @@ class Song extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -11626,7 +12174,7 @@ class UserType extends MagicObject
 	/**
 	 * Time Create
 	 * 
-	 * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Time Create")
 	 * @var string
 	 */
@@ -11635,7 +12183,7 @@ class UserType extends MagicObject
 	/**
 	 * Time Edit
 	 * 
-	 * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+	 * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Time Edit")
 	 * @var string
 	 */
@@ -12369,7 +12917,7 @@ class Album extends MagicObject
     /**
      * Time Create
      * 
-     * @Column(name="time_create", type="timestamp", length=19, nullable=true, updatable=false)
+     * @Column(name="time_create", type="timestamp", length=26, nullable=true, updatable=false)
      * @Label(content="Time Create")
      * @var string
      */
@@ -12378,7 +12926,7 @@ class Album extends MagicObject
     /**
      * Time Edit
      * 
-     * @Column(name="time_edit", type="timestamp", length=19, nullable=true)
+     * @Column(name="time_edit", type="timestamp", length=26, nullable=true)
      * @Label(content="Time Edit")
      * @var string
      */

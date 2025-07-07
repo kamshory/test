@@ -5,7 +5,7 @@
 
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\PicoModule;
 use MagicApp\AppUserPermission;
 use Sipro\Entity\Data\HariLibur;
@@ -31,7 +31,7 @@ $theme = "core-ui";
 $pathHeader = dirname(__DIR__)."/lib.themes/$theme/inc.backend/header.php";
 $themePath = "lib.themes/$theme/";
 
-$appEntityLanguage = new AppEntityLanguage(new HariLibur(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new HariLibur(), $appConfig, $currentUser->getLanguageId());
 $mainMenu = MenuUtil::getMainMenu($database, $appConfig, $currentUser, $appUserRoleImpl);
 
 foreach($mainMenu->getMenu() as $menuGroup)

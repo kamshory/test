@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -121,7 +121,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-insert">
@@ -183,9 +183,9 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$peralatan = new Peralatan(null, $database);
 	try{
 		$peralatan->findOneByPeralatanIdAndSupervisorId($inputGet->getPeralatanId(), $currentLoggedInSupervisor->getSupervisorId());
-		if($peralatan->hasValuePeralatanId())
+		if($peralatan->issetPeralatanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-update">
@@ -276,9 +276,9 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$peralatan->findOneWithPrimaryKeyValue($inputGet->getPeralatanId(), $subqueryMap);
-		if($peralatan->hasValuePeralatanId())
+		if($peralatan->issetPeralatanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -358,7 +358,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"nama" => PicoSpecification::filter("nama", "fulltext")

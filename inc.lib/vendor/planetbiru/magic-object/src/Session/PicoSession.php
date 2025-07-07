@@ -31,7 +31,7 @@ class PicoSession
      *
      * @var bool
      */
-    private $_sessionState = self::SESSION_NOT_STARTED; // NOSONAR
+    protected $_sessionState = self::SESSION_NOT_STARTED; // NOSONAR
 
     /**
      * The instance of the object.
@@ -41,7 +41,7 @@ class PicoSession
      *
      * @var self
      */
-    private static $_instance; // NOSONAR
+    protected static $_instance; // NOSONAR
 
 
     /**
@@ -100,7 +100,7 @@ class PicoSession
      *
      * This method starts a session if it hasn't been started already.
      *
-     * @return bool True if the session has been initialized, false otherwise.
+     * @return bool true if the session has been initialized, false otherwise.
      */
     public function startSession()
     {
@@ -115,7 +115,7 @@ class PicoSession
      *
      * This method checks whether the current session has been started.
      *
-     * @return bool True if the session has started, false otherwise.
+     * @return bool true if the session has started, false otherwise.
      */
     public function isSessionStarted()
     {
@@ -167,7 +167,7 @@ class PicoSession
      * This magic method checks whether a value is set in the session.
      *
      * @param string $name Name of the data to check.
-     * @return bool True if the data is set, false otherwise.
+     * @return bool true if the data is set, false otherwise.
      */
     public function __isset($name)
     {

@@ -73,7 +73,7 @@ class AkhirPekan extends MagicObject
 	/**
 	 * Waktu Buat
 	 * 
-	 * @Column(name="waktu_buat", type="timestamp", length=19, nullable=true, updatable=false)
+	 * @Column(name="waktu_buat", type="timestamp", length=26, nullable=true, updatable=false)
 	 * @Label(content="Waktu Buat")
 	 * @var string
 	 */
@@ -98,9 +98,18 @@ class AkhirPekan extends MagicObject
 	protected $adminBuat;
 
 	/**
+	 * Pembuat
+	 * 
+	 * @JoinColumn(name="admin_buat", referenceColumnName="admin_id")
+	 * @Label(content="Pembuat")
+	 * @var AdminMin
+	 */
+	protected $pembuat;
+
+	/**
 	 * Waktu Ubah
 	 * 
-	 * @Column(name="waktu_ubah", type="timestamp", length=19, nullable=true)
+	 * @Column(name="waktu_ubah", type="timestamp", length=26, nullable=true)
 	 * @Label(content="Waktu Ubah")
 	 * @var string
 	 */
@@ -123,6 +132,15 @@ class AkhirPekan extends MagicObject
 	 * @var int
 	 */
 	protected $adminUbah;
+
+	/**
+	 * Pengubah
+	 * 
+	 * @JoinColumn(name="admin_ubah", referenceColumnName="admin_id")
+	 * @Label(content="Pengubah")
+	 * @var AdminMin
+	 */
+	protected $pengubah;
 
 	/**
 	 * Aktif

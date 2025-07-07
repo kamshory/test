@@ -1,10 +1,10 @@
 <?php
 
-use MagicApp\AppLanguage;
+use Sipro\AppLanguageImpl;
 
 require_once __DIR__."/app.php";
 
-$appLanguage = new AppLanguage(
+$appLanguage = new AppLanguageImpl(
     $appConfig,
     'id'
 );

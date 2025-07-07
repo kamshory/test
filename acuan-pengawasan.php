@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -204,7 +204,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-insert">
@@ -264,7 +264,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$acuanPengawasan->findOne($specification);
 		if($acuanPengawasan->issetAcuanPengawasanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-update">
@@ -344,7 +344,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$acuanPengawasan->findOne($specification, null, $subqueryMap);
 		if($acuanPengawasan->issetAcuanPengawasanId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// Define map here
 			
@@ -422,7 +422,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new AcuanPengawasan(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"nama" => PicoSpecification::filter("nama", "fulltext"),

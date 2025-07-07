@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -123,7 +123,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Material(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-insert">
@@ -185,9 +185,9 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 	$material = new Material(null, $database);
 	try{
 		$material->findOneByMaterialIdAndSupervisorId($inputGet->getMaterialId(), $currentLoggedInSupervisor->getSupervisorId());
-		if($material->hasValueMaterialId())
+		if($material->issetMaterialId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Material(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-update">
@@ -278,9 +278,9 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$material->findOneWithPrimaryKeyValue($inputGet->getMaterialId(), $subqueryMap);
-		if($material->hasValueMaterialId())
+		if($material->issetMaterialId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Material(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -360,7 +360,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Material(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Material(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"nama" => PicoSpecification::filter("nama", "fulltext")

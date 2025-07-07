@@ -10,7 +10,7 @@ use MagicObject\Database\PicoSort;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\InputGet;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -32,7 +32,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		$kelasTower->findOneWithPrimaryKeyValue($inputGet->getKelasTowerId(), $subqueryMap);
 		if($kelasTower->hasValueKelasTowerId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new KelasTower(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new KelasTower(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -106,7 +106,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new KelasTower(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new KelasTower(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"nama" => PicoSpecification::filter("nama", "fulltext")

@@ -100,7 +100,7 @@ class PicoEntityGenerator
      * @param bool $prettifyLabel Whether to convert column names to human-readable labels (default is true).
      * @return string PHP code for the property with a docblock, ready to be inserted into a class.
      */
-    protected function createProperty($typeMap, $columnMap, $row, $nonupdatables = null, $prettifyLabel = true)
+    public function createProperty($typeMap, $columnMap, $row, $nonupdatables = null, $prettifyLabel = true) // NOSONAR
     {
         $columnName = $row['Field'];
         $columnType = $row['Type'];
@@ -167,10 +167,44 @@ class PicoEntityGenerator
         }
 
         $docs[] = "\t * @Label(content=\"$description\")";
+
+        $max = $this->getMaximumLength($columnType);
+        if (isset($max)) {
+            $docs[] = "\t * @MaxLength(value=$max)";
+        }
+
         $docs[] = "\t * @var $type";
         $docs[] = $docEnd;
         $prop = "\tprotected \$$propertyName;";
         return implode("\r\n", $docs) . "\r\n" . $prop . "\r\n";
+    }
+
+    /**
+     * Extract maximum length from column_type string if applicable.
+     *
+     * Supports MySQL, PostgreSQL, and SQLite types.
+     *
+     * @param string $columnType
+     * @return int|null
+     */
+    public function getMaximumLength($columnType)
+    {
+        // Normalize to lowercase and remove extra spaces
+        $type = strtolower(trim($columnType));
+
+        // Regex to match types with length, including:
+        // - varchar(255)
+        // - nvarchar(100)
+        // - character varying(150)
+        // - char(10)
+        // - nchar(20)
+        // - etc.
+        if (preg_match('/^(varchar|nvarchar|char|nchar|character varying|character)\s*\(\s*(\d+)\s*\)/i', $type, $matches)) {
+            return (int)$matches[2];
+        }
+
+        // No length information found
+        return null;
     }
 
     /**
@@ -183,14 +217,17 @@ class PicoEntityGenerator
      * @param bool $prettifyLabel Whether to replace 'Id' with 'ID' and 'Ip' with 'IP'
      * @return string Formatted property name (e.g., 'User ID', 'User IP')
      */
-    protected function getPropertyName($name, $prettifyLabel = true)
+    public function getPropertyName($name, $prettifyLabel = true)
     {
         $arr = explode("_", $name);
         foreach ($arr as $k => $v) {
             $arr[$k] = ucwords($v);
             if ($prettifyLabel) {
-                $arr[$k] = str_replace("Id", "ID", $arr[$k]);
-                $arr[$k] = str_replace("Ip", "IP", $arr[$k]);
+                if (strtolower($v) === 'id') {
+                    $arr[$k] = 'ID';
+                } elseif (strtolower($v) === 'ip') {
+                    $arr[$k] = 'IP';
+                }
             }
         }
         return implode(" ", $arr);
@@ -203,7 +240,7 @@ class PicoEntityGenerator
      * @param string $columnType Database column type
      * @return string Corresponding PHP data type
      */
-    protected function getColumnType($typeMap, $columnType)
+    public function getColumnType($typeMap, $columnType)
     {
         $length = "";
         $pos = strpos($columnType, "(");
@@ -228,7 +265,7 @@ class PicoEntityGenerator
      * @param string $columnType Database column type
      * @return string Corresponding PHP data type
      */
-    protected function getDataType($typeMap, $columnType)
+    public function getDataType($typeMap, $columnType)
     {
         $type = "";
         foreach ($typeMap as $key => $val) {
@@ -241,24 +278,53 @@ class PicoEntityGenerator
     }
 
     /**
-     * Get the length of the column based on its definition.
+     * Get the length of a column based on its data type definition.
      *
-     * @param string $str Column definition containing length
+     * Special handling for date/time types:
+     * - datetime(6) or timestamp(6) => 26
+     * - datetime(3) or timestamp(3) => 23
+     * - datetime or timestamp       => 26 (default to microseconds precision)
+     * - date                        => 10 (e.g., YYYY-MM-DD)
+     * - time                        => 8  (e.g., HH:MM:SS)
+     *
+     * For other types (e.g., varchar(255)), it extracts the numeric length.
+     *
+     * @param string $dataType Column definition containing type and optional length/precision
      * @return int Length of the column
      */
-    protected function getDataLength($str)
+    public function getDataLength($dataType)
     {
-        $str2 = preg_replace('~\D~', '', $str);
-        $length = empty($str2) ? 0 : (int)$str2;
+        $length = 0;
 
-        if (stripos($str, "datetime") !== false || stripos($str, "timestamp") !== false) {
-            $length += 20;
-            if ($length == 20) {
-                $length = 19;
+        // Normalize data type to lowercase for consistent comparison
+        $dataTypeLower = strtolower($dataType);
+
+        // Handle datetime and timestamp types with optional precision
+        if (preg_match('/(datetime|timestamp)(\((\d+)\))?/i', $dataType, $matches)) {
+            if (isset($matches[3])) {
+                $precision = (int)$matches[3];
+                $length = $precision === 3 ? 23 : 26;
+            } else {
+                $length = 26;
             }
         }
+        // Handle date type
+        elseif (strpos($dataTypeLower, 'date') === 0) {
+            $length = 10; // YYYY-MM-DD
+        }
+        // Handle time type
+        elseif (strpos($dataTypeLower, 'time') === 0) {
+            $length = 8; // HH:MM:SS
+        }
+        // Handle other types like varchar(255)
+        else {
+            $numeric = preg_replace('~\D~', '', $dataType);
+            $length = empty($numeric) ? 0 : (int)$numeric;
+        }
+
         return $length;
     }
+
 
     /**
      * Get a mapping of database types to PHP types for MySQL, PostgreSQL, and SQLite.
@@ -274,7 +340,7 @@ class PicoEntityGenerator
      * @return array Associative array of type mappings where the keys are database column types
      *               and the values are corresponding PHP types.
      */
-    protected function getTypeMap()
+    public function getTypeMap()
     {
         return array(
             // Numeric types
@@ -682,4 +748,170 @@ class ' . $className . ' extends MagicObject
 
         return file_put_contents($path, $classStr);
     }
+
+    /**
+     * Generates a PHP validator class string with annotated properties.
+     *
+     * This method constructs a PHP class definition as a string. The generated class extends
+     * `MagicObject` and contains properties corresponding to fields defined in the validation
+     * definition. Each property is annotated with relevant validation rules and data type
+     * information.
+     *
+     * The generated class includes:
+     * - Namespace declaration
+     * - PHPDoc block summarizing validated properties
+     * - Validation annotations (Required, Min, etc.)
+     * - Proper data type hinting for each property
+     *
+     * @param string $namespace             The PHP namespace where the validator class belongs.
+     * @param string $className             The base name of the class to be generated.
+     * @param string $moduleCode            The code name of the module this validator is for.
+     * @param array  $validationDefinition  An array of field definitions, each containing field name, type, and validation rules.
+     * @param string $applyKey              Determines which rules to apply, usually 'applyInsert' or 'applyUpdate'.
+     * @param string $tableName             Original table name
+     * @return string Returns the full PHP source code of the generated class as a string.
+     */
+    public function generateValidatorClass($namespace, $className, $moduleCode, $validationDefinition, $applyKey, $tableName = null) // NOSONAR
+    {
+        $properties = array();
+        $typeMap = $this->getTypeMap();
+        $columnMap = $this->getColumnMap();
+        $propTypes = array();
+
+        foreach ($validationDefinition as $itemObject) {
+            $item = $itemObject->valueArray();
+            $field = $item['fieldName'];
+            $fieldType = $item['fieldType'];
+            $canonicalFieldType = isset($columnMap[$fieldType]) ? $columnMap[$fieldType] : $fieldType;
+            $dataType = $this->getDataType($typeMap, $canonicalFieldType);
+
+            $camelField = PicoStringUtil::camelize($field);
+            $propTypes[$camelField] = $dataType;
+
+            foreach ($item['validation'] as $rule) {
+                if (!empty($rule[$applyKey])) {
+                    $type = $rule['type'];
+
+                    // Skip Enum if allowedValues is empty
+                    if ($type === 'Enum' && empty($rule['allowedValues'])) {
+                        continue;
+                    }
+
+                    if (!isset($properties[$camelField])) {
+                        $properties[$camelField] = array();
+                    }
+
+                    $annotationParts = array();
+                    foreach ($rule as $key => $value) {
+                        if (in_array($key, ['type', 'applyInsert', 'applyUpdate'])) {
+                            continue;
+                        }
+                        if ($value === '' || $value === null) {
+                            $annotationParts[] = "$key=\"\"";
+                        } elseif (is_string($value) && $type !== 'Enum') {
+                            $annotationParts[] = "$key=\"" . addslashes($value) . "\"";
+                        } else {
+                            $annotationParts[] = "$key=$value";
+                        }
+                    }
+
+                    $annotation = array();
+                    $annotation[] = "\t" . ' * @' . $type . '(' . implode(', ', $annotationParts) . ')';
+                    $properties[$camelField][] = implode("\r\n", $annotation);
+                }
+            }
+        }
+
+        $output = "<?php\r\n\r\n";
+        if (!empty($namespace)) {
+            $output .= "namespace " . $namespace . ";\r\n\r\n";
+        }
+        $output .= "use MagicObject\\MagicObject;\r\n\r\n";
+
+        // Build class docblock
+        $output .= "/**\r\n";
+        $output .= " * Represents a validator class for the `" . $moduleCode . "` module.\r\n";
+        $output .= " *\r\n";
+        $output .= " * This class is auto-generated and intended for " . ($applyKey === 'applyInsert' ? 'insert' : 'update') . " validation.\r\n";
+        $output .= " * You can add additional validation rules as needed.\r\n";
+        $output .= " *\r\n";
+        $output .= " * Validated properties:\r\n";
+
+        $no = 1;
+        foreach ($validationDefinition as $itemObject) {
+            $item = $itemObject->valueArray();
+            $field = $item['fieldName'];
+            $camelField = PicoStringUtil::camelize($field);
+
+            $ruleSummaries = [];
+
+            foreach ($item['validation'] as $rule) {
+                if (!empty($rule[$applyKey])) {
+                    $type = $rule['type'];
+
+                    // Skip Enum if allowedValues is empty
+                    if ($type === 'Enum' && empty($rule['allowedValues'])) {
+                        continue;
+                    }
+
+                    $parts = [];
+                    foreach ($rule as $key => $value) {
+                        if (in_array($key, ['type', 'applyInsert', 'applyUpdate'])) {
+                            continue;
+                        }
+
+                        if($key == 'message' && empty($value)) {
+                            continue;
+                        }
+
+                        if ($value === '' || $value === null) {
+                            $parts[] = "$key=\"\"";
+                        } elseif (is_string($value) && $type !== 'Enum') {
+                            $parts[] = "$key=\"" . addslashes($value) . "\"";
+                        } else {
+                            $parts[] = "$key=$value";
+                        }
+                    }
+
+                    $summary = "**$type**" . (!empty($parts) ? '(' . implode(', ', $parts) . ')' : '');
+                    $ruleSummaries[] = $summary;
+                }
+            }
+
+            if (!empty($ruleSummaries)) {
+                $output .= " * $no. `\$$camelField` ( " . implode(', ', $ruleSummaries) . " )\r\n";
+                $no++;
+            }
+        }
+
+        $output .= " * \r\n";
+        if(isset($tableName) && !empty($tableName))
+        {
+            $output .= " * @Validator\r\n";
+            $output .= " * @Table(name=\"$tableName\")\r\n";
+        }
+        $output .= " * @package $namespace\r\n";
+        $output .= " */\r\n";
+
+        // Begin class definition
+        $output .= "class " . $className . " extends MagicObject\n{\r\n";
+
+        foreach ($properties as $property => $annotations) {
+            $output .= "\r\n";
+            $output .= "\t/**\r\n";
+            foreach ($annotations as $annotation) {
+                $output .= $annotation . "\r\n";
+            }
+            $dataType = $propTypes[$property];
+            $output .= "\t * @var " . $dataType . "\r\n";
+            $output .= "\t */\r\n";
+            $output .= "\tprotected \$" . $property . ";\r\n";
+        }
+
+        $output .= "}\r\n";
+
+        return $output;
+    }
+
+
 }

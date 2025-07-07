@@ -2,6 +2,7 @@
 
 use MagicApp\AppLanguage;
 use MagicApp\AppUser;
+use MagicApp\AppUserActivityLogger;
 use MagicObject\Database\PicoPageData;
 use MagicObject\Database\PicoPredicate;
 use MagicObject\Database\PicoSpecification;
@@ -9,7 +10,9 @@ use MagicObject\SetterGetter;
 use MagicObject\Util\File\FileUtil;
 use MagicObject\Util\PicoIniUtil;
 use MagicObject\Util\PicoStringUtil;
+use Sipro\AppLanguageImpl;
 use Sipro\Entity\App\AppModuleImpl;
+use Sipro\Entity\App\AppUserActivityImpl;
 use Sipro\Entity\App\AppUserImpl;
 use Sipro\Entity\App\AppUserRoleImpl;
 
@@ -43,7 +46,9 @@ if(isset($sessions->adminUsername) && isset($sessions->adminPassword))
 
     $currentUser = new AppUser($appUserImpl);
     $currentUser->setLanguageId($currentUser->getLangId());
-    $appLanguage = new AppLanguage(
+    $currentUser->setAdminLevelId($currentUser->getUserLevelId());
+    $currentUser->setAdminLevel($currentUser->getUserLevel());
+    $appLanguage = new AppLanguageImpl(
         $appConfig,
         $currentUser->getLangId(),
         function($var, $value)
@@ -146,3 +151,5 @@ else
 {
     $dateTimeTranslation = null;
 }
+
+$userActivityLogger = new AppUserActivityLogger($appConfig, new AppUserActivityImpl(null, $database));

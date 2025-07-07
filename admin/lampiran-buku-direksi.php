@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -176,7 +176,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -288,7 +288,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$lampiranBukuDireksi->findOneByLampiranBukuDireksiId($inputGet->getLampiranBukuDireksiId());
 		if($lampiranBukuDireksi->issetLampiranBukuDireksiId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -445,7 +445,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$lampiranBukuDireksi->findOneWithPrimaryKeyValue($inputGet->getLampiranBukuDireksiId(), $subqueryMap);
 		if($lampiranBukuDireksi->issetLampiranBukuDireksiId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			$mapForGrupLampiran = array(
@@ -586,7 +586,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new LampiranBukuDireksi(), $appConfig, $currentUser->getLanguageId());
 $mapForGrupLampiran = array(
 	"M" => array("value" => "M", "label" => "Permasalahan", "default" => "false"),
 	"S" => array("value" => "S", "label" => "Penyelesaian", "default" => "false")

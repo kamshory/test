@@ -95,7 +95,7 @@ catch(Exception $e)
             Field::of()->lokasiKehadiranId, Field::of()->nama)
             ; ?>
         </select>
-        <textarea name="aktivitas" class="form-control"<?php echo $jenisKehadiran == 'P' ? ' style="display:block"' : '';?>></textarea>
+        <textarea name="aktivitas" class="form-control"<?php echo $jenisKehadiran == 'P' ? ' style="display:block"' : '';?> placeholder="Isi kegiatan secara umum"></textarea>
 
     </div>
     <input type="hidden" name="alamat" value="">

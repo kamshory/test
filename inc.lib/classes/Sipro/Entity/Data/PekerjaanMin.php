@@ -78,7 +78,7 @@ class PekerjaanMin extends MagicObject
 	 * 
 	 * @Column(name="latitude", type="double", nullable=true)
 	 * @Label(content="Latitude")
-	 * @var double
+	 * @var float
 	 */
 	protected $latitude;
 
@@ -87,7 +87,7 @@ class PekerjaanMin extends MagicObject
 	 * 
 	 * @Column(name="longitude", type="double", nullable=true)
 	 * @Label(content="Longitude")
-	 * @var double
+	 * @var float
 	 */
 	protected $longitude;
 
@@ -96,7 +96,7 @@ class PekerjaanMin extends MagicObject
 	 * 
 	 * @Column(name="atitude", type="double", nullable=true)
 	 * @Label(content="Atitude")
-	 * @var double
+	 * @var float
 	 */
 	protected $atitude;
 

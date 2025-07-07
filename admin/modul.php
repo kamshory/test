@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -97,7 +97,7 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 		$updater->update();
 		$newId = $inputPost->getModulId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
 
-		MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+		MenuUtil::clearAllCache($database);
 
 		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->modul_id, $newId);
 	}
@@ -126,7 +126,7 @@ else if($inputPost->getUserAction() == UserAction::ACTIVATE)
 				->setAktif(true)
 				->update();
 
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -157,7 +157,7 @@ else if($inputPost->getUserAction() == UserAction::DEACTIVATE)
 				->setAktif(false)
 				->update();
 
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -184,7 +184,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 				$modul->where($specification)
 					->delete();
 
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -217,7 +217,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 				$modul->where($specification)
 					->setSortOrder($sortOrder)
 					->update();
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -230,7 +230,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Modul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Modul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -337,7 +337,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$modul->findOne($specification);
 		if($modul->issetModulId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Modul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Modul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -473,7 +473,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$modul->findOne($specification, null, $subqueryMap);
 		if($modul->issetModulId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Modul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Modul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -575,7 +575,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Modul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Modul(), $appConfig, $currentUser->getLanguageId());
 
 if($inputGet->getGrupModulId() == 0)
 {

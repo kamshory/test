@@ -87,7 +87,7 @@ class PicoDownloadFile
     /**
      * Checks if the file exists.
      *
-     * @return bool True if the file exists, false otherwise.
+     * @return bool true if the file exists, false otherwise.
      */
     private function fileExists()
     {
@@ -137,7 +137,7 @@ class PicoDownloadFile
      * @param int $start The start byte.
      * @param int $end The end byte.
      * @param int $fileSize The total size of the file.
-     * @return bool True if the range is invalid.
+     * @return bool true if the range is invalid.
      */
     private function isInvalidRange($start, $end, $fileSize)
     {
@@ -153,8 +153,15 @@ class PicoDownloadFile
      */
     private function sendHeaders($start, $end, $fileSize)
     {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $this->filepath);
+        finfo_close($finfo);
+        if(!isset($mimeType) || $mimeType == '')
+        {
+            $mimeType = 'application/octet-stream';
+        }
         header('HTTP/1.1 206 Partial Content');
-        header("Content-Type: application/octet-stream");
+        header("Content-Type: ".$mimeType);
         header("Content-Description: File Transfer");
         header("Content-Disposition: attachment; filename=\"" . $this->filename . "\"");
         header("Content-Range: bytes $start-$end/$fileSize");

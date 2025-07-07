@@ -22,7 +22,10 @@ PicoDatabaseUtilMySql::showCreateTables($config, function($sql, $target){
     fclose($fp);
 });
 */
-PicoDatabaseUtilMySql::importData($config, function($sql, $databaseSource, $databaseTarget, $source, $target){
+
+$tool = new PicoDatabaseUtilMySql();
+
+$tool->importData($config, function($sql, $databaseSource, $databaseTarget, $source, $target){
     $fp = fopen(dirname(__DIR__).'/inc.cfg/import-data.sql', 'a');
     fwrite($fp, $sql.";\r\n\r\n");
     fclose($fp);

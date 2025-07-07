@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -105,7 +105,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		)
 		);
 		$bukuHarian->findOneWithPrimaryKeyValue($inputGet->getBukuHarianId(), $subqueryMap);
-		if($bukuHarian->hasValueBukuHarianId())
+		if($bukuHarian->issetBukuHarianId())
 		{
 			$x = array(1=>'cerah', 2=>'berawan', 3=>'hujan', 4=>'hujan-lebat');
 			$data_cuaca = array();
@@ -115,7 +115,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 				$tv = $bukuHarian->get('c'.$tt);
 				$data_cuaca[$tt] = isset($x[$tv]) ? $x[$tv] : null;
 			}
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -164,11 +164,11 @@ require_once __DIR__ . "/inc.app/header-supervisor.php";
 				<tbody>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSupervisor();?></td>
-						<td><?php echo $bukuHarian->hasValueSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->issetSupervisor() ? $bukuHarian->getSupervisor()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getProyek();?></td>
-						<td><?php echo $bukuHarian->hasValueProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
+						<td><?php echo $bukuHarian->issetProyek() ? $bukuHarian->getProyek()->getNama() : "";?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getTanggal();?></td>
@@ -233,7 +233,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentLoggedInSupervisor->getLanguageId());
 $periode = $inputGet->getPeriode(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
 $accKoordinator = $inputGet->getAccKoordinator(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
 

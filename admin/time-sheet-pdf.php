@@ -47,7 +47,6 @@
 	}
 
 	.travel {
-		background-color: #03F !important;
 	}
 
 	tfoot .leave {

@@ -14,7 +14,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\Field;
 use MagicApp\PicoModule;
 use MagicApp\UserAction;
@@ -84,7 +84,7 @@ else if($inputPost->getUserAction() == UserAction::UPDATE)
 	{
 		$updater->update();
 		$newId = $inputPost->getGrupModulId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT);
-		MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+		MenuUtil::clearAllCache($database);
 		$currentModule->redirectTo(UserAction::DETAIL, Field::of()->grup_modul_id, $newId);
 	}
 	catch(Exception $e)
@@ -111,7 +111,7 @@ else if($inputPost->getUserAction() == UserAction::ACTIVATE)
 				->setIpUbah($currentAction->getIp())
 				->setAktif(true)
 				->update();
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -141,7 +141,7 @@ else if($inputPost->getUserAction() == UserAction::DEACTIVATE)
 				->setIpUbah($currentAction->getIp())
 				->setAktif(false)
 				->update();
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -167,7 +167,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 				$grupModul = new GrupModul(null, $database);
 				$grupModul->where($specification)
 					->delete();
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -200,7 +200,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 				$grupModul->where($specification)
 					->setSortOrder($sortOrder)
 					->update();
-				MenuUtil::updateMenuForAllUserLevelId($database, $appConfig);
+				MenuUtil::clearAllCache($database);
 			}
 			catch(Exception $e)
 			{
@@ -213,7 +213,7 @@ else if($inputPost->getUserAction() == UserAction::SORT_ORDER)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new GrupModul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new GrupModul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -236,7 +236,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getDefaultData();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="number" step="1" name="default_data" id="default_data"/>
+							<label><input class="form-check-input" type="checkbox" name="default_data" id="default_data" value="1"/> <?php echo $appEntityLanguage->getDefaultData();?></label>
 						</td>
 					</tr>
 					<tr>
@@ -248,7 +248,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
 						<td>
-							<input autocomplete="off" class="form-control" type="number" step="1" name="aktif" id="aktif"/>
+							<label><input class="form-check-input" type="checkbox" name="aktif" id="aktif" value="1"/> <?php echo $appEntityLanguage->getAktif();?></label>
 						</td>
 					</tr>
 				</tbody>
@@ -279,7 +279,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$grupModul->findOne($specification);
 		if($grupModul->issetGrupModulId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new GrupModul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new GrupModul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -302,7 +302,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getDefaultData();?></td>
 						<td>
-							<input class="form-control" type="number" step="1" name="default_data" id="default_data" value="<?php echo $grupModul->getDefaultData();?>" autocomplete="off"/>
+							<label><input class="form-check-input" type="checkbox" name="default_data" id="default_data" value="1" <?php echo $grupModul->createCheckedDefaultData();?>/> <?php echo $appEntityLanguage->getDefaultData();?></label>
 						</td>
 					</tr>
 					<tr>
@@ -314,7 +314,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
 						<td>
-							<input class="form-control" type="number" step="1" name="aktif" id="aktif" value="<?php echo $grupModul->getAktif();?>" autocomplete="off"/>
+							<label><input class="form-check-input" type="checkbox" name="aktif" id="aktif" value="1" <?php echo $grupModul->createCheckedAktif();?>/> <?php echo $appEntityLanguage->getAktif();?></label>
 						</td>
 					</tr>
 				</tbody>
@@ -365,7 +365,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$grupModul->findOne($specification, null, $subqueryMap);
 		if($grupModul->issetGrupModulId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new GrupModul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new GrupModul(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -394,7 +394,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getDefaultData();?></td>
-						<td><?php echo $grupModul->getDefaultData();?></td>
+						<td><?php echo $grupModul->optionDefaultData($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getSortOrder();?></td>
@@ -402,7 +402,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					</tr>
 					<tr>
 						<td><?php echo $appEntityLanguage->getAktif();?></td>
-						<td><?php echo $grupModul->getAktif();?></td>
+						<td><?php echo $grupModul->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 					</tr>
 				</tbody>
 			</table>
@@ -447,10 +447,10 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new GrupModul(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new GrupModul(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
-	
+	"nama" => PicoSpecification::filter("nama", "fulltext"),
 );
 $sortOrderMap = array(
 	"nama" => "nama",
@@ -488,6 +488,14 @@ require_once $appInclude->mainAppHeader(__DIR__);
 	<div class="jambi-wrapper">
 		<div class="filter-section">
 			<form action="" method="get" class="filter-form">
+
+				<span class="filter-group">
+					<span class="filter-label"><?php echo $appEntityLanguage->getNama();?></span>
+					<span class="filter-control">
+						<input type="text" name="nama" class="form-control" value="<?php echo $inputGet->getNama();?>" autocomplete="off"/>
+					</span>
+				</span>
+
 				<span class="filter-group">
 					<button type="submit" class="btn btn-success"><?php echo $appLanguage->getButtonSearch();?></button>
 				</span>
@@ -580,9 +588,9 @@ require_once $appInclude->mainAppHeader(__DIR__);
 								<td class="data-number"><?php echo $pageData->getDataOffset() + $dataIndex;?></td>
 								<td data-col-name="nama"><?php echo $grupModul->getNama();?></td>
 								<td data-col-name="icon"><?php echo $grupModul->getIcon();?></td>
-								<td data-col-name="default_data"><?php echo $grupModul->getDefaultData();?></td>
+								<td data-col-name="default_data"><?php echo $grupModul->optionDefaultData($appLanguage->getYes(), $appLanguage->getNo());?></td>
 								<td data-col-name="sort_order" class="data-sort-order-column"><?php echo $grupModul->getSortOrder();?></td>
-								<td data-col-name="aktif"><?php echo $grupModul->getAktif();?></td>
+								<td data-col-name="aktif"><?php echo $grupModul->optionAktif($appLanguage->getYes(), $appLanguage->getNo());?></td>
 							</tr>
 							<?php 
 							}

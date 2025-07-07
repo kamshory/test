@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -140,6 +140,7 @@ else if($appUserImpl->getTipePengguna() == "ktsk" && $appUserImpl->getKtskId() !
 			$specification = PicoSpecification::getInstance()
 				->addAnd(PicoPredicate::getInstance()->in(Field::of()->bukuHarianId, $inputPost->getCheckedRowId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT)))
 				->addAnd(PicoPredicate::getInstance()->in(Field::of()->proyekId, $proyekIds))
+				->addAnd(PicoPredicate::getInstance()->equals(Field::of()->statusAccKoordinator, "CHECKED"))
 				;
 			if($inputPost->getUserAction() == UserAction::APPROVE)
 			{
@@ -257,7 +258,7 @@ if($inputGet->getUserAction() == UserAction::DETAIL)
 		$bukuHarian->findOne($specification, null, $subqueryMap);
 		if($bukuHarian->issetBukuHarianId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			
@@ -399,7 +400,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BukuHarian(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BukuHarian(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"proyekId" => PicoSpecification::filter("proyekId", "number"),

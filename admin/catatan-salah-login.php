@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -181,7 +181,7 @@ else if($inputPost->getUserAction() == UserAction::DELETE)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -279,7 +279,7 @@ else if($inputGet->getUserAction() == UserAction::UPDATE)
 		$catatanSalahLogin->findOne($specification);
 		if($catatanSalahLogin->issetCatatanSalahLoginId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-update">
@@ -414,7 +414,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$catatanSalahLogin->findOne($specification, null, $subqueryMap);
 		if($catatanSalahLogin->issetCatatanSalahLoginId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			$mapForTipePengguna = array(
@@ -503,7 +503,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new CatatanSalahLogin(), $appConfig, $currentUser->getLanguageId());
 $mapForTipePengguna = array(
 	"supervisor" => array("value" => "supervisor", "label" => "Supervisor", "default" => true),
 	"user" => array("value" => "user", "label" => "Administrator", "default" => true)

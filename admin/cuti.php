@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -157,6 +157,7 @@ else if($inputPost->getUserAction() == UserAction::APPROVE)
 						$kehadiran->setAdminUbah($currentAction->getAdminId());
 						$kehadiran->setWaktuUbah($currentAction->getTime());
 						$kehadiran->setIpUbah($currentAction->getIp());
+						$kehadiran->update();
 					}
 
 				}
@@ -220,7 +221,7 @@ else if($inputPost->getUserAction() == UserAction::REJECT)
 					// Tangani pengecualian jika terjadi error saat menghitung cuti supervisor
 					// Untuk saat ini tidak melakukan apa-apa
 				}
-				;
+				
 				$specificationCuti = PicoSpecification::getInstance()
 					->addAnd(PicoPredicate::getInstance()->equals(Field::of()->cutiId, $rowId))
 					->addAnd($dataFilter)
@@ -231,7 +232,6 @@ else if($inputPost->getUserAction() == UserAction::REJECT)
 					->where($specsCutiSupervisor)
 					->setStatusCuti('R') // Rejected
 					->update();
-				
 				
 				// Tolak cuti
 				$cuti
@@ -285,7 +285,7 @@ else if($inputPost->getUserAction() == UserAction::REJECT)
 }
 if($inputGet->getUserAction() == UserAction::CREATE)
 {
-$appEntityLanguage = new AppEntityLanguage(new Cuti(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Cuti(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 ?>
 <div class="page page-jambi page-insert">
@@ -513,7 +513,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$cuti->findOne($specification, null, $subqueryMap);
 		if($cuti->issetCutiId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new Cuti(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Cuti(), $appConfig, $currentUser->getLanguageId());
 require_once $appInclude->mainAppHeader(__DIR__);
 			// Define map here
 			$mapForStatusCuti = array(
@@ -668,7 +668,7 @@ require_once $appInclude->mainAppFooter(__DIR__);
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Cuti(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Cuti(), $appConfig, $currentUser->getLanguageId());
 $mapForStatusCuti = array(
 	"P" => array("value" => "P", "label" => "Menunggu Persetujuan", "group" => "", "selected" => false),
 	"A" => array("value" => "A", "label" => "Disetujui", "group" => "", "selected" => false),
@@ -984,7 +984,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 					<table class="table table-row table-sort-by-column">
 						<thead>
 							<tr>
-								<?php if($userPermission->isAllowedBatchAction()){ ?>
+								<?php if($userPermission->isAllowedBatchAction() || $userPermission->isAllowedApprove()){ ?>
 								<td class="data-controll data-selector" data-key="cuti_id">
 									<input type="checkbox" class="checkbox check-master" data-selector=".checkbox-cuti-id"/>
 								</td>
@@ -1019,7 +1019,7 @@ require_once $appInclude->mainAppHeader(__DIR__);
 							?>
 		
 							<tr data-number="<?php echo $pageData->getDataOffset() + $dataIndex;?>" data-active="<?php echo $cuti->optionAktif('true', 'false');?>">
-								<?php if($userPermission->isAllowedBatchAction()){ ?>
+								<?php if($userPermission->isAllowedBatchAction() || $userPermission->isAllowedApprove()){ ?>
 								<td class="data-selector" data-key="cuti_id">
 									<input type="checkbox" class="checkbox check-slave checkbox-cuti-id" name="checked_row_id[]" value="<?php echo $cuti->getCutiId();?>"<?php echo $cuti->equalsStatusCuti('P') ? '' : ' disabled';?>/>
 								</td>

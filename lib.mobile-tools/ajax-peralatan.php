@@ -1,12 +1,12 @@
 <?php
 
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicObject\Request\InputGet;
 use Sipro\Entity\Data\Peralatan;
 use Sipro\Util\CommonUtil;
 
 require_once dirname(__DIR__) . "/inc.app/auth-supervisor-no-form.php";
-$appEntityLanguage = new AppEntityLanguage(new Peralatan(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Peralatan(), $appConfig, $currentUser->getLanguageId());
 
 $inputGet = new InputGet();
 

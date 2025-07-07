@@ -21,7 +21,7 @@ if(isset($currentModule) && $currentModule->getModuleName() != null && isset($ma
 }
 if(!empty($__pageTitle))
 {
-  $__siteTitle = trim($__pageTitle . ' - '.$appConfig->getSite()->getTitle(), ' - ');
+  $__siteTitle = trim($appConfig->getSite()->getTitle().' - '.$__pageTitle, ' - ');
 }
 else
 {

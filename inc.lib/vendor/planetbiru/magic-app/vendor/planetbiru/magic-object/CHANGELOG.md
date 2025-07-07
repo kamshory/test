@@ -1,4 +1,3 @@
-
 # MagicObject Version 2
 
 ## What's New
@@ -383,3 +382,208 @@ echo $object->maskEmail(-10, 6, '*')."\r\n"; // Output: john.******ample.com
     ```
 
 With the addition of this formatting function, users can easily format object properties according to their needs.
+
+# MagicObject version 3.9
+
+## What's New
+
+- **Add Magic Methods**
+
+    -  **trim**: A function to retrieves the property value and trims any leading and trailing whitespace.  
+       
+       **Example Usage:**  
+        ```php
+        $object = new MagicObject();
+        $name = $object->trimName();
+        ```
+    -  **upper**: A function to retrieves the property value and transform it to uppercase.  
+       
+       **Example Usage:**  
+       
+        ```php
+        $object = new MagicObject();
+        $code = $object->upperCode();
+        ```
+    -  **lower**: A function to retrieves the property value and transform it to lowercase.  
+       
+       **Example Usage:**  
+        ```php
+        $object = new MagicObject();
+        $username = $object->lowerUsername();
+        ```
+    -  **dms**: A function to retrieves the property value and convert it to DMS (Degrees, Minutes, Seconds) format.  
+       
+       **Example Usage:**  
+        ```php
+        $object = new MagicObject();
+        $dms = $object->dmsDuration(true, ":", 2, true, 2, true);
+        ```
+        
+        **move**: A function to move uploaded file via callback function.
+        
+        **Example Usage**
+        ```php
+        $inputFiles = new PicoUploadFile();
+        $inputFiles->moveMyVideo(function($file){
+            foreach($file->getAll() as $fileItem)
+            {
+                $fileItem->moveTo("upload/".$fileItem->getName());
+            }
+        });
+        ```
+- **Add PicoFileRenderer Class**
+  MagicObject add utility class to render various file types (images, audio, video, files, links, text) into corresponding HTML elements from plain strings or JSON-encoded arrays.
+  
+- **Update documentation**
+  The documentation has been updated to reflect the new magic methods added in this version, ensuring clarity on how to use them in your code.
+  
+This version introduces essential new functions for better handling of data transformations such as trimming, converting to uppercase or lowercase, and formatting data into DMS (Degrees, Minutes, Seconds). These enhancements streamline property value manipulation and provide additional flexibility when interacting with data.
+
+# MagicObject version 3.10
+
+## What's New
+
+### **New Feature: `retrieve()` Method**
+
+We’re excited to introduce the **`retrieve()`** method in MagicObject 3.10, designed to make it easier to access deeply nested properties within your objects. This new feature allows you to pass multiple keys as arguments, making it incredibly efficient to traverse complex nested structures.
+
+#### **How it Works:**
+
+-   The `retrieve()` method takes one or more keys (in camelCase format) as parameters.
+-   It will traverse through the object, fetching values based on the provided keys.
+-   If a key is missing at any level, the method will return `null`.
+-   This is especially useful when dealing with objects that contain deep nested data.
+
+#### **Example:**
+
+```php
+$object = new  MagicObject();
+$yaml = '
+  prop1:
+    prop2:
+      prop3: Test
+';
+$object->loadYamlString($yaml, false, true, true);
+echo  $object->retrieve('prop1', 'prop2', 'prop3');
+```
+
+In this example:
+-   The method will first check `prop1`, then move to `prop2`, and finally `prop3`.
+-   If any of these keys do not exist, it will return `null`.    
+
+### **New Feature: `mergeWith()` Method**
+
+We’ve also added a powerful new method called **`mergeWith()`**, which allows you to merge two `MagicObject` instances with ease.
+
+#### What it Does:
+
+-   Combines properties from another object into the current one.
+-   If a property doesn’t exist in the current object, it will be added.
+-   If the property already exists:
+    -   If both values are `MagicObject` instances, they will be **merged recursively**.
+    -   Otherwise, the value will be **overwritten**.
+
+#### Example:
+
+```php
+$obj1 = new  MagicObject();
+$obj1->loadYamlString('
+user:
+  name: ALice
+client:
+  address: Jakarta
+', false, true, true);
+
+$obj2 = new  MagicObject();
+$obj2->loadYamlString('
+user:
+  email: alice@example.com
+client:
+  name: Ana
+', false, true, true);
+$obj1->mergeWith($obj2);
+
+echo  $obj1;
+
+// {"user":{"name":"ALice","email":"alice@example.com"},"client":{"address":"Jakarta","name":"Ana"}}
+```
+
+This method simplifies combining nested objects and ensures consistency in structured data merging.
+
+### **Bug Fixes & Performance Improvements**
+
+-   Various small bug fixes related to edge cases.
+-   Optimizations made to improve performance when accessing deeply nested data within MagicObject.
+    
+
+### **Other Changes**
+
+-   Internal code refactoring for improved readability and maintainability.
+-   Enhanced flexibility in property name handling, especially for camelCase formatting.
+
+
+# MagicObject version 3.11
+
+## What's New
+
+### Added: Matrix Calculation Class
+A new `MatrixCalculator` class has been introduced to perform basic matrix operations such as addition, subtraction, multiplication, and element-wise division.  
+This class is useful for numerical or scientific processing involving 2D arrays of real numbers.
+
+### Added: `toFixed` Magic Method in MagicObject
+A new `toFixed` magic method has been added to the core `MagicObject` class.  
+This allows any numeric property to be formatted as a string with a fixed number of decimal places using dynamic method access.
+
+**Example usage:**
+
+```php
+$object = new MagicObject();
+$object->setData(100.123456);
+echo $object->toFixedData(2)."\r\n"; // Outputs 100.12
+echo $object->toFixedData(4)."\r\n"; // Outputs 100.1235
+```
+
+### Bug Fixes
+
+-  Fixed an issue where countBy() returned 1 even when no records matched the condition.
+   The method now correctly uses fetchColumn() to retrieve the result from SELECT COUNT(*).
+
+### **Other Changes**
+
+-   Internal code refactoring for improved readability and maintainability.
+-   Enhanced flexibility in property name handling, especially for camelCase formatting.
+
+
+# MagicObject version 3.12
+
+## What's New
+
+- **Removed Exception Throwing for Empty Results in Multi-Record Finders**  
+  In this version, `EmptyResultException` and `NoRecordFoundException` are no longer thrown when methods for finding multiple records return an empty result. Instead, these methods will simply return an empty array or collection. This change improves developer experience by making it easier to handle cases where no records are found, without the need for additional exception handling.
+
+
+# MagicObject version 3.13
+
+## What's New
+
+### Added: `alwaysTrue()`  Specification Method
+
+A new static method `PicoSpecification::alwaysTrue()` has been added.  
+This method returns a specification that always evaluates to `TRUE` (`WHERE 1 = 1`  in SQL). It is especially useful for scenarios where developers need to update, delete, or retrieve **all records**  from a table without any filtering.
+
+**Example usage:**
+
+```php
+$specs = PicoSpecification::alwaysTrue();
+
+$userFinder = new UserMin(null, $database);
+try {
+    $pageData = $userFinder->findAll($specs);
+    foreach($pageData->getResult() as $user)
+    {
+      echo $user."\r\n";
+    }
+} catch (Exception $e) {
+    // Optional: handle or ignore
+}
+```

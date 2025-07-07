@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -21,6 +21,7 @@ use MagicApp\UserAction;
 use MagicApp\AppUserPermission;
 use Sipro\Entity\Data\Supervisor;
 use Sipro\AppIncludeImpl;
+use Sipro\Entity\Data\AccTimeSheet;
 use Sipro\Entity\Data\BukuHarianMin;
 use Sipro\Entity\Data\JabatanMin;
 use Sipro\Entity\Data\TskMin;
@@ -50,18 +51,88 @@ if(!$userPermission->allowedAccess($inputGet, $inputPost))
 	exit();
 }
 
+if($inputPost->getSupervisorId() != 0 && $inputPost->getPeriodeId() != '' && $currentUser->getKtskId() != 0)
+{
+	$supervisorId = $inputPost->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true);
+	$periodeId = $inputPost->getPeriodeId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
+	if($inputPost->getUserAction() == 'acc')
+	{
+		$accTimeSheet = new AccTimeSheet(null, $database);
+		try
+		{
+			$accTimeSheet->findOneBySupervisorIdAndPeriodeId($supervisorId, $periodeId);
+			$accTimeSheet->setAccKtsk(true);
+			$accTimeSheet->setKtskId($currentUser->getAdminId());
+			$accTimeSheet->setWaktuAccKtsk(date('Y-m-d H:i:s')); // NOSONAR
+			$accTimeSheet->setIpAccKtsk($_SERVER['REMOTE_ADDR']); // NOSONAR
+			$accTimeSheet->update();
+		}
+		catch(Exception $e)
+		{
+			$accTimeSheet->setSupervisorId($supervisorId);
+			$accTimeSheet->setPeriodeId($periodeId);
+			$accTimeSheet->setAccKtsk(true);
+			$accTimeSheet->setKtskId($currentUser->getAdminId());
+			$accTimeSheet->setWaktuAccKtsk(date('Y-m-d H:i:s')); // NOSONAR
+			$accTimeSheet->setIpAccKtsk($_SERVER['REMOTE_ADDR']); // NOSONAR
+			$accTimeSheet->update();
+		}
+		exit();
+	}
+	else if($inputPost->getUserAction() == 'cabut')
+	{
+		$accTimeSheet = new AccTimeSheet(null, $database);
+		try
+		{
+			$accTimeSheet->findOneBySupervisorIdAndPeriodeId($supervisorId, $periodeId);
+			$accTimeSheet->setAccKtsk(false);
+			$accTimeSheet->setKtskId(null);
+			$accTimeSheet->setWaktuAccKtsk(date('Y-m-d H:i:s')); // NOSONAR
+			$accTimeSheet->setIpAccKtsk($_SERVER['REMOTE_ADDR']); // NOSONAR
+			$accTimeSheet->update();
+		}
+		catch(Exception $e)
+		{
+			$accTimeSheet->setSupervisorId($supervisorId);
+			$accTimeSheet->setPeriodeId($periodeId);
+			$accTimeSheet->setKtskId($currentUser->getKtskId());
+			$accTimeSheet->setAccKtsk(false);
+			$accTimeSheet->setKtskId(null);
+			$accTimeSheet->setWaktuAccKtsk(date('Y-m-d H:i:s')); // NOSONAR
+			$accTimeSheet->setIpAccKtsk($_SERVER['REMOTE_ADDR']); // NOSONAR
+			$accTimeSheet->update();
+		}
+		exit();
+	}
+}
+
 $supervisorId = $inputGet->getSupervisorId(PicoFilterConstant::FILTER_SANITIZE_NUMBER_INT, false, false, true);
 $periodeId = $inputGet->getPeriodeId(PicoFilterConstant::FILTER_SANITIZE_SPECIAL_CHARS, false, false, true);
 
 if($supervisorId != 0 && !empty($periodeId))
 {
 	require_once $appInclude->mainAppHeader(__DIR__);
+	$accTimeSheet = new AccTimeSheet(null, $database);
+	
+	try{
+		$accTimeSheet->findOneBySupervisorIdAndPeriodeIdAndAccKtsk($supervisorId, $periodeId, true);
+		$timeSheetAccKtsk = true;
+		$ktskId = $accTimeSheet->getKtskId();
+		$ttdKtskId = $accTimeSheet->getKtskId();
+	}
+	catch(Exception $e)
+	{
+		$timeSheetAccKtsk = false;
+	}
+
     require_once __DIR__ . "/time-sheet-core.php";
 	?>
     <script type="text/javascript" src="../lib.assets/js/filesaver.js"></script>
 	<script type="text/javascript" src="../lib.assets/js/html-docx.js"></script>
 	<script type="application/javascript">
     var filename = 'time-sheet-<?php echo $supervisor->getNama(); ?>-<?php echo $tahun; ?>-<?php echo $bulan; ?>';
+	let supervisorId = <?php echo $supervisorId;?>;
+	let periodeId = '<?php echo $periodeId;?>';
     $(document).ready(function(e) {
         $(document).on('click', '#download', function(e) {
             var content = $('.table-scroll-horizontal').html();
@@ -122,11 +193,9 @@ if($supervisorId != 0 && !empty($periodeId))
 			}
 
 			.dayoff {
-				background-color: #F60;
 			}
 
 			.day.dayoff.weekend {
-				background-color: #F60 !important;
 			}
 
 			.travel.dayoff {
@@ -146,7 +215,6 @@ if($supervisorId != 0 && !empty($periodeId))
 			}
 
 			tfoot .leave {
-				background-color: #EE0000;
 			}
 			</style>`;
             content = `<!DOCTYPE html>
@@ -202,11 +270,40 @@ if($supervisorId != 0 && !empty($periodeId))
         canvas.remove();
         return doc;
     }
+	function accTimesheet(acc)
+	{
+		$.ajax({
+			type: 'POST',
+			url: 'time-sheet.php',
+			data: {userAction: acc?'acc':'cabut', supervisorId:supervisorId, periodeId:periodeId},
+			success: function(data) {
+				window.location.reload();
+			}
+		})
+	}
 	</script>
+	
 	<div class="button-area mb-lg-3">
-		<button type="button" id="download" class="btn btn-primary">Download Word</button>
-		<button type="button" id="pdf" class="btn btn-primary" onclick="window.open('time-sheet-pdf.php?<?php echo $_SERVER['QUERY_STRING']; ?>')">Print</button>
-		<button type="button" id="kembali" class="btn btn-secondary" onclick="window.location='<?php echo basename($_SERVER['PHP_SELF']); ?>'">Kembali</button>
+		<?php
+		if($currentUser->getKtskId())
+		{
+			if($timeSheetAccKtsk)
+			{
+				?>
+				<button type="button" id="cabut" class="btn btn-success" onclick="accTimesheet(false)"><?php echo $appLanguage->getCabut();?></button>
+				<?php
+			}
+			else
+			{
+				?>
+				<button type="button" id="acc" class="btn btn-success" onclick="accTimesheet(true)"><?php echo $appLanguage->getAcc();?></button>
+				<?php
+			}
+		}
+		?>
+		<button type="button" id="download" class="btn btn-primary"><?php echo $appLanguage->getDownloadWord();?></button>
+		<button type="button" id="pdf" class="btn btn-primary" onclick="window.open('time-sheet-pdf.php?<?php echo $_SERVER['QUERY_STRING']; ?>')"><?php echo $appLanguage->getPrint();?></button>
+		<button type="button" id="kembali" class="btn btn-secondary" onclick="window.location='<?php echo basename($_SERVER['PHP_SELF']); ?>'"><?php echo $appLanguage->getKembaliKeDaftar();?></button>
 	</div>
 	<?php
 	require_once $appInclude->mainAppFooter(__DIR__);
@@ -214,7 +311,7 @@ if($supervisorId != 0 && !empty($periodeId))
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new Supervisor(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new Supervisor(), $appConfig, $currentUser->getLanguageId());
 /*ajaxSupport*/
 if(!$currentAction->isRequestViaAjax()){
 require_once $appInclude->mainAppHeader(__DIR__);

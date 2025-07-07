@@ -13,7 +13,7 @@ use MagicObject\Database\PicoSpecification;
 use MagicObject\Request\PicoFilterConstant;
 use MagicObject\Request\InputGet;
 use MagicObject\Request\InputPost;
-use MagicApp\AppEntityLanguage;
+use Sipro\AppEntityLanguageImpl;
 use MagicApp\AppFormBuilder;
 use MagicApp\Field;
 use MagicApp\PicoModule;
@@ -131,7 +131,7 @@ if($inputGet->getUserAction() == UserAction::UPDATE)
 		$billOfQuantityProyek->findOneByBillOfQuantityProyekId($inputGet->getBillOfQuantityProyekId());
 		if($billOfQuantityProyek->issetBillOfQuantityProyekId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantityProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantityProyek(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 ?>
 <div class="page page-jambi page-update">
@@ -282,7 +282,7 @@ else if($inputGet->getUserAction() == UserAction::DETAIL)
 		$billOfQuantityProyek->findOneWithPrimaryKeyValue($inputGet->getBillOfQuantityProyekId(), $subqueryMap);
 		if($billOfQuantityProyek->issetBillOfQuantityProyekId())
 		{
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantityProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantityProyek(), $appConfig, $currentUser->getLanguageId());
 require_once __DIR__ . "/inc.app/header-supervisor.php";
 			// define map here
 			
@@ -380,7 +380,7 @@ require_once __DIR__ . "/inc.app/footer-supervisor.php";
 }
 else 
 {
-$appEntityLanguage = new AppEntityLanguage(new BillOfQuantityProyek(), $appConfig, $currentUser->getLanguageId());
+$appEntityLanguage = new AppEntityLanguageImpl(new BillOfQuantityProyek(), $appConfig, $currentUser->getLanguageId());
 
 $specMap = array(
 	"proyekId" => PicoSpecification::filter("proyekId", "number"),

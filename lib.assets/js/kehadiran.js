@@ -84,14 +84,12 @@ function triggerDetectLocation() {
             'url':'lib.mobile-tools/ajax-alamat.php',
             'data': {latitude: latitude, longitude:longitude},
             'dataType': 'json',
-            'success': function(data)
-            {
+            'success': function(data) {
                 document.querySelector('[name="alamat"]').value = JSON.stringify(data);
                 document.querySelector('[name="latitude"]').value = latitude;
                 document.querySelector('[name="longitude"]').value = longitude;
-
                 document.querySelector('#captureButton').disabled = false;
-
+                document.querySelector('#uploadButton').disabled = false;
             }
         });
     });

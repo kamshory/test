@@ -1,7 +1,6 @@
 
 <?php
 
-use MagicApp\AppLanguage;
 use MagicObject\Database\PicoSortable;
 use MagicObject\Database\PicoSpecification;
 use MagicObject\MagicObject;
@@ -9,6 +8,7 @@ use MagicObject\Request\InputGet;
 use MagicObject\Util\File\FileUtil;
 use MagicObject\Util\PicoIniUtil;
 use MagicObject\Util\PicoStringUtil;
+use Sipro\AppLanguageImpl;
 use Sipro\Entity\Data\ProgresProyek;
 use Sipro\Entity\Data\Proyek;
 use Sipro\Util\DateUtil;
@@ -16,7 +16,7 @@ use Sipro\Util\SCurveUtil;
 
 require_once dirname(__DIR__) . "/inc.app/app.php";
 
-$appLanguage = new AppLanguage(
+$appLanguage = new AppLanguageImpl(
   $appConfig,
   'id',
   function($var, $value)
